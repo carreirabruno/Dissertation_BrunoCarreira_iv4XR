@@ -1,0 +1,9 @@
+button0,door0,,,
+button1,,,,
+|w,w,w,w,w
+w,f,f,f,w
+w,f,f,f,w
+w,f,f,f,w
+w,f:d>n^door0,w,f:b^button0,w
+w,f:cb#00FF00^button1,w,f:a^agent0,w
+w,w,w,w,w
