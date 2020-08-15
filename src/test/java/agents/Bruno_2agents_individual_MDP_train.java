@@ -333,9 +333,10 @@ public class Bruno_2agents_individual_MDP_train {
                     stuckTicks++;
 
                     // Check if the target button isOn to end the game
-                    if (((e1 != null && e1.getBooleanProperty("isOn")) || (f1 != null && f1.getBooleanProperty("isOn"))) &&
-                            ((e2 != null && e2.getBooleanProperty("isOn")) || (f2 != null && f2.getBooleanProperty("isOn"))) &&
-                            ((e3 != null && e3.getBooleanProperty("isOn")) || (f3 != null && f3.getBooleanProperty("isOn")))) {
+//                    if (((e1 != null && e1.getBooleanProperty("isOn")) || (f1 != null && f1.getBooleanProperty("isOn"))) &&
+//                            ((e2 != null && e2.getBooleanProperty("isOn")) || (f2 != null && f2.getBooleanProperty("isOn"))) &&
+//                            ((e3 != null && e3.getBooleanProperty("isOn")) || (f3 != null && f3.getBooleanProperty("isOn")))) {
+                    if(target1_clicked && target2_clicked && target3_clicked){
                         System.out.println("Objetive completed");
                         break;
                     }
