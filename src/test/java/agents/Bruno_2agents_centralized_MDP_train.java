@@ -54,7 +54,7 @@ public class Bruno_2agents_centralized_MDP_train {
     int early_stop_counter_reset = 3;
     int early_stop_counter = early_stop_counter_reset;
 
-    int stuck_counter = 15;
+    int stuck_counter = 10;
 
     @BeforeAll
     static void start() throws Exception {
@@ -160,9 +160,13 @@ public class Bruno_2agents_centralized_MDP_train {
 //                    if (!g0.getStatus().inProgress() && !g1.getStatus().inProgress()) {
                     if ((!g0.getStatus().inProgress() && !g1.getStatus().inProgress()) || stuckTicks >= stuck_counter * amountOfTicks) {
 
+                        if (epsilon == 0)
+                            System.out.println(this.actions.get(action));
 
-                        if (stuckTicks >= stuck_counter * amountOfTicks)
+                        if (stuckTicks >= stuck_counter * amountOfTicks){
                             System.out.println("Stuck");
+                            System.out.println(this.actions.get(action));
+                        }
 
 
                         if (e1 != null && e1.getBooleanProperty("isOn") && this.actions.get(action)[0].equals(e1.id) && !target1_clicked) {

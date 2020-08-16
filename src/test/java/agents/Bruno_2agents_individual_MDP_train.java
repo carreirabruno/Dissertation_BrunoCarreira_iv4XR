@@ -58,7 +58,7 @@ public class Bruno_2agents_individual_MDP_train {
     int early_stop_counter_reset = 3;
     int early_stop_counter = early_stop_counter_reset;
 
-    int stuck_counter = 15;
+    int stuck_counter = 10;
 
     boolean static_actions = false;
     int static_action_agent0 = 3;
