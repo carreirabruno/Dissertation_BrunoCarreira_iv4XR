@@ -61,14 +61,14 @@ public class Bruno_2agents_individual_MDP_train {
     int stuck_counter = 10;
 
     boolean static_actions = false;
-    int static_action_agent0 = 3;
+    int static_action_agent0 = 2;
     int static_action_agent1 = 3;
 
 
     @BeforeAll
     static void start() throws Exception {
         // Uncomment this to make the game's graphic visible:
-//        TestSettings.USE_GRAPHICS = true;
+        TestSettings.USE_GRAPHICS = true;
         String labRecruitsExeRootDir = System.getProperty("user.dir");
         labRecruitsTestServer = TestSettings.start_LabRecruitsTestServer(labRecruitsExeRootDir);
     }

@@ -161,11 +161,11 @@ public class Bruno_2agents_centralized_MDP_train {
                     if ((!g0.getStatus().inProgress() && !g1.getStatus().inProgress()) || stuckTicks >= stuck_counter * amountOfTicks) {
 
                         if (epsilon == 0)
-                            System.out.println(this.actions.get(action));
+                            System.out.println(this.actions.get(action)[0] + "   " + this.actions.get(action)[1]);
 
                         if (stuckTicks >= stuck_counter * amountOfTicks){
                             System.out.println("Stuck");
-                            System.out.println(this.actions.get(action));
+                            System.out.println(this.actions.get(action)[0] + "   " + this.actions.get(action)[1]);
                         }
 
 
