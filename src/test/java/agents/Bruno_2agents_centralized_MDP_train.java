@@ -54,6 +54,7 @@ public class Bruno_2agents_centralized_MDP_train {
     int early_stop_counter_reset = 3;
     int early_stop_counter = early_stop_counter_reset;
 
+    int stuck_counter = 15;
 
     @BeforeAll
     static void start() throws Exception {
@@ -127,6 +128,9 @@ public class Bruno_2agents_centralized_MDP_train {
             double ns = 1000000000 / amountOfTicks;
             double delta = 0;
 
+            boolean target1_clicked = false;
+            boolean target2_clicked = false;
+
             while (((System.nanoTime() - start) / 1_000_000_000) < max_time) {
                 long now = System.nanoTime();
                 delta += (now - lasTime) / ns;
@@ -154,23 +158,27 @@ public class Bruno_2agents_centralized_MDP_train {
 
                     //Update agents
 //                    if (!g0.getStatus().inProgress() && !g1.getStatus().inProgress()) {
-                    if ((!g0.getStatus().inProgress() && !g1.getStatus().inProgress()) || stuckTicks >= 5*amountOfTicks ) {
+                    if ((!g0.getStatus().inProgress() && !g1.getStatus().inProgress()) || stuckTicks >= stuck_counter * amountOfTicks) {
 
-                        if (stuckTicks >= 5*amountOfTicks)
+
+                        if (stuckTicks >= stuck_counter * amountOfTicks)
                             System.out.println("Stuck");
 
 
-                        if (e1 != null && e1.getBooleanProperty("isOn") && this.actions.get(action)[0].equals(e1.id))
+                        if (e1 != null && e1.getBooleanProperty("isOn") && this.actions.get(action)[0].equals(e1.id) && !target1_clicked) {
                             reward += 100;
-
-                        else if (f1 != null && f1.getBooleanProperty("isOn") && this.actions.get(action)[1].equals(f1.id))
+                            target1_clicked = true;
+                        } else if (f1 != null && f1.getBooleanProperty("isOn") && this.actions.get(action)[1].equals(f1.id) && !target1_clicked) {
                             reward += 100;
-
-                        if (e2 != null && e2.getBooleanProperty("isOn") && this.actions.get(action)[0].equals(e2.id))
+                            target1_clicked = true;
+                        }
+                        if (e2 != null && e2.getBooleanProperty("isOn") && this.actions.get(action)[0].equals(e2.id) && !target2_clicked) {
                             reward += 100;
-
-                        else if (f2 != null && f2.getBooleanProperty("isOn") && this.actions.get(action)[1].equals(f2.id))
+                            target2_clicked = true;
+                        } else if (f2 != null && f2.getBooleanProperty("isOn") && this.actions.get(action)[1].equals(f2.id) && !target2_clicked) {
                             reward += 100;
+                            target2_clicked = true;
+                        }
 
 
                         //Next state
@@ -213,7 +221,6 @@ public class Bruno_2agents_centralized_MDP_train {
 //                        }
 
 
-
                         currentState_qtableObj = new QtableObject_centralized(nextState_qtableObj);
 
                         //Action
@@ -235,8 +242,9 @@ public class Bruno_2agents_centralized_MDP_train {
                     stuckTicks++;
 
                     // Check if the target button isOn to end the game - Tem que estar aqui para o reward ser válido
-                    if ((e1 != null && e1.getBooleanProperty("isOn") || f1 != null && f1.getBooleanProperty("isOn")) &&
-                            (e2 != null && e2.getBooleanProperty("isOn") || f2 != null && f2.getBooleanProperty("isOn"))) {
+//                    if ((e1 != null && e1.getBooleanProperty("isOn") || f1 != null && f1.getBooleanProperty("isOn")) &&
+//                            (e2 != null && e2.getBooleanProperty("isOn") || f2 != null && f2.getBooleanProperty("isOn"))) {
+                    if (target1_clicked && target2_clicked) {
                         System.out.println("Objetive completed");
                         break;
                     }
@@ -274,7 +282,7 @@ public class Bruno_2agents_centralized_MDP_train {
                     early_stop_counter = early_stop_counter_reset;
                 }
 
-                if (episodes_time_in_seconds <= best_time+1 && best_time != max_time) {
+                if (episodes_time_in_seconds <= best_time + 1 && best_time != max_time) {
                     early_stop_counter--;
                     System.out.println("Early stop counter = " + early_stop_counter);
                 } else
@@ -305,7 +313,7 @@ public class Bruno_2agents_centralized_MDP_train {
                 if (qtableObject.state.checkAllEquals(state))
                     action_object_index = getArgMax_double(qtableObject.actions);
 
-        } else{
+        } else {
 
             int agent0_action_index = ThreadLocalRandom.current().nextInt(0, this.singular_actions.size());
             int agent1_action_index = ThreadLocalRandom.current().nextInt(0, this.singular_actions.size());
@@ -332,8 +340,8 @@ public class Bruno_2agents_centralized_MDP_train {
 
 //            int agent0_action_object_index = ThreadLocalRandom.current().nextInt(0, this.singular_actions.size());
 //            int agent1_action_object_index = ThreadLocalRandom.current().nextInt(0, this.singular_actions.size());
-           for(int i = 0;  i< this.actions.size(); i++){
-                if(this.actions.get(i)[0].equals(this.singular_actions.get(agent0_action_index)) && this.actions.get(i)[1].equals(this.singular_actions.get(agent1_action_index))){
+            for (int i = 0; i < this.actions.size(); i++) {
+                if (this.actions.get(i)[0].equals(this.singular_actions.get(agent0_action_index)) && this.actions.get(i)[1].equals(this.singular_actions.get(agent1_action_index))) {
                     action_object_index = i;
                     break;
                 }
@@ -548,7 +556,7 @@ class State_centralized implements Serializable {
             this.agent2_pos = null;
 
         //Set up the buttons state
-        for(String button: actions_buttons) {
+        for (String button : actions_buttons) {
 
             int button_state = -1;
             var e = agent1.getState().worldmodel.getElement(button);

@@ -15,6 +15,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import world.BeliefState;
+import world.MentalMap;
 
 import java.awt.*;
 import java.io.*;
@@ -57,12 +58,11 @@ public class Bruno_2agents_individual_MDP_train {
     int early_stop_counter_reset = 3;
     int early_stop_counter = early_stop_counter_reset;
 
-    int stuck_counter = 5;
+    int stuck_counter = 15;
 
     boolean static_actions = false;
-    int static_action_agent0 = 0;
-    int static_action_agent1 = 0;
-
+    int static_action_agent0 = 3;
+    int static_action_agent1 = 3;
 
 
     @BeforeAll
@@ -82,9 +82,7 @@ public class Bruno_2agents_individual_MDP_train {
      * Test that the agent can train in this scenario
      */
     @Test
-//    public void create_policy_train(String scenario_filename, String target1, ArrayList<String> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
-//        public void create_policy_train(String scenario_filename, String target1, String target2, ArrayList<String> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
-    public void create_policy_train(String scenario_filename, String target1, String target2, String target3, ArrayList<String> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
+    public void create_policy_train(String scenario_filename, String target1, String target2, ArrayList<String> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
 
 
         System.out.println(LocalDateTime.now());
@@ -92,11 +90,15 @@ public class Bruno_2agents_individual_MDP_train {
         this.actions = actions;
         this.existing_buttons = existing_buttons;
 
+
+
         // Train
         for (int i = 0; i < episodes; i++) {
             System.out.println("Episode " + i + " of " + (episodes - 1) + " epsilon " + epsilon);
 
-            var environment = new LabRecruitsEnvironment(new EnvironmentConfig("bruno_" + scenario_filename).replaceAgentMovementSpeed(0.53f));
+//            var environment = new LabRecruitsEnvironment(new EnvironmentConfig("bruno_" + scenario_filename).replaceAgentMovementSpeed(0.53f));
+            var environment = new LabRecruitsEnvironment(new EnvironmentConfig("bruno_" + scenario_filename).replaceAgentViewDistance(20f));
+
 
             // Create the agents
             var agent0 = new LabRecruitsTestAgent("agent0")
@@ -112,6 +114,8 @@ public class Bruno_2agents_individual_MDP_train {
             // press play in Unity
             if (!environment.startSimulation())
                 throw new InterruptedException("Unity refuses to start the Simulation!");
+
+
 
             // set up the initial states
             agent0.update();
@@ -156,7 +160,6 @@ public class Bruno_2agents_individual_MDP_train {
 
             boolean target1_clicked = false;
             boolean target2_clicked = false;
-            boolean target3_clicked = false;
 
             while (((System.nanoTime() - start) / 1_000_000_000) < max_time) {
                 long now = System.nanoTime();
@@ -168,10 +171,8 @@ public class Bruno_2agents_individual_MDP_train {
                     var f1 = agent1.getState().worldmodel.getElement(target1);
                     var e2 = agent0.getState().worldmodel.getElement(target2);
                     var f2 = agent1.getState().worldmodel.getElement(target2);
-                    var e3 = agent0.getState().worldmodel.getElement(target3);
-                    var f3 = agent1.getState().worldmodel.getElement(target3);
 
-
+//                    System.out.println(belief1.knownButtons().get(1).id);
 //                    System.out.println(this.actions.get(action_agent0) + "  " + this.actions.get(action_agent1));
 
 
@@ -191,24 +192,26 @@ public class Bruno_2agents_individual_MDP_train {
                     // Agents
                     if ((!g0.getStatus().inProgress() && !g1.getStatus().inProgress()) || stuckTicks >= stuck_counter * amountOfTicks) {
 
-                        if(epsilon == 0)
+
+
+                        if (epsilon == 0)
                             System.out.println(action_agent0 + "  " + action_agent1);
 
-                        if (stuckTicks >= (stuck_counter * amountOfTicks))
+                        if (stuckTicks >= (stuck_counter * amountOfTicks)) {
                             System.out.println("agents stuck");
+                            System.out.println(action_agent0 + "  " + action_agent1);
+                        }
 
                         // Agent0
 
                         //Reward
-                        if (e1 != null && e1.getBooleanProperty("isOn") && this.actions.get(action_agent0).equals(e1.id) && !target1_clicked){
+                        if (e1 != null && e1.getBooleanProperty("isOn") && this.actions.get(action_agent0).equals(e1.id) && !target1_clicked) {
                             reward_agent0 += 100;
                             target1_clicked = true;
-                        }else if(e2 != null && e2.getBooleanProperty("isOn") && this.actions.get(action_agent0).equals(e2.id) && !target2_clicked){
+                        }
+                        if (e2 != null && e2.getBooleanProperty("isOn") && this.actions.get(action_agent0).equals(e2.id) && !target2_clicked) {
                             reward_agent0 += 100;
                             target2_clicked = true;
-                        }else if(e3 != null && e3.getBooleanProperty("isOn") && this.actions.get(action_agent0).equals(e3.id) && !target3_clicked){
-                            reward_agent0 += 100;
-                            target3_clicked = true;
                         }
 
                         //Next state
@@ -265,15 +268,13 @@ public class Bruno_2agents_individual_MDP_train {
                         // Agent1
 
                         //Reward
-                        if (f1 != null && f1.getBooleanProperty("isOn") && this.actions.get(action_agent1).equals(f1.id) && !target1_clicked){
+                        if (f1 != null && f1.getBooleanProperty("isOn") && this.actions.get(action_agent1).equals(f1.id) && !target1_clicked) {
                             reward_agent1 += 100;
                             target1_clicked = true;
-                        }else if(f2 != null && f2.getBooleanProperty("isOn") && this.actions.get(action_agent1).equals(f2.id) && !target2_clicked){
+                        }
+                        if (f2 != null && f2.getBooleanProperty("isOn") && this.actions.get(action_agent1).equals(f2.id) && !target2_clicked) {
                             reward_agent1 += 100;
                             target2_clicked = true;
-                        }else if(f3 != null && f3.getBooleanProperty("isOn") && this.actions.get(action_agent1).equals(f3.id) && !target3_clicked){
-                            reward_agent1 += 100;
-                            target3_clicked = true;
                         }
 
                         //Next state
@@ -336,7 +337,7 @@ public class Bruno_2agents_individual_MDP_train {
 //                    if (((e1 != null && e1.getBooleanProperty("isOn")) || (f1 != null && f1.getBooleanProperty("isOn"))) &&
 //                            ((e2 != null && e2.getBooleanProperty("isOn")) || (f2 != null && f2.getBooleanProperty("isOn"))) &&
 //                            ((e3 != null && e3.getBooleanProperty("isOn")) || (f3 != null && f3.getBooleanProperty("isOn")))) {
-                    if(target1_clicked && target2_clicked && target3_clicked){
+                    if (target1_clicked && target2_clicked) {
                         System.out.println("Objetive completed");
                         break;
                     }

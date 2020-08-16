@@ -37,64 +37,64 @@ public class Bruno_2agents_MDP_main {
         this.actions.add(new String[]{"null", "button3"});
         this.actions.add(new String[]{"null", "button4"});
         this.actions.add(new String[]{"null", "button5"});
-//        this.actions.add(new String[]{"null", "button6"});
+        this.actions.add(new String[]{"null", "button6"});
         this.actions.add(new String[]{"button1", "null"});
         this.actions.add(new String[]{"button1", "button1"});
         this.actions.add(new String[]{"button1", "button2"});
         this.actions.add(new String[]{"button1", "button3"});
         this.actions.add(new String[]{"button1", "button4"});
         this.actions.add(new String[]{"button1", "button5"});
-//        this.actions.add(new String[]{"button1", "button6"});
+        this.actions.add(new String[]{"button1", "button6"});
         this.actions.add(new String[]{"button2", "null"});
         this.actions.add(new String[]{"button2", "button1"});
         this.actions.add(new String[]{"button2", "button2"});
         this.actions.add(new String[]{"button2", "button3"});
         this.actions.add(new String[]{"button2", "button4"});
         this.actions.add(new String[]{"button2", "button5"});
-//        this.actions.add(new String[]{"button2", "button6"});
+        this.actions.add(new String[]{"button2", "button6"});
         this.actions.add(new String[]{"button3", "null"});
         this.actions.add(new String[]{"button3", "button1"});
         this.actions.add(new String[]{"button3", "button2"});
         this.actions.add(new String[]{"button3", "button3"});
         this.actions.add(new String[]{"button3", "button4"});
         this.actions.add(new String[]{"button3", "button5"});
-//        this.actions.add(new String[]{"button3", "button6"});
+        this.actions.add(new String[]{"button3", "button6"});
         this.actions.add(new String[]{"button4", "null"});
         this.actions.add(new String[]{"button4", "button1"});
         this.actions.add(new String[]{"button4", "button2"});
         this.actions.add(new String[]{"button4", "button3"});
         this.actions.add(new String[]{"button4", "button4"});
         this.actions.add(new String[]{"button4", "button5"});
-//        this.actions.add(new String[]{"button4", "button6"});
+        this.actions.add(new String[]{"button4", "button6"});
         this.actions.add(new String[]{"button5", "null"});
         this.actions.add(new String[]{"button5", "button1"});
         this.actions.add(new String[]{"button5", "button2"});
         this.actions.add(new String[]{"button5", "button3"});
         this.actions.add(new String[]{"button5", "button4"});
         this.actions.add(new String[]{"button5", "button5"});
-//        this.actions.add(new String[]{"button5", "button6"});
-//        this.actions.add(new String[]{"button6", "null"});
-//        this.actions.add(new String[]{"button6", "button1"});
-//        this.actions.add(new String[]{"button6", "button2"});
-//        this.actions.add(new String[]{"button6", "button3"});
-//        this.actions.add(new String[]{"button6", "button4"});
-//        this.actions.add(new String[]{"button6", "button5"});
-//        this.actions.add(new String[]{"button6", "button6"});
+        this.actions.add(new String[]{"button5", "button6"});
+        this.actions.add(new String[]{"button6", "null"});
+        this.actions.add(new String[]{"button6", "button1"});
+        this.actions.add(new String[]{"button6", "button2"});
+        this.actions.add(new String[]{"button6", "button3"});
+        this.actions.add(new String[]{"button6", "button4"});
+        this.actions.add(new String[]{"button6", "button5"});
+        this.actions.add(new String[]{"button6", "button6"});
 
         this.singular_actions.add("null");
         this.singular_actions.add("button1");
         this.singular_actions.add("button2");
         this.singular_actions.add("button3");
         this.singular_actions.add("button4");
-//        this.singular_actions.add("button5");
-//        this.singular_actions.add("button6");
+        this.singular_actions.add("button5");
+        this.singular_actions.add("button6");
 
         this.existing_buttons.add("button1");
         this.existing_buttons.add("button2");
         this.existing_buttons.add("button3");
         this.existing_buttons.add("button4");
-//        this.existing_buttons.add("button5");
-//        this.existing_buttons.add("button6");
+        this.existing_buttons.add("button5");
+        this.existing_buttons.add("button6");
 
         Tuple<ArrayList<Vec3>, ArrayList<Vec3>> positions = null;
 
@@ -111,25 +111,24 @@ public class Bruno_2agents_MDP_main {
 //        String target3 = "button3";
 //        String scenario = "scenario2";
 
-//        String scenario = "scenario3";
-//        String target1 = "button5";
-//        String target2 = "button6";
+        String scenario = "scenario3";
+        String target1 = "button5";
+        String target2 = "button6";
 
-        String scenario = "scenario4";
-        String target1 = "button1";
-        String target2 = "button2";
-        String target3 = "button3";
+//        String scenario = "scenario4";
+//        String target1 = "button3";
+//        String target2 = "button3";
 
 //        String scenario = "scenario5";
 //        String target1 = "button5";
 //        String target2 = "button5";
 
 
-//        centralizedTraining(scenario, target1, target2, this.actions, this.singular_actions, this.existing_buttons);
+        centralizedTraining(scenario, target1, target2, this.actions, this.singular_actions, this.existing_buttons);
 //        positions = centralizedTesting(scenario, target1, target2, this.actions, this.existing_buttons);
 
-        individualTraining(scenario, target1, target2, target3, this.singular_actions, this.existing_buttons);
-//        positions = individualTesting(scenario, target1, target2, target3, this.singular_actions, this.existing_buttons);
+//        individualTraining(scenario, target1, target2, this.singular_actions, this.existing_buttons);
+//        positions = individualTesting(scenario, target1, target2, this.singular_actions, this.existing_buttons);
 
 //        saveToTXT("C:/Users/bruno/Desktop/Ambiente de Trabalho/" + scenario + "_individual_agent0.txt", positions.object1);
 //        saveToTXT("C:/Users/bruno/Desktop/Ambiente de Trabalho/" + scenario + "_individual_agent1.txt", positions.object2);
@@ -154,19 +153,19 @@ public class Bruno_2agents_MDP_main {
         return Positions;
     }
 
-    public void individualTraining(String scenario, String target1, String target2, String target3, ArrayList<String> singular_actions, ArrayList<String> existing_buttons) throws Exception {
+    public void individualTraining(String scenario, String target1, String target2, ArrayList<String> singular_actions, ArrayList<String> existing_buttons) throws Exception {
         Bruno_2agents_individual_MDP_train.start();
         Bruno_2agents_individual_MDP_train individual_train_new = new Bruno_2agents_individual_MDP_train();
-        individual_train_new.create_policy_train(scenario, target1, target2, target3, singular_actions, existing_buttons);
+        individual_train_new.create_policy_train(scenario, target1, target2, singular_actions, existing_buttons);
         Bruno_2agents_individual_MDP_train.close();
     }
 
-    public Tuple<ArrayList<Vec3>, ArrayList<Vec3>> individualTesting(String scenario, String target1, String target2, String target3, ArrayList<String> singular_actions, ArrayList<String> existing_buttons) throws Exception {
+    public Tuple<ArrayList<Vec3>, ArrayList<Vec3>> individualTesting(String scenario, String target1, String target2, ArrayList<String> singular_actions, ArrayList<String> existing_buttons) throws Exception {
         Tuple<ArrayList<Vec3>, ArrayList<Vec3>> Positions = null;
 
         Bruno_2agents_individual_MDP_test.start();
         Bruno_2agents_individual_MDP_test individual_test = new Bruno_2agents_individual_MDP_test();
-        Positions = individual_test.run(scenario, target1, target2, target3, singular_actions, existing_buttons);
+        Positions = individual_test.run(scenario, target1, target2, singular_actions, existing_buttons);
         Bruno_2agents_individual_MDP_test.close();
 
 

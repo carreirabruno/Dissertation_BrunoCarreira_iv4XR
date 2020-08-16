@@ -53,7 +53,7 @@ public class Bruno_2agents_individual_MDP_test {
      * Test that the agent can test this scenario
      */
     @Test
-    public Tuple<ArrayList<Vec3>, ArrayList<Vec3>> run(String scenario_filename, String target1, String target2, String target3, ArrayList<String> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
+    public Tuple<ArrayList<Vec3>, ArrayList<Vec3>> run(String scenario_filename, String target1, String target2, ArrayList<String> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
 
         this.actions = actions;
         this.existing_buttons = existing_buttons;
@@ -116,13 +116,10 @@ public class Bruno_2agents_individual_MDP_test {
             var f1 = agent1.getState().worldmodel.getElement(target1);
             var e2 = agent0.getState().worldmodel.getElement(target2);
             var f2 = agent1.getState().worldmodel.getElement(target2);
-            var e3 = agent0.getState().worldmodel.getElement(target3);
-            var f3 = agent1.getState().worldmodel.getElement(target3);
 
             // Check if the target button isOn to end the game
             if (((e1 != null && e1.getBooleanProperty("isOn")) || (f1 != null && f1.getBooleanProperty("isOn"))) &&
-                    ((e2 != null && e2.getBooleanProperty("isOn")) || (f2 != null && f2.getBooleanProperty("isOn"))) &&
-                    ((e3 != null && e3.getBooleanProperty("isOn")) || (f3 != null && f3.getBooleanProperty("isOn")))) {
+                    ((e2 != null && e2.getBooleanProperty("isOn")) || (f2 != null && f2.getBooleanProperty("isOn")))) {
 
                 if (g0.getStatus().success())
                     pressedButtons.add(new String[]{"Agent0", this.actions.get(action_agent0)});
