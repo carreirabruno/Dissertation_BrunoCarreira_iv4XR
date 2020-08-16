@@ -170,6 +170,9 @@ public class Bruno_2agents_individual_MDP_test {
 
         System.out.println("Time " + totalTime);
 
+        for(String[] a : pressedButtons)
+            System.out.println(a[0] + " : " + a[1]);
+
         return new Tuple(agent0Positions, agent1Positions);
     }
 
