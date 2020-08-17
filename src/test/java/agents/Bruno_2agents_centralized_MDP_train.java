@@ -37,7 +37,7 @@ public class Bruno_2agents_centralized_MDP_train {
     //    ArrayList<Number> NumberOfSteps = new ArrayList<Number>();
     ArrayList<Number> TimePerEpisode = new ArrayList<Number>();
 
-    int episodes = 1001;
+    int episodes = 5001;
 
     double epsilon = 1;
 
