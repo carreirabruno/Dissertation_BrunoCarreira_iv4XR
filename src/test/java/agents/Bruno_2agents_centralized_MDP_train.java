@@ -5,11 +5,7 @@ import environments.EnvironmentConfig;
 import environments.LabRecruitsEnvironment;
 import game.LabRecruitsTestServer;
 import helperclasses.datastructures.Vec3;
-import nl.uu.cs.aplib.mainConcepts.Goal;
 import nl.uu.cs.aplib.mainConcepts.GoalStructure;
-import org.jfree.chart.ChartUtilities;
-import org.jfree.data.time.TimeSeries;
-import org.jfree.data.xy.XYDataset;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -36,7 +32,7 @@ public class Bruno_2agents_centralized_MDP_train {
 
     ArrayList<TransitionObject_centralized> TransitionTable = new ArrayList<TransitionObject_centralized>();
 
-    ArrayList<QtableObject_centralized> RewardTable = new ArrayList<QtableObject_centralized>();
+    ArrayList<TransitionObject_centralized> RewardTable = new ArrayList<TransitionObject_centralized>();
 
     //    ArrayList<Number> NumberOfSteps = new ArrayList<Number>();
     ArrayList<Number> TimePerEpisode = new ArrayList<Number>();
@@ -48,7 +44,7 @@ public class Bruno_2agents_centralized_MDP_train {
     double learning_rate = 0.1;
     double gamma = 0.65;
 
-    int max_time = 30;
+    int max_time = 45;
     long best_time = max_time;
 
     int early_stop_counter_reset = 3;
@@ -163,7 +159,7 @@ public class Bruno_2agents_centralized_MDP_train {
                         if (epsilon == 0)
                             System.out.println(this.actions.get(action)[0] + "   " + this.actions.get(action)[1]);
 
-                        if (stuckTicks >= stuck_counter * amountOfTicks){
+                        if (stuckTicks >= stuck_counter * amountOfTicks) {
                             System.out.println("Stuck");
                             System.out.println(this.actions.get(action)[0] + "   " + this.actions.get(action)[1]);
                         }
@@ -193,36 +189,62 @@ public class Bruno_2agents_centralized_MDP_train {
                         updateQtable(currentState_qtableObj, nextState_qtableObj, action, reward);
 
 
-//                        //Dyna-Q
-//                        QtableObject_centralized _currentState_qtableObj = new QtableObject_centralized(currentState_qtableObj);
-//                        QtableObject_centralized _nextState_qtableObj = new QtableObject_centralized(nextState_qtableObj);
-//                        int _action = action;
-//                        double _reward = reward;
+                        //Dyna-Q
+                        QtableObject_centralized _currentState_qtableObj = new QtableObject_centralized(currentState_qtableObj);
+                        QtableObject_centralized _nextState_qtableObj = new QtableObject_centralized(nextState_qtableObj);
+                        int _action = action;
+                        double _reward = reward;
+
+                        for (int j = 0; j < 10; j++) {
+                            //          Update model
+                            //update T'[s,a,s']
+                            TransitionTable_update(_currentState_qtableObj.state, _nextState_qtableObj.state, _action);
+
+                            //udpate R'[s,a]
+                            RewardTable_update(_currentState_qtableObj.state, _nextState_qtableObj.state, _action, _reward);
+
+//                            System.out.println(currentState_qtableObj.toString());
+//                            System.out.println(action);
+//                            System.out.println(reward);
+//                            System.out.println(nextState_qtableObj.toString());
+//                            System.out.println();
+//                            System.out.println();
+//                            printQtable();
+//                            System.out.println();
+//                            printTransitionTable();
+//                            System.out.println();
+//                            printRewardTable();
+//                            System.out.println();
+//                            System.out.println();
+
+
+                            //          Hallucinate
+                            //s = random
+                            _currentState_qtableObj = new QtableObject_centralized(this.TransitionTable.get(new Random().nextInt(this.TransitionTable.size())).currentState);
+                            //a = random
+                            _action = getPossibleAction_TransitiontTable(_currentState_qtableObj);
+                            //s' = infer from T[]
+                            _nextState_qtableObj = new QtableObject_centralized(getNextState_TransitionTable(_currentState_qtableObj));
+                            //r = infer from R[s',a]
+                            _reward = getReward_RewardTable(_currentState_qtableObj, _nextState_qtableObj, _action);
+                            try {
+                                //          Q update
+                                updateQtable(_currentState_qtableObj, _nextState_qtableObj, _action, _reward);
+                            } catch (Exception o) {
+                            }
+
+//                            System.out.println(_currentState_qtableObj.toString());
+//                            System.out.println(_action);
+//                            System.out.println(_reward);
+//                            System.out.println(_nextState_qtableObj.toString());
+//                            System.out.println();
+//                            printQtable();
 //
-//                        for (int j = 0; j < 50; j++) {
-//                            //          Update model
-//                            //update T'[s,a,s']
-//                            TransitionTable_update(_currentState_qtableObj.state, _nextState_qtableObj.state, _action);
 //
-//                            //udpate R'[s,a]
-//                            RewardTable_update(_currentState_qtableObj, _action, _reward);
-//
-//                            //          Hallucinate
-//                            //s = random
-//                            _currentState_qtableObj = new QtableObject_centralized(this.TransitionTable.get(new Random().nextInt(this.TransitionTable.size())).currentState);
-//                            //a = random
-//                            _action = getPossibleAction_TransitiontTable(_currentState_qtableObj);
-//                            //s' = infer from T[]
-//                            _nextState_qtableObj = new QtableObject_centralized(getNextState_TransitionTable(_currentState_qtableObj));
-//                            //r = infer from R[s',a]
-//                            _reward = getReward_RewardTable(_currentState_qtableObj, _action);
-//                            try {
-//                                //          Q update
-//                                updateQtable(_currentState_qtableObj, _nextState_qtableObj, _action, _reward);
-//                            } catch (Exception o) {
-//                            }
-//
-//                        }
+//                            System.out.println();
+//                            System.out.println("NEW");
+                        }
+//                            Thread.sleep(5000);
 
 
                         currentState_qtableObj = new QtableObject_centralized(nextState_qtableObj);
@@ -386,6 +408,18 @@ public class Bruno_2agents_centralized_MDP_train {
         }
     }
 
+    public void printTransitionTable() {
+        for (TransitionObject_centralized obj : this.TransitionTable) {
+            System.out.println(obj.toString());
+        }
+    }
+
+    public void printRewardTable() {
+        for (TransitionObject_centralized obj : this.RewardTable) {
+            System.out.println(obj.toString());
+        }
+    }
+
     public int getArgMax_double(double[] array) {
         double max = array[0];
         int maxIdx = 0;
@@ -460,19 +494,19 @@ public class Bruno_2agents_centralized_MDP_train {
     public void TransitionTable_update(State_centralized currentState, State_centralized nextState, int action) {
         if (this.TransitionTable.size() == 0) {
             this.TransitionTable.add(new TransitionObject_centralized(currentState));
-            this.TransitionTable.get(0).udpateTransitionList(new QtableObject_centralized(nextState), action);
+            this.TransitionTable.get(0).udpateTransitionListAction(new QtableObject_centralized(nextState), action);
         } else {
             boolean exists = false;
             for (TransitionObject_centralized tempObject : this.TransitionTable) {
                 if (tempObject.currentState.checkAllEquals(currentState)) {
-                    tempObject.udpateTransitionList(new QtableObject_centralized(nextState), action);
+                    tempObject.udpateTransitionListAction(new QtableObject_centralized(nextState), action);
                     exists = true;
                     break;
                 }
             }
             if (!exists) {
                 this.TransitionTable.add(new TransitionObject_centralized(currentState));
-                this.TransitionTable.get(this.TransitionTable.size() - 1).udpateTransitionList(new QtableObject_centralized(nextState), action);
+                this.TransitionTable.get(this.TransitionTable.size() - 1).udpateTransitionListAction(new QtableObject_centralized(nextState), action);
             }
         }
     }
@@ -511,32 +545,33 @@ public class Bruno_2agents_centralized_MDP_train {
         return null;
     }
 
-    public void RewardTable_update(QtableObject_centralized currentState, int action, double reward) {
+    public void RewardTable_update(State_centralized currentState, State_centralized nextState, int action, double reward) {
         if (this.RewardTable.size() == 0) {
-            this.RewardTable.add(new QtableObject_centralized(currentState));
-            this.RewardTable.get(0).actions[action] = reward;
+            this.RewardTable.add(new TransitionObject_centralized(currentState));
+            this.RewardTable.get(0).udpateTransitionListReward(new QtableObject_centralized(nextState), action, reward);
         } else {
             boolean exists = false;
-            for (QtableObject_centralized tempObject : this.RewardTable) {
-                if (tempObject.state.checkAllEquals(currentState.state)) {
-                    tempObject.actions[action] = reward;
+            for (TransitionObject_centralized tempObject : this.RewardTable) {
+                if (tempObject.currentState.checkAllEquals(currentState)) {
+                    tempObject.udpateTransitionListReward(new QtableObject_centralized(nextState), action, reward);
                     exists = true;
                     break;
                 }
             }
             if (!exists) {
-                this.RewardTable.add(new QtableObject_centralized(currentState));
-                this.RewardTable.get(this.RewardTable.size() - 1).actions[action] = reward;
+                this.RewardTable.add(new TransitionObject_centralized(currentState));
+                this.RewardTable.get(this.RewardTable.size() - 1).udpateTransitionListReward(new QtableObject_centralized(nextState), action, reward);
             }
         }
     }
 
-    public double getReward_RewardTable(QtableObject_centralized currentState, int action) {
-        for (QtableObject_centralized tempObj : this.RewardTable) {
-            if (tempObj.state.checkAllEquals(currentState.state)) {
-                return tempObj.actions[action];
-            }
-        }
+    public double getReward_RewardTable(QtableObject_centralized currentState, QtableObject_centralized nextState, int action) {
+        for (TransitionObject_centralized tempObj : this.RewardTable)
+            if (tempObj.currentState.checkAllEquals(currentState.state))
+                for (QtableObject_centralized obj : tempObj.transitions)
+                    if (obj.state.checkAllEquals(nextState.state))
+                        return obj.actions[action];
+
         return -1;
     }
 
@@ -680,7 +715,7 @@ class TransitionObject_centralized {
         this.currentState = currentState;
     }
 
-    public void udpateTransitionList(QtableObject_centralized nextState, int action) {
+    public void udpateTransitionListAction(QtableObject_centralized nextState, int action) {
         boolean exists = false;
         for (QtableObject_centralized state : transitions) {
             if (state.state.checkAllEquals(nextState.state)) {
@@ -692,6 +727,21 @@ class TransitionObject_centralized {
         if (!exists) {
             transitions.add(new QtableObject_centralized(nextState, true));
             transitions.get(transitions.size() - 1).actions[action] = 1;
+        }
+    }
+
+    public void udpateTransitionListReward(QtableObject_centralized nextState, int action, double reward) {
+        boolean exists = false;
+        for (QtableObject_centralized state : transitions) {
+            if (state.state.checkAllEquals(nextState.state)) {
+                state.actions[action] = reward;
+                exists = true;
+                break;
+            }
+        }
+        if (!exists) {
+            transitions.add(new QtableObject_centralized(nextState, true));
+            transitions.get(transitions.size() - 1).actions[action] = reward;
         }
     }
 

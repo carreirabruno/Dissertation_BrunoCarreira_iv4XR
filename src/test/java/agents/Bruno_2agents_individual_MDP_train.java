@@ -52,7 +52,7 @@ public class Bruno_2agents_individual_MDP_train {
     double learning_rate = 0.1;
     double gamma = 0.65;
 
-    int max_time = 30;
+    int max_time = 45;
     long best_time = max_time;
 
     int early_stop_counter_reset = 3;
@@ -61,8 +61,8 @@ public class Bruno_2agents_individual_MDP_train {
     int stuck_counter = 10;
 
     boolean static_actions = false;
-    int static_action_agent0 = 0;
-    int static_action_agent1 = 0;
+    int static_action_agent0 = 2;
+    int static_action_agent1 = 3;
 
 
     @BeforeAll
@@ -123,14 +123,14 @@ public class Bruno_2agents_individual_MDP_train {
             Qtable_add(this.Qtable_agent0, currentState_qtableObj_agent0);
 
             double reward_agent0 = 0;
-            int action_agent0 = getNextActionIndex(this.Qtable_agent0, currentState_qtableObj_agent0.state);
+            int action_agent0 = getNextActionIndex(this.Qtable_agent0, currentState_qtableObj_agent0.state, agent0, true);
 
             agent1.update();
             QtableObject_individual currentState_qtableObj_agent1 = new QtableObject_individual(new State_individual(agent1, this.existing_buttons));
             Qtable_add(this.Qtable_agent1, currentState_qtableObj_agent1);
 
             double reward_agent1 = 0;
-            int action_agent1 = getNextActionIndex(this.Qtable_agent1, currentState_qtableObj_agent1.state);
+            int action_agent1 = getNextActionIndex(this.Qtable_agent1, currentState_qtableObj_agent1.state, agent1, true);
 
             if (static_actions) {
                 action_agent0 = static_action_agent0;
@@ -256,7 +256,7 @@ public class Bruno_2agents_individual_MDP_train {
                         currentState_qtableObj_agent0 = new QtableObject_individual(nextState_qtableObj_agent0);
 
                         //Action
-                        action_agent0 = getNextActionIndex(this.Qtable_agent0, currentState_qtableObj_agent0.state);
+                        action_agent0 = getNextActionIndex(this.Qtable_agent0, currentState_qtableObj_agent0.state, agent0, false);
                         if (static_actions)
                             action_agent0 = static_action_agent0;
                         g0 = doNextAction(action_agent0, agent0);
@@ -318,7 +318,7 @@ public class Bruno_2agents_individual_MDP_train {
                         currentState_qtableObj_agent1 = new QtableObject_individual(nextState_qtableObj_agent1);
 
                         //Action
-                        action_agent1 = getNextActionIndex(this.Qtable_agent1, currentState_qtableObj_agent1.state);
+                        action_agent1 = getNextActionIndex(this.Qtable_agent1, currentState_qtableObj_agent1.state, agent1, false);
                         if (static_actions)
                             action_agent1 = static_action_agent1;
                         g1 = doNextAction(action_agent1, agent1);
@@ -401,13 +401,20 @@ public class Bruno_2agents_individual_MDP_train {
         example.run();
     }
 
-    public int getNextActionIndex(ArrayList<QtableObject_individual> Qtable, State_individual state) {
+    public int getNextActionIndex(ArrayList<QtableObject_individual> Qtable, State_individual state, LabRecruitsTestAgent agent, boolean first) {
         int action_object_index = -1;
         if (new Random().nextDouble() > epsilon) {
             for (QtableObject_individual qtableObject : Qtable)
                 if (qtableObject.state.checkAllEquals(state))
                     action_object_index = getArgMax_double(qtableObject.actions);
 
+//        } else if(!first){
+//            while(action_object_index < 1 || !agent.getState().canInteract(this.actions.get(action_object_index))) {
+//                if(action_object_index != -1)
+//                    System.out.println(agent.getId() + " trying to interact with " + this.actions.get(action_object_index));
+//                action_object_index = ThreadLocalRandom.current().nextInt(0, this.actions.size());
+//            }
+//            System.out.println(agent.getId() + " will interact with " + this.actions.get(action_object_index));
         } else
             action_object_index = ThreadLocalRandom.current().nextInt(0, this.actions.size());
 
