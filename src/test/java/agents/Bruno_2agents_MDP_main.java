@@ -108,7 +108,6 @@ public class Bruno_2agents_MDP_main {
 //        String scenario = "scenario1";
 //        String target1 = "button3";
 //        String target2 = "button3";
-//        String target3 = "button3";
 //        String scenario = "scenario2";
 
 //        String scenario = "scenario3";
@@ -119,15 +118,19 @@ public class Bruno_2agents_MDP_main {
 //        String target1 = "button5";
 //        String target2 = "button5";
 
-        String scenario = "scenario5";
+//        String scenario = "scenario5";
+//        String target1 = "button5";
+//        String target2 = "button5";
+
+        String scenario = "scenario6";
         String target1 = "button5";
         String target2 = "button5";
 
 
 //        centralizedTraining(scenario, target1, target2, this.actions, this.singular_actions, this.existing_buttons);
-        positions = centralizedTesting(scenario, target1, target2, this.actions, this.existing_buttons);
+//        positions = centralizedTesting(scenario, target1, target2, this.actions, this.existing_buttons);
 
-//        individualTraining(scenario, target1, target2, this.singular_actions, this.existing_buttons);
+        individualTraining(scenario, target1, target2, this.singular_actions, this.existing_buttons);
 //        positions = individualTesting(scenario, target1, target2, this.singular_actions, this.existing_buttons);
 
 //        saveToTXT("C:/Users/bruno/Desktop/Ambiente de Trabalho/" + scenario + "_individual_agent0.txt", positions.object1);
