@@ -44,7 +44,7 @@ public class Bruno_2agents_individual_MDP_train {
 
     ArrayList<Number> TimePerEpisode = new ArrayList<Number>();
 
-    int episodes = 1001;
+    int episodes = 5001;
 
     double epsilon = 1;
 
@@ -60,8 +60,8 @@ public class Bruno_2agents_individual_MDP_train {
     int stuck_counter = 10;
 
     boolean static_actions = false;
-    int static_action_agent0 = 0;
-    int static_action_agent1 = 0;
+    int static_action_agent0 = 1;
+    int static_action_agent1 = 1;
 
 
     @BeforeAll
