@@ -129,7 +129,7 @@ public class Bruno_2agents_MDP_main {
         String scenario = "scenario7";
         String target1 = "button4";
         String target2 = "button5";
-
+ 
 
 //        centralizedTraining(scenario, target1, target2, this.actions, this.singular_actions, this.existing_buttons);
 //        positions = centralizedTesting(scenario, target1, target2, this.actions, this.existing_buttons);
