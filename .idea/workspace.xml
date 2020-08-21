@@ -4,11 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b82204b2-f933-434f-b6ac-98a0e93d5a53" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/agents/Bruno_2agents_MDP_main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/agents/Bruno_2agents_MDP_main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/java/agents/Bruno_2agents_individual_MDP_train.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/java/agents/Bruno_2agents_individual_MDP_train.java" afterDir="false" />
-    </list>
+    <list default="true" id="b82204b2-f933-434f-b6ac-98a0e93d5a53" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
