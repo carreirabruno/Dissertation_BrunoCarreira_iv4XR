@@ -61,7 +61,7 @@ public class Bruno_2agents_individual_MDP_train {
 
     boolean static_actions = false;
     int static_action_agent0 = 1;
-    int static_action_agent1 = 1;
+    int static_action_agent1 = 3;
 
 
     @BeforeAll
