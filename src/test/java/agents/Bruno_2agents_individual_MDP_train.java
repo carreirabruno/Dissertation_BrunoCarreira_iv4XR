@@ -44,24 +44,24 @@ public class Bruno_2agents_individual_MDP_train {
 
     ArrayList<Number> TimePerEpisode = new ArrayList<Number>();
 
-    int episodes = 5001;
+    int episodes = 10001;
 
     double epsilon = 1;
 
     double learning_rate = 0.1;
     double gamma = 0.65;
 
-    int max_time = 45;
+    int max_time = 30;
     long best_time = max_time;
 
     int early_stop_counter_reset = 3;
     int early_stop_counter = early_stop_counter_reset;
 
-    int stuck_counter = 10;
+    int stuck_counter = 5;
 
     boolean static_actions = false;
-    int static_action_agent0 = 1;
-    int static_action_agent1 = 3;
+    int static_action_agent0 = 5;
+    int static_action_agent1 = 5;
 
 
     @BeforeAll
@@ -95,8 +95,8 @@ public class Bruno_2agents_individual_MDP_train {
         for (int i = 0; i < episodes; i++) {
             System.out.println("Episode " + i + " of " + (episodes - 1) + " epsilon " + epsilon);
 
-//            var environment = new LabRecruitsEnvironment(new EnvironmentConfig("bruno_" + scenario_filename).replaceAgentMovementSpeed(0.53f));
-            var environment = new LabRecruitsEnvironment(new EnvironmentConfig("bruno_" + scenario_filename).replaceAgentViewDistance(20f));
+            var environment = new LabRecruitsEnvironment(new EnvironmentConfig("bruno_" + scenario_filename).replaceAgentMovementSpeed(0.53f));
+//            var environment = new LabRecruitsEnvironment(new EnvironmentConfig("bruno_" + scenario_filename).replaceAgentViewDistance(20f));
 
 
             // Create the agents
