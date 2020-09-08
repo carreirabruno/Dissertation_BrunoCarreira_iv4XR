@@ -53,6 +53,8 @@ public class Bruno_2agents_centralized_MDP_test {
         // Get the policy for the agents to use
         getPolicy("2agents_" + scenario_filename + "_centralized_agents_Q_time");
 
+
+
         var environment = new LabRecruitsEnvironment(new EnvironmentConfig("bruno_" + scenario_filename));
 
         // Create the agent
@@ -143,7 +145,8 @@ public class Bruno_2agents_centralized_MDP_test {
             } catch (Exception wtf) {
             }
 
-            System.out.println(currentState.toString());
+
+//            System.out.println(currentState.toString());
 
         }
 
@@ -156,6 +159,13 @@ public class Bruno_2agents_centralized_MDP_test {
 
         System.out.println("Time " + totalTime);
 
+//        FileWriter write = new FileWriter("policy.txt", false);
+//        PrintWriter print_line = new PrintWriter(write);
+//
+//        for (QtableObject_centralized pos : this.policy)
+//            print_line.println(pos.toString());
+//
+//        print_line.close();
 
         return new Tuple(agent0Positions, agent1Positions);
 

@@ -172,6 +172,12 @@ public class Bruno_2agents_individual_MDP_test {
 
         for(String[] a : pressedButtons)
             System.out.println(a[0] + " : " + a[1]);
+        System.out.println();
+        for(Vec3 a : agent0Positions)
+            System.out.println((int)a.x + " " + (int)a.y + " " + (int)a.z );
+        System.out.println();
+        for(Vec3 b : agent1Positions)
+            System.out.println((int)b.x + " " + (int)b.y + " " + (int)b.z );
 
         return new Tuple(agent0Positions, agent1Positions);
     }
@@ -227,15 +233,22 @@ public class Bruno_2agents_individual_MDP_test {
     }
 
     public void addToPos(Vec3 agentPos, ArrayList<Vec3> list) {
+
         if (agentPos != null) {
+            agentPos = new Vec3((int)agentPos.x, (int)agentPos.y, (int)agentPos.z);
             if (list.size() == 0)
                 list.add(agentPos);
             boolean equal = false;
-            for (Vec3 temp : list)
-                if (temp.equals(agentPos) || (temp.x == agentPos.x && temp.z == agentPos.z)) {
-                    equal = true;
-                    break;
-                }
+//            for (Vec3 temp : list)
+//                if (temp.x == agentPos.x && temp.z == agentPos.z) {
+//                    equal = true;
+//                    break;
+//                }
+
+            if (list.get(list.size()-1).x == agentPos.x && list.get(list.size()-1).z == agentPos.z) {
+                equal = true;
+            }
+
             if (!equal)
                 list.add(agentPos);
         }
