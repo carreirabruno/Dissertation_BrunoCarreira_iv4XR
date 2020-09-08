@@ -37,20 +37,20 @@ public class Bruno_2agents_centralized_MDP_train {
     //    ArrayList<Number> NumberOfSteps = new ArrayList<Number>();
     ArrayList<Number> TimePerEpisode = new ArrayList<Number>();
 
-    int episodes = 5001;
+    int episodes = 10001;
 
     double epsilon = 1;
 
     double learning_rate = 0.1;
     double gamma = 0.65;
 
-    int max_time = 45;
+    int max_time = 30;
     long best_time = max_time;
 
-    int early_stop_counter_reset = 3;
+    int early_stop_counter_reset = 5;
     int early_stop_counter = early_stop_counter_reset;
 
-    int stuck_counter = 10;
+    int stuck_counter = 5;
 
     @BeforeAll
     static void start() throws Exception {
@@ -82,7 +82,8 @@ public class Bruno_2agents_centralized_MDP_train {
         for (int i = 0; i < episodes; i++) {
             System.out.println("Episode " + i + " of " + (episodes - 1) + " epsilon " + epsilon);
 
-            var environment = new LabRecruitsEnvironment(new EnvironmentConfig("bruno_" + scenario_filename));
+            var environment = new LabRecruitsEnvironment(new EnvironmentConfig("bruno_" + scenario_filename).replaceAgentMovementSpeed(0.53f));
+//            var environment = new LabRecruitsEnvironment(new EnvironmentConfig("bruno_" + scenario_filename));
 
             // Create the agents
             var agent0 = new LabRecruitsTestAgent("agent0")

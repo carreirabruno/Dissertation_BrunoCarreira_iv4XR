@@ -45,7 +45,7 @@ public class Bruno_2agents_centralized_MDP_test {
      * Test that the agent can test this scenario
      */
     @Test
-  public Tuple<ArrayList<Vec3>, ArrayList<Vec3>> run(String scenario_filename, String target1, String target2, ArrayList<String[]> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
+    public Tuple<ArrayList<Vec3>, ArrayList<Vec3>> run(String scenario_filename, String target1, String target2, ArrayList<String[]> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
 
         this.actions = actions;
         this.existing_buttons = existing_buttons;
@@ -143,6 +143,8 @@ public class Bruno_2agents_centralized_MDP_test {
             } catch (Exception wtf) {
             }
 
+            System.out.println(currentState.toString());
+
         }
 
 
@@ -198,7 +200,7 @@ public class Bruno_2agents_centralized_MDP_test {
             for (; ; ) {
                 obj = in.readObject();
                 this.policy.add((QtableObject_centralized) obj);
-//                System.out.println(obj.toString());
+                System.out.println(obj.toString());
             }
 
         } catch (Exception ignored) {
