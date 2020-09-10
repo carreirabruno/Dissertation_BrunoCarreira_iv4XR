@@ -94,9 +94,9 @@ public class Bruno_2agents_individual_MDP_test {
         int action_agent1 = getNextActionIndex(this.policy_agent1, currentState_agent1);
 
         // Set initial goals to agents
-        var g0 = doNextAction(action_agent0);
+        var g0 = doNextAction(action_agent0, agent0);
         agent0.setGoal(g0);
-        var g1 = doNextAction(action_agent1);
+        var g1 = doNextAction(action_agent1, agent1);
         agent1.setGoal(g1);
 
 
@@ -142,13 +142,13 @@ public class Bruno_2agents_individual_MDP_test {
                 //Next Action - Agent0
                 currentState_agent0 = new State_individual(agent0, this.existing_buttons);
                 action_agent0 = getNextActionIndex(this.policy_agent0, currentState_agent0);
-                g0 = doNextAction(action_agent0);
+                g0 = doNextAction(action_agent0, agent0);
                 agent0.setGoal(g0);
 
                 //Next Action - Agent1
                 currentState_agent1 = new State_individual(agent1, this.existing_buttons);
                 action_agent1 = getNextActionIndex(this.policy_agent1, currentState_agent1);
-                g1 = doNextAction(action_agent1);
+                g1 = doNextAction(action_agent1, agent1);
                 agent1.setGoal(g1);
 
             }
@@ -190,12 +190,20 @@ public class Bruno_2agents_individual_MDP_test {
         return 0;
     }
 
-    public GoalStructure doNextAction(int actionIndex) {
+//    public GoalStructure doNextAction(int actionIndex) {
+//        String action_object = this.actions.get(actionIndex);
+//        if (action_object.equals("null"))
+//            return GoalLib.doNothing();
+//        else
+//            return GoalLib.entityIsInteracted(action_object);
+//    }
+
+    public GoalStructure doNextAction(int actionIndex, LabRecruitsTestAgent agent) {
         String action_object = this.actions.get(actionIndex);
         if (action_object.equals("null"))
             return GoalLib.doNothing();
         else
-            return GoalLib.entityIsInteracted(action_object);
+            return GoalLib.entityIsInteracted_Bruno(agent, action_object);
     }
 
     public int getArgMax_double(double[] array) {

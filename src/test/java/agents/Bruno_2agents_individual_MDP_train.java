@@ -51,17 +51,17 @@ public class Bruno_2agents_individual_MDP_train {
     double learning_rate = 0.1;
     double gamma = 0.65;
 
-    int max_time = 30;
+    int max_time = 60;
     long best_time = max_time;
 
-    int early_stop_counter_reset = 3;
+    int early_stop_counter_reset = 5;
     int early_stop_counter = early_stop_counter_reset;
 
-    int stuck_counter = 5;
+    int stuck_counter = 10;
 
     boolean static_actions = false;
-    int static_action_agent0 = 5;
-    int static_action_agent1 = 5;
+    int static_action_agent0 = 3;
+    int static_action_agent1 = 3;
 
 
     @BeforeAll
@@ -198,7 +198,7 @@ public class Bruno_2agents_individual_MDP_train {
 
                         if (stuckTicks >= (stuck_counter * amountOfTicks)) {
                             System.out.println("agents stuck");
-                            System.out.println(action_agent0 + "  " + action_agent1);
+//                            System.out.println(action_agent0 + "  " + action_agent1);
                         }
 
                         // Agent0

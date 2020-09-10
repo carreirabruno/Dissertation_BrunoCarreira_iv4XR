@@ -81,9 +81,9 @@ public class Bruno_2agents_centralized_MDP_test {
         int action = getNextActionIndex(currentState);
 
         // Set initial goals to agents
-        var g0 = doNextAction(action, 0);
+        var g0 = doNextAction(action, 0, agent0);
         agent0.setGoal(g0);
-        var g1 = doNextAction(action, 1);
+        var g1 = doNextAction(action, 1, agent1);
         agent1.setGoal(g1);
 
         long start = System.nanoTime();
@@ -94,6 +94,8 @@ public class Bruno_2agents_centralized_MDP_test {
         ArrayList<Vec3> agent1Positions = new ArrayList<Vec3>();
 
         while (true) {
+
+            System.out.println(action);
 
             addToPos(agent0.getState().worldmodel.position, agent0Positions);
             addToPos(agent1.getState().worldmodel.position, agent1Positions);
@@ -129,11 +131,11 @@ public class Bruno_2agents_centralized_MDP_test {
 
                 // Set up the next action - agent0
                 action = getNextActionIndex(currentState);
-                g0 = doNextAction(action, 0);
+                g0 = doNextAction(action, 0, agent0);
                 agent0.setGoal(g0);
                 g0.getStatus().resetToInProgress();
                 // Set up the next action - agent1
-                g1 = doNextAction(action, 1);
+                g1 = doNextAction(action, 1, agent1);
                 agent1.setGoal(g1);
                 g1.getStatus().resetToInProgress();
 
@@ -176,15 +178,23 @@ public class Bruno_2agents_centralized_MDP_test {
             if (qtableObject.state.checkAllEquals(state))
                 return getArgMax_double(qtableObject.actions);
 
-        return 0;
+        return -1;
     }
 
-    public GoalStructure doNextAction(int actionIndex, int agent) {
+//    public GoalStructure doNextAction(int actionIndex, int agent) {
+//        String[] action_object = this.actions.get(actionIndex);
+//        if (action_object[agent].equals("null"))
+//            return GoalLib.doNothing();
+//        else
+//            return GoalLib.entityIsInteracted(action_object[agent]);
+//    }
+
+    public GoalStructure doNextAction(int actionIndex, int agentID, LabRecruitsTestAgent agent) {
         String[] action_object = this.actions.get(actionIndex);
-        if (action_object[agent].equals("null"))
+        if (action_object[agentID].equals("null"))
             return GoalLib.doNothing();
         else
-            return GoalLib.entityIsInteracted(action_object[agent]);
+            return GoalLib.entityIsInteracted_Bruno(agent, action_object[agentID]);
     }
 
     public int getArgMax_double(double[] array) {
@@ -210,7 +220,7 @@ public class Bruno_2agents_centralized_MDP_test {
             for (; ; ) {
                 obj = in.readObject();
                 this.policy.add((QtableObject_centralized) obj);
-                System.out.println(obj.toString());
+//                System.out.println(obj.toString());
             }
 
         } catch (Exception ignored) {
