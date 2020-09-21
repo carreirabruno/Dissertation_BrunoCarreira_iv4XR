@@ -131,7 +131,7 @@ public class Bruno_2agents_MDP_main {
 //        String target2 = "button5";
 
 //        centralizedTraining(scenario, target1, target2, this.actions, this.singular_actions, this.existing_buttons);
-        positions = centralizedTesting(scenario, target1, target2, this.actions, this.existing_buttons);
+//        positions = centralizedTesting(scenario, target1, target2, this.actions, this.existing_buttons);
 
 //        individualTraining(scenario, target1, target2, this.singular_actions, this.existing_buttons);
 //        positions = individualTesting(scenario, target1, target2, this.singular_actions, this.existing_buttons);
@@ -139,6 +139,7 @@ public class Bruno_2agents_MDP_main {
 //        saveToTXT("C:/Users/bruno/Desktop/Ambiente de Trabalho/" + scenario + "_individual_agent0.txt", positions.object1);
 //        saveToTXT("C:/Users/bruno/Desktop/Ambiente de Trabalho/" + scenario + "_individual_agent1.txt", positions.object2);
 
+        manualControl(scenario, target1, target2);
     }
 
     public void centralizedTraining(String scenario, String target1, String target2, ArrayList<String[]> actions, ArrayList<String> singular_actions, ArrayList<String> existing_buttons) throws Exception {
@@ -189,4 +190,12 @@ public class Bruno_2agents_MDP_main {
 
     }
 
+    public void manualControl(String scenario,  String target1, String target2) throws Exception {
+        Bruno_2agents_manualControl.start();
+        Bruno_2agents_manualControl individual_train_new = new Bruno_2agents_manualControl();
+        individual_train_new.create_policy_manually(scenario, target1, target2);
+        Bruno_2agents_manualControl.close();
+    }
+    
+    
 }
