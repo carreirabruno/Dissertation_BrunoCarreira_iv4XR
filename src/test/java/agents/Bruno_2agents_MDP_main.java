@@ -85,14 +85,14 @@ public class Bruno_2agents_MDP_main {
         this.singular_actions.add("button1");
         this.singular_actions.add("button2");
         this.singular_actions.add("button3");
-//        this.singular_actions.add("button4");
+        this.singular_actions.add("button4");
 //        this.singular_actions.add("button5");
 //        this.singular_actions.add("button6");
 
         this.existing_buttons.add("button1");
         this.existing_buttons.add("button2");
         this.existing_buttons.add("button3");
-//        this.existing_buttons.add("button4");
+        this.existing_buttons.add("button4");
 //        this.existing_buttons.add("button5");
 //        this.existing_buttons.add("button6");
 
@@ -105,9 +105,9 @@ public class Bruno_2agents_MDP_main {
 //        String target1 = "button1";
 //        String target2 = "button3";
 
-        String scenario = "scenario1";
-        String target1 = "button3";
-        String target2 = "button3";
+//        String scenario = "scenario1";
+//        String target1 = "button3";
+//        String target2 = "button3";
 //        String scenario = "scenario2";
 
 //        String scenario = "scenario3";
@@ -122,9 +122,9 @@ public class Bruno_2agents_MDP_main {
 //        String target1 = "button5";
 //        String target2 = "button5";
 
-//        String scenario = "scenario6";
-//        String target1 = "button6";
-//        String target2 = "button6";
+        String scenario = "scenario6";
+        String target1 = "button4";
+        String target2 = "button4";
 
 //        String scenario = "scenario7";
 //        String target1 = "button1";
@@ -133,8 +133,8 @@ public class Bruno_2agents_MDP_main {
 //        centralizedTraining(scenario, target1, target2, this.actions, this.singular_actions, this.existing_buttons);
 //        positions = centralizedTesting(scenario, target1, target2, this.actions, this.existing_buttons);
 //
-//        individualTraining(scenario, target1, target2, this.singular_actions, this.existing_buttons);
-        positions = individualTesting(scenario, target1, target2, this.singular_actions, this.existing_buttons);
+        individualTraining(scenario, target1, target2, this.singular_actions, this.existing_buttons);
+//        positions = individualTesting(scenario, target1, target2, this.singular_actions, this.existing_buttons);
 
 //        saveToTXT("C:/Users/bruno/Desktop/Ambiente de Trabalho/" + scenario + "_individual_agent0.txt", positions.object1);
 //        saveToTXT("C:/Users/bruno/Desktop/Ambiente de Trabalho/" + scenario + "_individual_agent1.txt", positions.object2);
