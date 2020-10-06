@@ -44,13 +44,13 @@ public class Bruno_2agents_centralized_MDP_train {
     double learning_rate = 0.1;
     double gamma = 0.65;
 
-    int max_time = 30;
+    int max_time = 60;
     long best_time = max_time;
 
     int early_stop_counter_reset = 5;
     int early_stop_counter = early_stop_counter_reset;
 
-    int stuck_counter = 5;
+    int stuck_counter = 8;
 
     @BeforeAll
     static void start() throws Exception {

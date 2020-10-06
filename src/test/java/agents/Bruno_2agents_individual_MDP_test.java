@@ -53,7 +53,9 @@ public class Bruno_2agents_individual_MDP_test {
      * Test that the agent can test this scenario
      */
     @Test
-    public Tuple<ArrayList<Vec3>, ArrayList<Vec3>> run(String scenario_filename, String target1, String target2, ArrayList<String> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
+//    public Tuple<ArrayList<Vec3>, ArrayList<Vec3>> run(String scenario_filename, String target1, String target2, ArrayList<String> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
+    public ArrayList<String[]> run(String scenario_filename, String target1, String target2, ArrayList<String> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
+
 
         this.actions = actions;
         this.existing_buttons = existing_buttons;
@@ -168,18 +170,19 @@ public class Bruno_2agents_individual_MDP_test {
         if (!environment.close())
             throw new InterruptedException("Unity refuses to close the Simulation!");
 
+//        for(Vec3 a : agent0Positions)
+//            System.out.println((int)a.x + " " + (int)a.y + " " + (int)a.z );
+//        System.out.println();
+//        for(Vec3 b : agent1Positions)
+//            System.out.println((int)b.x + " " + (int)b.y + " " + (int)b.z );
+
+        System.out.println("INDIVIDUAL");
         System.out.println("Time " + totalTime);
+        for(String[] _actions : pressedButtons)
+            System.out.println(_actions[0] + " " + _actions[1]);
 
-        for(String[] a : pressedButtons)
-            System.out.println(a[0] + " : " + a[1]);
-        System.out.println();
-        for(Vec3 a : agent0Positions)
-            System.out.println((int)a.x + " " + (int)a.y + " " + (int)a.z );
-        System.out.println();
-        for(Vec3 b : agent1Positions)
-            System.out.println((int)b.x + " " + (int)b.y + " " + (int)b.z );
-
-        return new Tuple(agent0Positions, agent1Positions);
+        return pressedButtons;
+//        return new Tuple(agent0Positions, agent1Positions);
     }
 
     public int getNextActionIndex(ArrayList<QtableObject_individual> policy, State_individual state) {

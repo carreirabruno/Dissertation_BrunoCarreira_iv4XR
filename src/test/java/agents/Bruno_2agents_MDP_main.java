@@ -15,6 +15,9 @@ public class Bruno_2agents_MDP_main {
     ArrayList<String> singular_actions = new ArrayList<String>();
     ArrayList<String> existing_buttons = new ArrayList<String>();
 
+    ArrayList<String[]> pressedButtons_centralized = new ArrayList<String[]>();
+    ArrayList<String[]> pressedButtons_individual = new ArrayList<String[]>();
+
     @BeforeAll
     static void start() {
         // Uncomment this to make the game's graphic visible:
@@ -36,50 +39,50 @@ public class Bruno_2agents_MDP_main {
         this.actions.add(new String[]{"null", "button2"});
         this.actions.add(new String[]{"null", "button3"});
         this.actions.add(new String[]{"null", "button4"});
-        this.actions.add(new String[]{"null", "button5"});
-        this.actions.add(new String[]{"null", "button6"});
+//        this.actions.add(new String[]{"null", "button5"});
+//        this.actions.add(new String[]{"null", "button6"});
         this.actions.add(new String[]{"button1", "null"});
         this.actions.add(new String[]{"button1", "button1"});
         this.actions.add(new String[]{"button1", "button2"});
         this.actions.add(new String[]{"button1", "button3"});
         this.actions.add(new String[]{"button1", "button4"});
-        this.actions.add(new String[]{"button1", "button5"});
-        this.actions.add(new String[]{"button1", "button6"});
+//        this.actions.add(new String[]{"button1", "button5"});
+//        this.actions.add(new String[]{"button1", "button6"});
         this.actions.add(new String[]{"button2", "null"});
         this.actions.add(new String[]{"button2", "button1"});
         this.actions.add(new String[]{"button2", "button2"});
         this.actions.add(new String[]{"button2", "button3"});
         this.actions.add(new String[]{"button2", "button4"});
-        this.actions.add(new String[]{"button2", "button5"});
-        this.actions.add(new String[]{"button2", "button6"});
+//        this.actions.add(new String[]{"button2", "button5"});
+//        this.actions.add(new String[]{"button2", "button6"});
         this.actions.add(new String[]{"button3", "null"});
         this.actions.add(new String[]{"button3", "button1"});
         this.actions.add(new String[]{"button3", "button2"});
         this.actions.add(new String[]{"button3", "button3"});
         this.actions.add(new String[]{"button3", "button4"});
-        this.actions.add(new String[]{"button3", "button5"});
-        this.actions.add(new String[]{"button3", "button6"});
+//        this.actions.add(new String[]{"button3", "button5"});
+//        this.actions.add(new String[]{"button3", "button6"});
         this.actions.add(new String[]{"button4", "null"});
         this.actions.add(new String[]{"button4", "button1"});
         this.actions.add(new String[]{"button4", "button2"});
         this.actions.add(new String[]{"button4", "button3"});
         this.actions.add(new String[]{"button4", "button4"});
-        this.actions.add(new String[]{"button4", "button5"});
-        this.actions.add(new String[]{"button4", "button6"});
-        this.actions.add(new String[]{"button5", "null"});
-        this.actions.add(new String[]{"button5", "button1"});
-        this.actions.add(new String[]{"button5", "button2"});
-        this.actions.add(new String[]{"button5", "button3"});
-        this.actions.add(new String[]{"button5", "button4"});
-        this.actions.add(new String[]{"button5", "button5"});
-        this.actions.add(new String[]{"button5", "button6"});
-        this.actions.add(new String[]{"button6", "null"});
-        this.actions.add(new String[]{"button6", "button1"});
-        this.actions.add(new String[]{"button6", "button2"});
-        this.actions.add(new String[]{"button6", "button3"});
-        this.actions.add(new String[]{"button6", "button4"});
-        this.actions.add(new String[]{"button6", "button5"});
-        this.actions.add(new String[]{"button6", "button6"});
+//        this.actions.add(new String[]{"button4", "button5"});
+//        this.actions.add(new String[]{"button4", "button6"});
+//        this.actions.add(new String[]{"button5", "null"});
+//        this.actions.add(new String[]{"button5", "button1"});
+//        this.actions.add(new String[]{"button5", "button2"});
+//        this.actions.add(new String[]{"button5", "button3"});
+//        this.actions.add(new String[]{"button5", "button4"});
+//        this.actions.add(new String[]{"button5", "button5"});
+//        this.actions.add(new String[]{"button5", "button6"});
+//        this.actions.add(new String[]{"button6", "null"});
+//        this.actions.add(new String[]{"button6", "button1"});
+//        this.actions.add(new String[]{"button6", "button2"});
+//        this.actions.add(new String[]{"button6", "button3"});
+//        this.actions.add(new String[]{"button6", "button4"});
+//        this.actions.add(new String[]{"button6", "button5"});
+//        this.actions.add(new String[]{"button6", "button6"});
 
         this.singular_actions.add("null");
         this.singular_actions.add("button1");
@@ -106,9 +109,12 @@ public class Bruno_2agents_MDP_main {
 //        String target2 = "button3";
 
 //        String scenario = "scenario1";
+//        String target1 = "button4";
+//        String target2 = "button4";
+
+//        String scenario = "scenario2";
 //        String target1 = "button3";
 //        String target2 = "button3";
-//        String scenario = "scenario2";
 
 //        String scenario = "scenario3";
 //        String target1 = "button5";
@@ -122,24 +128,33 @@ public class Bruno_2agents_MDP_main {
 //        String target1 = "button5";
 //        String target2 = "button5";
 
-        String scenario = "scenario6";
+//        String scenario = "scenario6";
+//        String target1 = "button3";
+//        String target2 = "button3";
+
+//        String scenario = "scenario7";
+//        String target1 = "button5";
+//        String target2 = "button5";
+
+        String scenario = "scenario8";
         String target1 = "button4";
         String target2 = "button4";
 
-//        String scenario = "scenario7";
-//        String target1 = "button1";
-//        String target2 = "button5";
+//        manualControl(scenario, target1, target2);
 
-//        centralizedTraining(scenario, target1, target2, this.actions, this.singular_actions, this.existing_buttons);
-//        positions = centralizedTesting(scenario, target1, target2, this.actions, this.existing_buttons);
+        centralizedTraining(scenario, target1, target2, this.actions, this.singular_actions, this.existing_buttons);
+//        positions = centralizedTesting_positions(scenario, target1, target2, this.actions, this.existing_buttons);
+//        centralizedTesting_pressedButtons(scenario, target1, target2, this.actions, this.existing_buttons);
+
 //
-        individualTraining(scenario, target1, target2, this.singular_actions, this.existing_buttons);
+//        individualTraining(scenario, target1, target2, this.singular_actions, this.existing_buttons);
 //        positions = individualTesting(scenario, target1, target2, this.singular_actions, this.existing_buttons);
+//        individualTesting_pressedButtons(scenario, target1, target2, this.singular_actions, this.existing_buttons);
 
 //        saveToTXT("C:/Users/bruno/Desktop/Ambiente de Trabalho/" + scenario + "_individual_agent0.txt", positions.object1);
 //        saveToTXT("C:/Users/bruno/Desktop/Ambiente de Trabalho/" + scenario + "_individual_agent1.txt", positions.object2);
 
-//        manualControl(scenario, target1, target2);
+//        comparePolicies(pressedButtons_centralized, pressedButtons_individual);
     }
 
     public void centralizedTraining(String scenario, String target1, String target2, ArrayList<String[]> actions, ArrayList<String> singular_actions, ArrayList<String> existing_buttons) throws Exception {
@@ -150,14 +165,22 @@ public class Bruno_2agents_MDP_main {
 
     }
 
-    public Tuple<ArrayList<Vec3>, ArrayList<Vec3>> centralizedTesting(String scenario, String target1, String target2, ArrayList<String[]> actions, ArrayList<String> existing_buttons) throws Exception {
-        Tuple<ArrayList<Vec3>, ArrayList<Vec3>> Positions = null;
+//    public Tuple<ArrayList<Vec3>, ArrayList<Vec3>> centralizedTesting_positions(String scenario, String target1, String target2, ArrayList<String[]> actions, ArrayList<String> existing_buttons) throws Exception {
+//        Tuple<ArrayList<Vec3>, ArrayList<Vec3>> Positions = null;
+//        Bruno_2agents_centralized_MDP_test.start();
+//        Bruno_2agents_centralized_MDP_test centralized_test = new Bruno_2agents_centralized_MDP_test();
+//        Positions = centralized_test.run(scenario, target1, target2, actions, existing_buttons);
+//        Bruno_2agents_centralized_MDP_test.close();
+//
+//        return Positions;
+//    }
+
+    public void centralizedTesting_pressedButtons(String scenario, String target1, String target2, ArrayList<String[]> actions, ArrayList<String> existing_buttons) throws Exception {
         Bruno_2agents_centralized_MDP_test.start();
         Bruno_2agents_centralized_MDP_test centralized_test = new Bruno_2agents_centralized_MDP_test();
-        Positions = centralized_test.run(scenario, target1, target2, actions, existing_buttons);
+        pressedButtons_centralized = centralized_test.run(scenario, target1, target2, actions, existing_buttons);
         Bruno_2agents_centralized_MDP_test.close();
 
-        return Positions;
     }
 
     public void individualTraining(String scenario, String target1, String target2, ArrayList<String> singular_actions, ArrayList<String> existing_buttons) throws Exception {
@@ -167,16 +190,22 @@ public class Bruno_2agents_MDP_main {
         Bruno_2agents_individual_MDP_train.close();
     }
 
-    public Tuple<ArrayList<Vec3>, ArrayList<Vec3>> individualTesting(String scenario, String target1, String target2, ArrayList<String> singular_actions, ArrayList<String> existing_buttons) throws Exception {
-        Tuple<ArrayList<Vec3>, ArrayList<Vec3>> Positions = null;
+//    public Tuple<ArrayList<Vec3>, ArrayList<Vec3>> individualTesting(String scenario, String target1, String target2, ArrayList<String> singular_actions, ArrayList<String> existing_buttons) throws Exception {
+//        Tuple<ArrayList<Vec3>, ArrayList<Vec3>> Positions = null;
+//
+//        Bruno_2agents_individual_MDP_test.start();
+//        Bruno_2agents_individual_MDP_test individual_test = new Bruno_2agents_individual_MDP_test();
+//        Positions = individual_test.run(scenario, target1, target2, singular_actions, existing_buttons);
+//        Bruno_2agents_individual_MDP_test.close();
+//
+//        return Positions;
+//    }
 
+    public void individualTesting_pressedButtons(String scenario, String target1, String target2, ArrayList<String> singular_actions, ArrayList<String> existing_buttons) throws Exception {
         Bruno_2agents_individual_MDP_test.start();
         Bruno_2agents_individual_MDP_test individual_test = new Bruno_2agents_individual_MDP_test();
-        Positions = individual_test.run(scenario, target1, target2, singular_actions, existing_buttons);
+        pressedButtons_individual = individual_test.run(scenario, target1, target2, singular_actions, existing_buttons);
         Bruno_2agents_individual_MDP_test.close();
-
-
-        return Positions;
     }
 
     public void saveToTXT(String filename, ArrayList<Vec3> list) throws IOException {
@@ -190,12 +219,19 @@ public class Bruno_2agents_MDP_main {
 
     }
 
-    public void manualControl(String scenario,  String target1, String target2) throws Exception {
+    public void manualControl(String scenario, String target1, String target2) throws Exception {
         Bruno_2agents_manualControl.start();
         Bruno_2agents_manualControl individual_train_new = new Bruno_2agents_manualControl();
         individual_train_new.create_policy_manually(scenario, target1, target2);
         Bruno_2agents_manualControl.close();
     }
-    
-    
+
+    public void comparePolicies(ArrayList<String[]> pressedButtons_centralized, ArrayList<String[]> pressedButtons_individual) throws Exception {
+        Bruno_2agents_ComparePolicies.start();
+        Bruno_2agents_ComparePolicies _comparePolicies = new Bruno_2agents_ComparePolicies();
+        _comparePolicies.run(pressedButtons_centralized, pressedButtons_individual);
+        Bruno_2agents_ComparePolicies.close();
+    }
+
+
 }

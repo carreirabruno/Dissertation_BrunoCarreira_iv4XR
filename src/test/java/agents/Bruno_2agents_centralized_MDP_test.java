@@ -45,7 +45,9 @@ public class Bruno_2agents_centralized_MDP_test {
      * Test that the agent can test this scenario
      */
     @Test
-    public Tuple<ArrayList<Vec3>, ArrayList<Vec3>> run(String scenario_filename, String target1, String target2, ArrayList<String[]> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
+//    public Tuple<ArrayList<Vec3>, ArrayList<Vec3>> run(String scenario_filename, String target1, String target2, ArrayList<String[]> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
+    public ArrayList<String[]> run(String scenario_filename, String target1, String target2, ArrayList<String[]> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
+
 
         this.actions = actions;
         this.existing_buttons = existing_buttons;
@@ -95,8 +97,6 @@ public class Bruno_2agents_centralized_MDP_test {
 
         while (true) {
 
-            System.out.println(action);
-
             addToPos(agent0.getState().worldmodel.position, agent0Positions);
             addToPos(agent1.getState().worldmodel.position, agent1Positions);
 
@@ -122,7 +122,7 @@ public class Bruno_2agents_centralized_MDP_test {
             if (!g0.getStatus().inProgress() && !g1.getStatus().inProgress()) {
                 if (g0.getStatus().success())
                     pressedButtons.add(new String[]{"Agent0", this.actions.get(action)[0]});
-                ;
+
                 if (g1.getStatus().success())
                     pressedButtons.add(new String[]{"Agent1", this.actions.get(action)[1]});
 
@@ -147,9 +147,6 @@ public class Bruno_2agents_centralized_MDP_test {
             } catch (Exception wtf) {
             }
 
-
-//            System.out.println(currentState.toString());
-
         }
 
 
@@ -159,25 +156,25 @@ public class Bruno_2agents_centralized_MDP_test {
         if (!environment.close())
             throw new InterruptedException("Unity refuses to close the Simulation!");
 
+        System.out.println("CENTRALIZED");
         System.out.println("Time " + totalTime);
+        for(String[] _actions : pressedButtons)
+            System.out.println(_actions[0] + " " + _actions[1]);
 
-//        FileWriter write = new FileWriter("policy.txt", false);
-//        PrintWriter print_line = new PrintWriter(write);
-//
-//        for (QtableObject_centralized pos : this.policy)
-//            print_line.println(pos.toString());
-//
-//        print_line.close();
-
-        return new Tuple(agent0Positions, agent1Positions);
+        return pressedButtons;
+//        return new Tuple(agent0Positions, agent1Positions);
 
     }
 
     public int getNextActionIndex(State_centralized state) {
+
         for (QtableObject_centralized qtableObject : this.policy)
             if (qtableObject.state.checkAllEquals(state))
                 return getArgMax_double(qtableObject.actions);
-
+        System.out.println(state.toString());
+        System.out.println();
+        for (QtableObject_centralized qtableObject : this.policy)
+            System.out.println(qtableObject.state.toString());
         return -1;
     }
 

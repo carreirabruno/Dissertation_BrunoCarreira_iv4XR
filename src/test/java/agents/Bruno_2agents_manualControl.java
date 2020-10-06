@@ -17,7 +17,7 @@ public class Bruno_2agents_manualControl{
 
     private static LabRecruitsTestServer labRecruitsTestServer;
 
-    int max_time = 60;
+    int max_time = 60000;
 
 
     @BeforeAll
