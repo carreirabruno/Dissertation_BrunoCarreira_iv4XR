@@ -300,7 +300,7 @@ public class Bruno_2agents_centralized_MDP_train {
                 this.TimePerEpisode.add(episodes_time_in_seconds);
                 System.out.println("added time");
 
-                printQtable();
+//                printQtable();
 
                 //Early stop
                 if (episodes_time_in_seconds < best_time) {
@@ -312,8 +312,10 @@ public class Bruno_2agents_centralized_MDP_train {
                 if (episodes_time_in_seconds <= best_time + 1 && best_time != max_time) {
                     early_stop_counter--;
                     System.out.println("Early stop counter = " + early_stop_counter);
-                } else
+                } else {
                     early_stop_counter = early_stop_counter_reset;
+                    best_time = max_time;
+                }
 
                 if (early_stop_counter == 0)
                     break;
@@ -323,7 +325,7 @@ public class Bruno_2agents_centralized_MDP_train {
                 throw new InterruptedException("Unity refuses to close the Simulation!");
         }
 
-        printQtable();
+//        printQtable();
 
         savePolicyToFile("2agents_" + scenario_filename + "_centralized_agents_Q_time");
 

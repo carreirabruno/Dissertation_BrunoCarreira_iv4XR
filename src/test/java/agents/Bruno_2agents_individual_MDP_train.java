@@ -364,9 +364,9 @@ public class Bruno_2agents_individual_MDP_train {
                 long episodes_time_in_seconds = episode_time / 1_000_000_000;
                 this.TimePerEpisode.add(episodes_time_in_seconds);
                 System.out.println("added time");
-                printQtable(this.Qtable_agent0);
-                System.out.println();
-                printQtable(this.Qtable_agent1);
+//                printQtable(this.Qtable_agent0);
+//                System.out.println();
+//                printQtable(this.Qtable_agent1);
 
 
                 //Early stop
@@ -379,8 +379,10 @@ public class Bruno_2agents_individual_MDP_train {
                 if (episodes_time_in_seconds <= best_time + 1 && best_time != max_time && best_time + 1 != max_time) {
                     early_stop_counter--;
                     System.out.println("Early stop counter = " + early_stop_counter);
-                } else
+                } else {
                     early_stop_counter = early_stop_counter_reset;
+                    best_time = max_time;
+                }
 
                 if (early_stop_counter == 0)
                     break;

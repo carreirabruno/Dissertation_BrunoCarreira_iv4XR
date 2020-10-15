@@ -10,13 +10,13 @@ w,f,f,f,f,f,f,f,f,f,f,w
 w,w,w,w,w,w,w,w,f,f,f,w
 w,f:b^button1,f,f,f,f,f,f:d>e^door1,f,f,f,w
 w,f,f,f,f,f,f,w,f,f,f,w
-w,f:a^agent0,f,f,f,f,f,w,f,f,f,w
 w,f,f,f,f,f,f,w,f,f,f,w
-w,f,f,f,f,f:b^button2,f,w,f,f,f,w
+w,f,f,f,f,f,f,w,f,f,f,w
+w,f:a^agent0,f,f,f,f:b^button2,f,w,f,f,f,w
 w,w,w,w,w,w,w,w,w,f:d>n^door3,w,w
-w,f,f,f,f,f:b^button3,f,w,f,f,f,w
+w,f:a^agent1,f,f,f,f:b^button3,f,w,f,f,f,w
 w,f,f,f,f,f,f,w,f,f,f,w
-w,f:a^agent1,f,f,f,f,f,w,f,f,f,w
+w,f,f,f,f,f,f,w,f,f,f,w
 w,f,f,f,f,f,f,w,f,f,f,w
 w,f:b^button4,f,f,f,f,f,f:d>e^door2,f,f,f,w
 w,w,w,w,w,w,w,w,f,f,f,w
