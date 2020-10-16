@@ -157,7 +157,7 @@ public class Bruno_2agents_centralized_MDP_train {
 //                    if (!g0.getStatus().inProgress() && !g1.getStatus().inProgress()) {
                     if ((!g0.getStatus().inProgress() && !g1.getStatus().inProgress()) || stuckTicks >= stuck_counter * amountOfTicks) {
 
-                        if (epsilon == 0)
+                        if (epsilon == 0 && g0.getStatus().success() && g1.getStatus().success())
                             System.out.println(this.actions.get(action)[0] + "   " + this.actions.get(action)[1]);
 
                         if (stuckTicks >= stuck_counter * amountOfTicks) {
@@ -204,21 +204,6 @@ public class Bruno_2agents_centralized_MDP_train {
                             //udpate R'[s,a]
                             RewardTable_update(_currentState_qtableObj.state, _nextState_qtableObj.state, _action, _reward);
 
-//                            System.out.println(currentState_qtableObj.toString());
-//                            System.out.println(action);
-//                            System.out.println(reward);
-//                            System.out.println(nextState_qtableObj.toString());
-//                            System.out.println();
-//                            System.out.println();
-//                            printQtable();
-//                            System.out.println();
-//                            printTransitionTable();
-//                            System.out.println();
-//                            printRewardTable();
-//                            System.out.println();
-//                            System.out.println();
-
-
                             //          Hallucinate
                             //s = random
                             _currentState_qtableObj = new QtableObject_centralized(this.TransitionTable.get(new Random().nextInt(this.TransitionTable.size())).currentState);
@@ -234,19 +219,7 @@ public class Bruno_2agents_centralized_MDP_train {
                             } catch (Exception o) {
                             }
 
-//                            System.out.println(_currentState_qtableObj.toString());
-//                            System.out.println(_action);
-//                            System.out.println(_reward);
-//                            System.out.println(_nextState_qtableObj.toString());
-//                            System.out.println();
-//                            printQtable();
-//
-//
-//                            System.out.println();
-//                            System.out.println("NEW");
                         }
-//                            Thread.sleep(5000);
-
 
                         currentState_qtableObj = new QtableObject_centralized(nextState_qtableObj);
 
