@@ -1,11 +1,9 @@
 package agents;
 
 import agents.tactics.GoalLib;
-import alice.tuprolog.Agent;
 import environments.EnvironmentConfig;
 import environments.LabRecruitsEnvironment;
 import game.LabRecruitsTestServer;
-import helperclasses.datastructures.Tuple;
 import helperclasses.datastructures.Vec3;
 import nl.uu.cs.aplib.mainConcepts.GoalStructure;
 import org.junit.jupiter.api.AfterAll;
@@ -13,13 +11,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import world.BeliefState;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
-import static agents.TestSettings.USE_SERVER_FOR_TEST;
 
-
-public class Bruno_2agents_centralized_MDP_test {
+public class Bruno_2agents_singular_centralized_MDP_test {
 
     private static LabRecruitsTestServer labRecruitsTestServer = null;
 
@@ -28,7 +26,7 @@ public class Bruno_2agents_centralized_MDP_test {
 
     ArrayList<QtableObject_centralized> policy = new ArrayList<QtableObject_centralized>();
 
-    ArrayList<String> statesList = new ArrayList<String>();
+    ArrayList<String> actionPolicyList = new ArrayList<String>();
 
     @BeforeAll
     static void start() {
@@ -51,12 +49,11 @@ public class Bruno_2agents_centralized_MDP_test {
 //    public ArrayList<String[]> run(String scenario_filename, String target1, String target2, ArrayList<String[]> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
     public void run(String scenario_filename, String target1, String target2, ArrayList<String[]> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
 
-
         this.actions = actions;
         this.existing_buttons = existing_buttons;
 
         // Get the policy for the agents to use
-        getPolicy("2agents_" + scenario_filename + "_centralized_agents_Q_time");
+        getPolicy("2agents_" + scenario_filename + "_centralized_agents");
 
         var environment = new LabRecruitsEnvironment(new EnvironmentConfig("bruno_" + scenario_filename));
 
@@ -79,6 +76,8 @@ public class Bruno_2agents_centralized_MDP_test {
         // set up the initial state
         agent0.update();
         agent1.update();
+
+
         State_centralized currentState = new State_centralized(agent0, agent1, this.existing_buttons);
 
         int action = getNextActionIndex(currentState);
@@ -90,13 +89,12 @@ public class Bruno_2agents_centralized_MDP_test {
         agent1.setGoal(g1);
 
         long start = System.nanoTime();
-        ArrayList<String[]> pressedButtons = new ArrayList<String[]>();
 
         while (true) {
 
-            String stringToAdd = prepareStateToAdd(currentState);
-            if (stringToAdd != null && statesList.size() == 0 || !statesList.get(statesList.size()-1).equals(stringToAdd))
-                statesList.add(stringToAdd);
+            String stringToAdd = prepareStateToAdd(agent0, agent1,currentState);
+            if (stringToAdd != null)
+                actionPolicyList.add(stringToAdd);
 
 
             var e1 = agent0.getState().worldmodel.getElement(target1);
@@ -109,10 +107,10 @@ public class Bruno_2agents_centralized_MDP_test {
                     (e2 != null && e2.getBooleanProperty("isOn") || f2 != null && f2.getBooleanProperty("isOn"))) {
 
                 if (g0.getStatus().success())
-                    pressedButtons.add(new String[]{"Agent0", this.actions.get(action)[0]});
+                    actionPolicyList.add("agent0 pressed " + this.actions.get(action)[0]);
 
                 if (g1.getStatus().success())
-                    pressedButtons.add(new String[]{"Agent1", this.actions.get(action)[1]});
+                    actionPolicyList.add("agent1 pressed " + this.actions.get(action)[1]);
 
                 System.out.println("Objetive completed");
                 break;
@@ -120,10 +118,10 @@ public class Bruno_2agents_centralized_MDP_test {
 
             if (!g0.getStatus().inProgress() && !g1.getStatus().inProgress()) {
                 if (g0.getStatus().success())
-                    pressedButtons.add(new String[]{"Agent0", this.actions.get(action)[0]});
+                    actionPolicyList.add("agent0 pressed " + this.actions.get(action)[0]);
 
                 if (g1.getStatus().success())
-                    pressedButtons.add(new String[]{"Agent1", this.actions.get(action)[1]});
+                    actionPolicyList.add("agent1 pressed " + this.actions.get(action)[1]);
 
                 currentState = new State_centralized(agent0, agent1, this.existing_buttons);
 
@@ -155,11 +153,12 @@ public class Bruno_2agents_centralized_MDP_test {
             throw new InterruptedException("Unity refuses to close the Simulation!");
 
         System.out.println("CENTRALIZED");
-        System.out.println("Time " + totalTime);
-        for(String[] _actions : pressedButtons)
-            System.out.println(_actions[0] + " " + _actions[1]);
-
-
+        ArrayList<String> temp_actionPolicyList = new ArrayList<String>();
+        for(String _a : actionPolicyList)
+            if(temp_actionPolicyList.isEmpty() || !temp_actionPolicyList.get(temp_actionPolicyList.size()-1).equals(_a)){
+                temp_actionPolicyList.add(_a);
+                System.out.println(_a);
+            }
 
 //        return pressedButtons;
 //        return new Tuple(agent0Positions, agent1Positions);
@@ -228,11 +227,13 @@ public class Bruno_2agents_centralized_MDP_test {
 
     }
 
-    public String prepareStateToAdd(State_centralized state) {
+    public String prepareStateToAdd(LabRecruitsTestAgent agent0, LabRecruitsTestAgent agent1, State_centralized state) {
         String stringToAdd = "<(";
-        if (state.agent1_pos != null && state.agent2_pos != null) {
-            stringToAdd += (int) state.agent1_pos.x + ", " + (int) state.agent1_pos.y + ", " + (int) state.agent1_pos.z
-                    + "), (" + (int) state.agent2_pos.x + ", " + (int) state.agent2_pos.y + ", " + (int) state.agent2_pos.z
+        Vec3 agent0_pos = agent0.getState().worldmodel.position;
+        Vec3 agent1_pos = agent1.getState().worldmodel.position;
+        if (agent0_pos != null && agent1_pos != null) {
+            stringToAdd += (int) agent0_pos.x + ", " + (int) agent0_pos.y + ", " + (int) agent0_pos.z
+                    + "), (" + (int) agent1_pos.x + ", " + (int) agent1_pos.y + ", " + (int) agent1_pos.z
                     + "), [";
             for (int _bs : state.button_states)
                 stringToAdd += _bs + ", ";

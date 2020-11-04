@@ -300,7 +300,7 @@ public class Bruno_2agents_centralized_MDP_train {
 
 //        printQtable();
 
-        savePolicyToFile("2agents_" + scenario_filename + "_centralized_agents_Q_time");
+        savePolicyToFile("2agents_" + scenario_filename + "_centralized_agents");
 
         System.out.println(LocalDateTime.now());
 
@@ -573,15 +573,15 @@ class State_centralized implements Serializable {
         //Set up the buttons state
         for (String button : actions_buttons) {
 
-            int button_state = -1;
+            int button_state = 0;
             var e = agent1.getState().worldmodel.getElement(button);
             var f = agent2.getState().worldmodel.getElement(button);
 
 
             if ((e != null && e.getBooleanProperty("isOn")) || (f != null && f.getBooleanProperty("isOn")))
                 button_state = 1;
-            else if ((e != null && !e.getBooleanProperty("isOn")) || (f != null && !f.getBooleanProperty("isOn")))
-                button_state = 0;
+//            else if ((e != null && !e.getBooleanProperty("isOn")) || (f != null && !f.getBooleanProperty("isOn")))
+//                button_state = 0;
 
             button_states.add(button_state);
         }
