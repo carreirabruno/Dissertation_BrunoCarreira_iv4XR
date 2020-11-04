@@ -116,20 +116,14 @@ public class Bruno_2agents_individual_MDP_train {
 
 
 
-            // set up the initial states
-            agent0.update();
-            QtableObject_individual currentState_qtableObj_agent0 = new QtableObject_individual(new State_individual(agent0, this.existing_buttons));
-            Qtable_add(this.Qtable_agent0, currentState_qtableObj_agent0);
 
             double reward_agent0 = 0;
-            int action_agent0 = getNextActionIndex(this.Qtable_agent0, currentState_qtableObj_agent0.state, agent0, true);
-
-            agent1.update();
-            QtableObject_individual currentState_qtableObj_agent1 = new QtableObject_individual(new State_individual(agent1, this.existing_buttons));
-            Qtable_add(this.Qtable_agent1, currentState_qtableObj_agent1);
+//            int action_agent0 = getNextActionIndex(this.Qtable_agent0, currentState_qtableObj_agent0.state, agent0);
+            int action_agent0 = 0;
 
             double reward_agent1 = 0;
-            int action_agent1 = getNextActionIndex(this.Qtable_agent1, currentState_qtableObj_agent1.state, agent1, true);
+//            int action_agent1 = getNextActionIndex(this.Qtable_agent1, currentState_qtableObj_agent1.state, agent1);
+            int action_agent1 = 0;
 
             if (static_actions) {
                 action_agent0 = static_action_agent0;
@@ -139,14 +133,20 @@ public class Bruno_2agents_individual_MDP_train {
             // Set initial goals to agents
             var g0 = doNextAction(action_agent0, agent0);
             agent0.setGoal(g0);
-//            agent0.budget(3);
-
             var g1 = doNextAction(action_agent1, agent1);
             agent1.setGoal(g1);
-//            agent1.budget(3);
 
+            while(agent0.getState().worldmodel.position == null && agent1.getState().worldmodel.position == null){
+                agent0.update();
+                agent1.update();
+            }
+
+            QtableObject_individual currentState_qtableObj_agent0 = new QtableObject_individual(new State_individual(agent0, this.existing_buttons));
+            Qtable_add(this.Qtable_agent0, currentState_qtableObj_agent0);
             QtableObject_individual nextState_qtableObj_agent0 = new QtableObject_individual(new State_individual(agent0, this.existing_buttons));
 
+            QtableObject_individual currentState_qtableObj_agent1 = new QtableObject_individual(new State_individual(agent1, this.existing_buttons));
+            Qtable_add(this.Qtable_agent1, currentState_qtableObj_agent1);
             QtableObject_individual nextState_qtableObj_agent1 = new QtableObject_individual(new State_individual(agent1, this.existing_buttons));
 
             int stuckTicks = 0;
@@ -255,7 +255,7 @@ public class Bruno_2agents_individual_MDP_train {
                         currentState_qtableObj_agent0 = new QtableObject_individual(nextState_qtableObj_agent0);
 
                         //Action
-                        action_agent0 = getNextActionIndex(this.Qtable_agent0, currentState_qtableObj_agent0.state, agent0, false);
+                        action_agent0 = getNextActionIndex(this.Qtable_agent0, currentState_qtableObj_agent0.state, agent0);
                         if (static_actions)
                             action_agent0 = static_action_agent0;
                         g0 = doNextAction(action_agent0, agent0);
@@ -317,7 +317,7 @@ public class Bruno_2agents_individual_MDP_train {
                         currentState_qtableObj_agent1 = new QtableObject_individual(nextState_qtableObj_agent1);
 
                         //Action
-                        action_agent1 = getNextActionIndex(this.Qtable_agent1, currentState_qtableObj_agent1.state, agent1, false);
+                        action_agent1 = getNextActionIndex(this.Qtable_agent1, currentState_qtableObj_agent1.state, agent1);
                         if (static_actions)
                             action_agent1 = static_action_agent1;
                         g1 = doNextAction(action_agent1, agent1);
@@ -393,8 +393,8 @@ public class Bruno_2agents_individual_MDP_train {
                 throw new InterruptedException("Unity refuses to close the Simulation!");
         }
 
-        savePoliciesToFile(this.Qtable_agent0, "2agents_" + scenario_filename + "_individual_agent0_Q_time");
-        savePoliciesToFile(this.Qtable_agent1, "2agents_" + scenario_filename + "_individual_agent1_Q_time");
+        savePoliciesToFile(this.Qtable_agent0, "2agents_" + scenario_filename + "_individual_agent0");
+        savePoliciesToFile(this.Qtable_agent1, "2agents_" + scenario_filename + "_individual_agent1");
 
         System.out.println(LocalDateTime.now());
 
@@ -402,7 +402,7 @@ public class Bruno_2agents_individual_MDP_train {
         example.run();
     }
 
-    public int getNextActionIndex(ArrayList<QtableObject_individual> Qtable, State_individual state, LabRecruitsTestAgent agent, boolean first) {
+    public int getNextActionIndex(ArrayList<QtableObject_individual> Qtable, State_individual state, LabRecruitsTestAgent agent) {
         int action_object_index = -1;
         if (new Random().nextDouble() > epsilon) {
             for (QtableObject_individual qtableObject : Qtable)
@@ -631,13 +631,13 @@ class State_individual implements Serializable {
 
         //Set up the buttons state
         for (String button : actions) {
-            int button_state = -1;
+            int button_state = 0;
             var e = agent.getState().worldmodel.getElement(button);
 
             if (e != null && e.getBooleanProperty("isOn"))
                 button_state = 1;
-            else if (e != null && e.getBooleanProperty("isOff"))
-                button_state = 0;
+//            else if (e != null && e.getBooleanProperty("isOff"))
+//                button_state = 0;
 
             button_states.add(button_state);
         }

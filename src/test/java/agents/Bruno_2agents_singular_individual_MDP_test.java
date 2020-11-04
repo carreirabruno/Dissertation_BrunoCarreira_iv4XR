@@ -16,21 +16,25 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
+import static agents.TestSettings.USE_SERVER_FOR_TEST;
 
-public class Bruno_2agents_singular_centralized_MDP_test {
+/**
+ * Test the individual policy
+ */
+public class Bruno_2agents_singular_individual_MDP_test {
 
-    private static LabRecruitsTestServer labRecruitsTestServer = null;
+    private static LabRecruitsTestServer labRecruitsTestServer;
 
-    ArrayList<String[]> actions = new ArrayList<String[]>();
+    ArrayList<String> actions = new ArrayList<String>();
     ArrayList<String> existing_buttons = new ArrayList<String>();
 
-    ArrayList<QtableObject_centralized> policy = new ArrayList<QtableObject_centralized>();
+    ArrayList<QtableObject_individual> policy_agent0 = new ArrayList<QtableObject_individual>();
+    ArrayList<QtableObject_individual> policy_agent1 = new ArrayList<QtableObject_individual>();
 
     ArrayList<String> actionPolicyList = new ArrayList<String>();
 
     @BeforeAll
     static void start() {
-        // Uncomment this to make the game's graphic visible:
         TestSettings.USE_GRAPHICS = true;
         String labRecruitsExeRootDir = System.getProperty("user.dir");
         labRecruitsTestServer = TestSettings.start_LabRecruitsTestServer(labRecruitsExeRootDir);
@@ -38,26 +42,28 @@ public class Bruno_2agents_singular_centralized_MDP_test {
 
     @AfterAll
     static void close() {
-        if (labRecruitsTestServer != null) labRecruitsTestServer.close();
+        if (USE_SERVER_FOR_TEST) labRecruitsTestServer.close();
     }
 
     /**
      * Test that the agent can test this scenario
      */
     @Test
-//    public Tuple<ArrayList<Vec3>, ArrayList<Vec3>> run(String scenario_filename, String target1, String target2, ArrayList<String[]> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
-//    public ArrayList<String[]> run(String scenario_filename, String target1, String target2, ArrayList<String[]> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
-    public void run(String scenario_filename, String target1, String target2, ArrayList<String[]> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
+//    public Tuple<ArrayList<Vec3>, ArrayList<Vec3>> run(String scenario_filename, String target1, String target2, ArrayList<String> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
+//    public ArrayList<String[]> run(String scenario_filename, String target1, String target2, ArrayList<String> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
+    public void run(String scenario_filename, String target1, String target2, ArrayList<String> actions, ArrayList<String> existing_buttons) throws InterruptedException, IOException {
 
         this.actions = actions;
         this.existing_buttons = existing_buttons;
 
         // Get the policy for the agents to use
-        getPolicy("2agents_" + scenario_filename + "_centralized_agents");
+        getPolicy("2agents_" + scenario_filename + "_individual_agent0", this.policy_agent0);
+        System.out.println();
+        getPolicy("2agents_" + scenario_filename + "_individual_agent1", this.policy_agent1);
 
         var environment = new LabRecruitsEnvironment(new EnvironmentConfig("bruno_" + scenario_filename));
 
-        // Create the agent
+        // Create the agents
         var agent0 = new LabRecruitsTestAgent("agent0")
                 .attachState(new BeliefState())
                 .attachEnvironment(environment);
@@ -72,25 +78,28 @@ public class Bruno_2agents_singular_centralized_MDP_test {
         if (!environment.startSimulation())
             throw new InterruptedException("Unity refuses to start the Simulation!");
 
-//        int action = getNextActionIndex(currentState);
-        int action = 0;
+//        int action_agent0 = getNextActionIndex(this.policy_agent0, currentState_agent0);
+        int action_agent0 = 0;
+
+//        int action_agent1 = getNextActionIndex(this.policy_agent1, currentState_agent1);
+        int action_agent1 = 0;
 
         // Set initial goals to agents
-        var g0 = doNextAction(action, 0, agent0);
+        var g0 = doNextAction(action_agent0, agent0);
         agent0.setGoal(g0);
-        var g1 = doNextAction(action, 1, agent1);
+        var g1 = doNextAction(action_agent1, agent1);
         agent1.setGoal(g1);
 
         while (agent0.getState().worldmodel.position == null && agent1.getState().worldmodel.position == null) {
             agent0.update();
             agent1.update();
         }
-        State_centralized currentState = new State_centralized(agent0, agent1, this.existing_buttons);
+
+        State_individual currentState_agent0 = new State_individual(agent0, this.existing_buttons);
+        State_individual currentState_agent1 = new State_individual(agent1, this.existing_buttons);
 
         long start = System.nanoTime();
 
-        boolean agent0First = true;
-        boolean agent1First = true;
 
         while (true) {
 
@@ -99,18 +108,14 @@ public class Bruno_2agents_singular_centralized_MDP_test {
             var e2 = agent0.getState().worldmodel.getElement(target2);
             var f2 = agent1.getState().worldmodel.getElement(target2);
 
-            if (g0.getStatus().success() && agent0First) {
-                actionPolicyList.add("agent0 pressed " + this.actions.get(action)[0]);
-                agent0First = false;
-            }
-            if (g1.getStatus().success() && agent1First) {
-                actionPolicyList.add("agent1 pressed " + this.actions.get(action)[1]);
-                agent1First = false;
-            }
+            if (g0.getStatus().success())
+                actionPolicyList.add("agent0 pressed " + this.actions.get(action_agent0));
+            if (g1.getStatus().success())
+                actionPolicyList.add("agent1 pressed " + this.actions.get(action_agent1));
 
             // Check if the target button isOn to end the game
-            if ((e1 != null && e1.getBooleanProperty("isOn") || f1 != null && f1.getBooleanProperty("isOn")) &&
-                    (e2 != null && e2.getBooleanProperty("isOn") || f2 != null && f2.getBooleanProperty("isOn"))) {
+            if (((e1 != null && e1.getBooleanProperty("isOn")) || (f1 != null && f1.getBooleanProperty("isOn"))) &&
+                    ((e2 != null && e2.getBooleanProperty("isOn")) || (f2 != null && f2.getBooleanProperty("isOn")))) {
                 System.out.println("Objetive completed");
                 break;
             }
@@ -119,29 +124,28 @@ public class Bruno_2agents_singular_centralized_MDP_test {
             if (stringToAdd != null)
                 actionPolicyList.add(stringToAdd);
 
-            if (!g0.getStatus().inProgress() && !g1.getStatus().inProgress()) {
+            if (!g0.getStatus().inProgress() ) {
 
-                agent0First = true;
-                agent1First = true;
 
-                currentState = new State_centralized(agent0, agent1, this.existing_buttons);
-                System.out.println("second " + currentState.toString());
-                // Set up the next action - agent0
-                action = getNextActionIndex(currentState);
-                g0 = doNextAction(action, 0, agent0);
+                //Next Action - Agent0
+                currentState_agent0 = new State_individual(agent0, this.existing_buttons);
+                action_agent0 = getNextActionIndex(this.policy_agent0, currentState_agent0);
+                g0 = doNextAction(action_agent0, agent0);
                 agent0.setGoal(g0);
-                g0.getStatus().resetToInProgress();
-                // Set up the next action - agent1
-                g1 = doNextAction(action, 1, agent1);
-                agent1.setGoal(g1);
-                g1.getStatus().resetToInProgress();
+            }
 
+            if(!g1.getStatus().inProgress()){
+                //Next Action - Agent1
+                currentState_agent1 = new State_individual(agent1, this.existing_buttons);
+                action_agent1 = getNextActionIndex(this.policy_agent1, currentState_agent1);
+                g1 = doNextAction(action_agent1, agent1);
+                agent1.setGoal(g1);
             }
 
             try {
                 agent0.update();
                 agent1.update();
-            } catch (Exception wtf) {
+            } catch (Exception ignored) {
             }
 
         }
@@ -153,45 +157,37 @@ public class Bruno_2agents_singular_centralized_MDP_test {
         if (!environment.close())
             throw new InterruptedException("Unity refuses to close the Simulation!");
 
-        System.out.println("CENTRALIZED");
-//        ArrayList<String> temp_actionPolicyList = new ArrayList<String>();
+
+        System.out.println("INDIVIDUAL");
         for (String _a : actionPolicyList)
-//            if(temp_actionPolicyList.isEmpty() || !temp_actionPolicyList.get(temp_actionPolicyList.size()-1).equals(_a)){
-//                temp_actionPolicyList.add(_a);
             System.out.println(_a);
-//            }
 
 //        return pressedButtons;
 //        return new Tuple(agent0Positions, agent1Positions);
-
     }
 
-    public int getNextActionIndex(State_centralized state) {
-
-        for (QtableObject_centralized qtableObject : this.policy)
+    public int getNextActionIndex(ArrayList<QtableObject_individual> policy, State_individual state) {
+        for (QtableObject_individual qtableObject : policy)
             if (qtableObject.state.checkAllEquals(state))
                 return getArgMax_double(qtableObject.actions);
-//        System.out.println(state.toString());
-//        System.out.println();
-//        for (QtableObject_centralized qtableObject : this.policy)
-//            System.out.println(qtableObject.state.toString());
-        return -1;
+
+        return 0;
     }
 
-//    public GoalStructure doNextAction(int actionIndex, int agent) {
-//        String[] action_object = this.actions.get(actionIndex);
-//        if (action_object[agent].equals("null"))
+//    public GoalStructure doNextAction(int actionIndex) {
+//        String action_object = this.actions.get(actionIndex);
+//        if (action_object.equals("null"))
 //            return GoalLib.doNothing();
 //        else
-//            return GoalLib.entityIsInteracted(action_object[agent]);
+//            return GoalLib.entityIsInteracted(action_object);
 //    }
 
-    public GoalStructure doNextAction(int actionIndex, int agentID, LabRecruitsTestAgent agent) {
-        String[] action_object = this.actions.get(actionIndex);
-        if (action_object[agentID].equals("null"))
+    public GoalStructure doNextAction(int actionIndex, LabRecruitsTestAgent agent) {
+        String action_object = this.actions.get(actionIndex);
+        if (action_object.equals("null"))
             return GoalLib.doNothing();
         else
-            return GoalLib.entityIsInteracted_Bruno(agent, action_object[agentID]);
+            return GoalLib.entityIsInteracted_Bruno(agent, action_object);
     }
 
     public int getArgMax_double(double[] array) {
@@ -206,7 +202,7 @@ public class Bruno_2agents_singular_centralized_MDP_test {
         return maxIdx;
     }
 
-    public void getPolicy(String filename) throws IOException {
+    public void getPolicy(String filename, ArrayList<QtableObject_individual> policy) throws IOException {
         // read the object from file
         FileInputStream fis = null;
         ObjectInputStream in = null;
@@ -216,15 +212,38 @@ public class Bruno_2agents_singular_centralized_MDP_test {
             in = new ObjectInputStream(fis);
             for (; ; ) {
                 obj = in.readObject();
-                this.policy.add((QtableObject_centralized) obj);
+                policy.add((QtableObject_individual) obj);
 //                System.out.println(obj.toString());
             }
 
         } catch (Exception ignored) {
-//            System.out.println(i.toString());
         }
 
+//        System.out.println();
         assert in != null;
+        in.close();
+    }
+
+    public void addToPos(Vec3 agentPos, ArrayList<Vec3> list) {
+
+        if (agentPos != null) {
+            agentPos = new Vec3((int)agentPos.x, (int)agentPos.y, (int)agentPos.z);
+            if (list.size() == 0)
+                list.add(agentPos);
+            boolean equal = false;
+//            for (Vec3 temp : list)
+//                if (temp.x == agentPos.x && temp.z == agentPos.z) {
+//                    equal = true;
+//                    break;
+//                }
+
+            if (list.get(list.size()-1).x == agentPos.x && list.get(list.size()-1).z == agentPos.z) {
+                equal = true;
+            }
+
+            if (!equal)
+                list.add(agentPos);
+        }
 
     }
 
@@ -244,5 +263,6 @@ public class Bruno_2agents_singular_centralized_MDP_test {
         } else
             return null;
     }
+
 
 }
