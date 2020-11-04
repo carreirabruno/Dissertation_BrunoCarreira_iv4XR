@@ -103,7 +103,8 @@ public class Bruno_2agents_centralized_MDP_train {
             QtableObject_centralized currentState_qtableObj = new QtableObject_centralized(new State_centralized(agent0, agent1, this.existing_buttons));
 
             double reward = 0;
-            int action = getNextActionIndex(currentState_qtableObj.state, agent0, agent1);
+//            int action = getNextActionIndex(currentState_qtableObj.state, agent0, agent1);
+            int action = 0;
 
             // Set initial goals to agents
             var g0 = doNextAction(action, 0, agent0);
