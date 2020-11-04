@@ -109,14 +109,17 @@ public class Bruno_2agents_MDP_main {
 //        String target1 = "button5";
 //        String target2 = "button6";
 
-        String scenario = "scenario7";
+//        String scenario = "scenario7";
+//        String target1 = "button5";
+//        String target2 = "button5";
+
+        String scenario = "scenario8";
         String target1 = "button5";
         String target2 = "button5";
 
-
 //        manualControl(scenario, target1, target2);
 
-//        centralizedTraining(scenario, target1, target2, this.actions, this.singular_actions, this.existing_buttons);
+        centralizedTraining(scenario, target1, target2, this.actions, this.singular_actions, this.existing_buttons);
 //        positions = centralizedTesting_positions(scenario, target1, target2, this.actions, this.existing_buttons);
         centralizedTesting_pressedButtons(scenario, target1, target2, this.actions, this.existing_buttons);
 
