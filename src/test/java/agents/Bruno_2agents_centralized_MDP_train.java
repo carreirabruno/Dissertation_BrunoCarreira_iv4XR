@@ -100,11 +100,7 @@ public class Bruno_2agents_centralized_MDP_train {
             if (!environment.startSimulation())
                 throw new InterruptedException("Unity refuses to start the Simulation!");
 
-            // set up the initial state
-            agent0.update();
-            agent1.update();
             QtableObject_centralized currentState_qtableObj = new QtableObject_centralized(new State_centralized(agent0, agent1, this.existing_buttons));
-            Qtable_add(currentState_qtableObj);
 
             double reward = 0;
             int action = getNextActionIndex(currentState_qtableObj.state, agent0, agent1);
@@ -114,6 +110,14 @@ public class Bruno_2agents_centralized_MDP_train {
             agent0.setGoal(g0);
             var g1 = doNextAction(action, 1, agent1);
             agent1.setGoal(g1);
+
+            // set up the initial state
+            while(agent0.getState().worldmodel.position == null && agent1.getState().worldmodel.position == null){
+                agent0.update();
+                agent1.update();
+            }
+            currentState_qtableObj = new QtableObject_centralized(new State_centralized(agent0, agent1, this.existing_buttons));
+            Qtable_add(currentState_qtableObj);
 
             QtableObject_centralized nextState_qtableObj = new QtableObject_centralized(new State_centralized(agent0, agent1, this.existing_buttons));
 
@@ -135,7 +139,6 @@ public class Bruno_2agents_centralized_MDP_train {
                 if (delta >= 1) {
 //                    g1.printGoalStructureStatus();
 //                    agent1.printStatus();
-
 
                     var e1 = agent0.getState().worldmodel.getElement(target1);
                     var f1 = agent1.getState().worldmodel.getElement(target1);
