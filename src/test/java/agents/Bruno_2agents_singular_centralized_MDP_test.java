@@ -88,63 +88,71 @@ public class Bruno_2agents_singular_centralized_MDP_test {
 //        }
 //        State_centralized currentState = new State_centralized(agent0, agent1, this.existing_buttons);
 
-        long start = System.nanoTime();
-
         boolean agent0First = true;
         boolean agent1First = true;
 
+        long start = System.nanoTime();
+        long lasTime = System.nanoTime();
+        final double amountOfTicks = 10.0;  // update 5x per second
+        double ns = 1000000000 / amountOfTicks;
+        double delta = 0;
+
+
         while (true) {
+            long now = System.nanoTime();
+            delta += (now - lasTime) / ns;
+            lasTime = now;
+            if (delta >= 1) {
 
-            var e1 = agent0.getState().worldmodel.getElement(target1);
-            var f1 = agent1.getState().worldmodel.getElement(target1);
-            var e2 = agent0.getState().worldmodel.getElement(target2);
-            var f2 = agent1.getState().worldmodel.getElement(target2);
+                var e1 = agent0.getState().worldmodel.getElement(target1);
+                var f1 = agent1.getState().worldmodel.getElement(target1);
+                var e2 = agent0.getState().worldmodel.getElement(target2);
+                var f2 = agent1.getState().worldmodel.getElement(target2);
 
-            if (g0.getStatus().success() && agent0First) {
-                actionPolicyList.add("agent0 pressed " + this.actions.get(action)[0]);
-                agent0First = false;
+                if (g0.getStatus().success() && agent0First) {
+                    actionPolicyList.add("agent0 pressed " + this.actions.get(action)[0]);
+                    agent0First = false;
+                }
+                if (g1.getStatus().success() && agent1First) {
+                    actionPolicyList.add("agent1 pressed " + this.actions.get(action)[1]);
+                    agent1First = false;
+                }
+
+                // Check if the target button isOn to end the game
+                if ((e1 != null && e1.getBooleanProperty("isOn") || f1 != null && f1.getBooleanProperty("isOn")) &&
+                        (e2 != null && e2.getBooleanProperty("isOn") || f2 != null && f2.getBooleanProperty("isOn"))) {
+                    System.out.println("Objetive completed");
+                    break;
+                }
+
+                String stringToAdd = prepareStateToAdd(agent0, agent1, new State_centralized(agent0, agent1, this.existing_buttons));
+                if (stringToAdd != null)
+                    actionPolicyList.add(stringToAdd);
+
+                if (!g0.getStatus().inProgress() && !g1.getStatus().inProgress()) {
+
+                    agent0First = true;
+                    agent1First = true;
+
+                    currentState = new State_centralized(agent0, agent1, this.existing_buttons);
+                    // Set up the next action - agent0
+                    action = getNextActionIndex(currentState);
+                    g0 = doNextAction(action, 0, agent0);
+                    agent0.setGoal(g0);
+                    g0.getStatus().resetToInProgress();
+                    // Set up the next action - agent1
+                    g1 = doNextAction(action, 1, agent1);
+                    agent1.setGoal(g1);
+                    g1.getStatus().resetToInProgress();
+
+                }
+
+                try {
+                    agent0.update();
+                    agent1.update();
+                } catch (Exception wtf) {
+                }
             }
-            if (g1.getStatus().success() && agent1First) {
-                actionPolicyList.add("agent1 pressed " + this.actions.get(action)[1]);
-                agent1First = false;
-            }
-
-            // Check if the target button isOn to end the game
-            if ((e1 != null && e1.getBooleanProperty("isOn") || f1 != null && f1.getBooleanProperty("isOn")) &&
-                    (e2 != null && e2.getBooleanProperty("isOn") || f2 != null && f2.getBooleanProperty("isOn"))) {
-                System.out.println("Objetive completed");
-                break;
-            }
-
-            String stringToAdd = prepareStateToAdd(agent0, agent1, new State_centralized(agent0, agent1, this.existing_buttons));
-            if (stringToAdd != null)
-                actionPolicyList.add(stringToAdd);
-
-            if (!g0.getStatus().inProgress() && !g1.getStatus().inProgress()) {
-
-                agent0First = true;
-                agent1First = true;
-
-                currentState = new State_centralized(agent0, agent1, this.existing_buttons);
-                System.out.println("second " + currentState.toString());
-                // Set up the next action - agent0
-                action = getNextActionIndex(currentState);
-                g0 = doNextAction(action, 0, agent0);
-                agent0.setGoal(g0);
-                g0.getStatus().resetToInProgress();
-                // Set up the next action - agent1
-                g1 = doNextAction(action, 1, agent1);
-                agent1.setGoal(g1);
-                g1.getStatus().resetToInProgress();
-
-            }
-
-            try {
-                agent0.update();
-                agent1.update();
-            } catch (Exception wtf) {
-            }
-
         }
 
 
