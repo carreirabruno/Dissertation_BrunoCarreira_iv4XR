@@ -183,10 +183,15 @@ public class Bruno_2agents_MDP_main {
 //    }
 
     public void individualTesting_pressedButtons(String scenario, String target1, String target2, ArrayList<String> singular_actions, ArrayList<String> existing_buttons) throws Exception {
-        Bruno_2agents_individual_MDP_test.start();
-        Bruno_2agents_individual_MDP_test individual_test = new Bruno_2agents_individual_MDP_test();
-        pressedButtons_individual = individual_test.run(scenario, target1, target2, singular_actions, existing_buttons);
-        Bruno_2agents_individual_MDP_test.close();
+//        Bruno_2agents_individual_MDP_test.start();
+//        Bruno_2agents_individual_MDP_test individual_test = new Bruno_2agents_individual_MDP_test();
+//        pressedButtons_individual = individual_test.run(scenario, target1, target2, singular_actions, existing_buttons);
+//        Bruno_2agents_individual_MDP_test.close();
+
+        Bruno_2agents_singular_individual_MDP_test.start();
+        Bruno_2agents_singular_individual_MDP_test individual_test = new Bruno_2agents_singular_individual_MDP_test();
+        individual_test.run(scenario, target1, target2, singular_actions, existing_buttons);
+        Bruno_2agents_singular_individual_MDP_test.close();
     }
 
     public void saveToTXT(String filename, ArrayList<Vec3> list) throws IOException {

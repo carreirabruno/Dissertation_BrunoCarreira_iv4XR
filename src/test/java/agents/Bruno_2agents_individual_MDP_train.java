@@ -631,13 +631,13 @@ class State_individual implements Serializable {
 
         //Set up the buttons state
         for (String button : actions) {
-            int button_state = 0;
+            int button_state = -1;
             var e = agent.getState().worldmodel.getElement(button);
 
             if (e != null && e.getBooleanProperty("isOn"))
                 button_state = 1;
-//            else if (e != null && e.getBooleanProperty("isOff"))
-//                button_state = 0;
+            else if (e != null && e.getBooleanProperty("isOff"))
+                button_state = 0;
 
             button_states.add(button_state);
         }

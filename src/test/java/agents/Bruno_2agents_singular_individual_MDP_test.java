@@ -57,9 +57,9 @@ public class Bruno_2agents_singular_individual_MDP_test {
         this.existing_buttons = existing_buttons;
 
         // Get the policy for the agents to use
-        getPolicy("2agents_" + scenario_filename + "_individual_agent0", this.policy_agent0);
+        getPolicy("2agents_" + scenario_filename + "_individual_agent0_Q_time", this.policy_agent0);
         System.out.println();
-        getPolicy("2agents_" + scenario_filename + "_individual_agent1", this.policy_agent1);
+        getPolicy("2agents_" + scenario_filename + "_individual_agent1_Q_time", this.policy_agent1);
 
         var environment = new LabRecruitsEnvironment(new EnvironmentConfig("bruno_" + scenario_filename));
 
@@ -77,12 +77,12 @@ public class Bruno_2agents_singular_individual_MDP_test {
         // press play in Unity
         if (!environment.startSimulation())
             throw new InterruptedException("Unity refuses to start the Simulation!");
-
-//        int action_agent0 = getNextActionIndex(this.policy_agent0, currentState_agent0);
-        int action_agent0 = 0;
-
-//        int action_agent1 = getNextActionIndex(this.policy_agent1, currentState_agent1);
-        int action_agent1 = 0;
+        State_individual currentState_agent0 = new State_individual(agent0, this.existing_buttons);
+        int action_agent0 = getNextActionIndex(this.policy_agent0, currentState_agent0);
+//        int action_agent0 = 0;
+        State_individual currentState_agent1 = new State_individual(agent1, this.existing_buttons);
+        int action_agent1 = getNextActionIndex(this.policy_agent1, currentState_agent1);
+//        int action_agent1 = 0;
 
         // Set initial goals to agents
         var g0 = doNextAction(action_agent0, agent0);
@@ -90,13 +90,13 @@ public class Bruno_2agents_singular_individual_MDP_test {
         var g1 = doNextAction(action_agent1, agent1);
         agent1.setGoal(g1);
 
-        while (agent0.getState().worldmodel.position == null && agent1.getState().worldmodel.position == null) {
-            agent0.update();
-            agent1.update();
-        }
+//        while (agent0.getState().worldmodel.position == null && agent1.getState().worldmodel.position == null) {
+//            agent0.update();
+//            agent1.update();
+//        }
 
-        State_individual currentState_agent0 = new State_individual(agent0, this.existing_buttons);
-        State_individual currentState_agent1 = new State_individual(agent1, this.existing_buttons);
+//        State_individual currentState_agent0 = new State_individual(agent0, this.existing_buttons);
+//        State_individual currentState_agent1 = new State_individual(agent1, this.existing_buttons);
 
         long start = System.nanoTime();
 

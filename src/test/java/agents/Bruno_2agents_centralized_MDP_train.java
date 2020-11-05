@@ -577,15 +577,15 @@ class State_centralized implements Serializable {
         //Set up the buttons state
         for (String button : actions_buttons) {
 
-            int button_state = 0;
+            int button_state = -1;
             var e = agent1.getState().worldmodel.getElement(button);
             var f = agent2.getState().worldmodel.getElement(button);
 
 
             if ((e != null && e.getBooleanProperty("isOn")) || (f != null && f.getBooleanProperty("isOn")))
                 button_state = 1;
-//            else if ((e != null && !e.getBooleanProperty("isOn")) || (f != null && !f.getBooleanProperty("isOn")))
-//                button_state = 0;
+            else if ((e != null && !e.getBooleanProperty("isOn")) || (f != null && !f.getBooleanProperty("isOn")))
+                button_state = 0;
 
             button_states.add(button_state);
         }

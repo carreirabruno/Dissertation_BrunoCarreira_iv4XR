@@ -266,4 +266,21 @@ public class Bruno_2agents_individual_MDP_test {
 
     }
 
+    public String prepareStateToAdd(LabRecruitsTestAgent agent0, LabRecruitsTestAgent agent1, State_centralized state) {
+        String stringToAdd = "<(";
+        Vec3 agent0_pos = agent0.getState().worldmodel.position;
+        Vec3 agent1_pos = agent1.getState().worldmodel.position;
+        if (agent0_pos != null && agent1_pos != null) {
+            stringToAdd += (int) agent0_pos.x + ", " + (int) agent0_pos.y + ", " + (int) agent0_pos.z
+                    + "), (" + (int) agent1_pos.x + ", " + (int) agent1_pos.y + ", " + (int) agent1_pos.z
+                    + "), [";
+            for (int _bs : state.button_states)
+                stringToAdd += _bs + ", ";
+
+            stringToAdd = stringToAdd.substring(0, stringToAdd.length() - 2) + "]>";
+            return stringToAdd;
+        } else
+            return null;
+    }
+
 }

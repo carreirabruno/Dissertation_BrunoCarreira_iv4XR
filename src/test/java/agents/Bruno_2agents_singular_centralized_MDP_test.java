@@ -53,7 +53,7 @@ public class Bruno_2agents_singular_centralized_MDP_test {
         this.existing_buttons = existing_buttons;
 
         // Get the policy for the agents to use
-        getPolicy("2agents_" + scenario_filename + "_centralized_agents");
+        getPolicy("2agents_" + scenario_filename + "_centralized_agents_Q_time");
 
         var environment = new LabRecruitsEnvironment(new EnvironmentConfig("bruno_" + scenario_filename));
 
@@ -72,8 +72,9 @@ public class Bruno_2agents_singular_centralized_MDP_test {
         if (!environment.startSimulation())
             throw new InterruptedException("Unity refuses to start the Simulation!");
 
-//        int action = getNextActionIndex(currentState);
-        int action = 0;
+        State_centralized currentState = new State_centralized(agent0, agent1, this.existing_buttons);
+        int action = getNextActionIndex(currentState);
+//        int action = 0;
 
         // Set initial goals to agents
         var g0 = doNextAction(action, 0, agent0);
@@ -81,11 +82,11 @@ public class Bruno_2agents_singular_centralized_MDP_test {
         var g1 = doNextAction(action, 1, agent1);
         agent1.setGoal(g1);
 
-        while (agent0.getState().worldmodel.position == null && agent1.getState().worldmodel.position == null) {
-            agent0.update();
-            agent1.update();
-        }
-        State_centralized currentState = new State_centralized(agent0, agent1, this.existing_buttons);
+//        while (agent0.getState().worldmodel.position == null && agent1.getState().worldmodel.position == null) {
+//            agent0.update();
+//            agent1.update();
+//        }
+//        State_centralized currentState = new State_centralized(agent0, agent1, this.existing_buttons);
 
         long start = System.nanoTime();
 
