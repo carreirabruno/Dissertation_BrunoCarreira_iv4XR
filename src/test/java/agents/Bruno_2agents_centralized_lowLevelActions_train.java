@@ -1,7 +1,5 @@
 package agents;
 
-import alice.tuprolog.Int;
-import game.LabRecruitsTestServer;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -10,7 +8,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Random;
 
 import java.io.BufferedReader;
@@ -20,13 +17,16 @@ import java.io.FileReader;
 public class Bruno_2agents_centralized_lowLevelActions_train {
 
     String[] actions;
+    ArrayList<String[]> centralizedActions;
     String[] targetButtons;
     int[] doorsState;
     ArrayList<String[]> initialMapMatrix;
     ArrayList<String[]> mapMatrix;
     ArrayList<String[]> connectionButtonsDoors;
 
-    int episodes = 100;
+    ArrayList<CentralizedQTableObj> QTable;
+
+    int episodes = 1000;
 
     double epsilon = 1;
 
@@ -38,6 +38,8 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
 
     int early_stop_counter_reset = 5;
     int early_stop_counter = early_stop_counter_reset;
+
+    int minimumValidationSteps;
 
 
     @BeforeAll
@@ -56,14 +58,19 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
 
         this.initialMapMatrix = new ArrayList<String[]>();
         this.connectionButtonsDoors = new ArrayList<String[]>();
+        this.QTable = new ArrayList<CentralizedQTableObj>();
 
         setUpScenarioMatrix(scenario_filename);
 
         this.targetButtons = targetButtons;
         this.actions = new String[]{"Nothing", "Up", "Down", "Left", "Right", "Press"};
+        setupCentralizedActions();
+
+//        for(int i = 0; i < this.centralizedActions.size(); i++)
+//            System.out.println(i + "  " + Arrays.toString(this.centralizedActions.get(i)));
 
         max_steps = this.initialMapMatrix.size() * this.initialMapMatrix.get(0).length * this.actions.length;
-//        max_steps = 10;
+        minimumValidationSteps = max_steps-1;  //Menos porque os agentes tem que conseguir resolver com menos ações dos que as totais possiveis
 
         for (int _episode = 0; _episode < this.episodes; _episode++) {
 
@@ -71,36 +78,37 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
             this.doorsState = new int[countApperancesOfWordOnInitialMap("door")];
 
             CentralizedState nextState = new CentralizedState(findTruePosInInitialMapMatrix("agent0"), findTruePosInInitialMapMatrix("agent1"), countApperancesOfWordOnInitialMap("button"));
-            CentralizedState currentState;
+            CentralizedState currentState = new CentralizedState(nextState);
+            this.QTable.add(new CentralizedQTableObj(currentState));
             int actionAgent0;
             int actionAgent1;
             int rewardAgent0;
             int rewardAgent1;
+            int reward;
+            int action;
             RewardRewardStateObject rewardRewardStateObject;
 
             boolean reachedEnd = false;
 
-//            int steps = 0;
-//            while (currentState.buttonsState[3] == 0) {
-//                steps++;
-            for (int step = 0; step < max_steps; step++) {
-                //see current State
-                currentState = new CentralizedState(nextState);
+           int step;
+//            while(!reachedEnd){
+            for (step = 0; step < max_steps; step++) {
 
                 //action Agent0
-                actionAgent0 = chooseAction();
+                actionAgent0 = chooseAction(currentState, 0);
 
                 //action Agent1
-                actionAgent1 = chooseAction();
+                actionAgent1 = chooseAction(currentState, 1);
 
                 //Act on map, get rewards and nextState
                 rewardRewardStateObject = new RewardRewardStateObject(actOnMap(currentState, actionAgent0, actionAgent1));
                 rewardAgent0 = rewardRewardStateObject.rewardAgent0;
                 rewardAgent1 = rewardRewardStateObject.rewardAgent1;
                 nextState = rewardRewardStateObject.state;
-
+                reward = rewardAgent0 + rewardAgent1;
 
                 //Prints to understand whats is happening
+
 //            System.out.println(currentState.toString());
 //            System.out.println("Agent0, " + this.actions[actionAgent0] + ", " + rewardAgent0);
 //            System.out.println("Agent1, " + this.actions[actionAgent1] + ", " + rewardAgent1);
@@ -109,7 +117,8 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
 //            System.out.println();
 
                 //Update Q Table
-                updateQTable(currentState, actionAgent0, actionAgent1, rewardAgent0, rewardAgent1, nextState);
+                action = getCentralizedAction(actionAgent0, actionAgent1);
+                updateQTable(currentState, action, reward, nextState);
 
                 //Check if the target buttons have been clicked
                 if (checkIfEndend(nextState)) {
@@ -117,230 +126,262 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
                     break;
                 }
 
+                //Set current State
+                currentState = new CentralizedState(nextState);
+
             }
-            System.out.println("Episode " + _episode + "/" + this.episodes + " done | Reached end = " + reachedEnd);
+
+//            System.out.println("Episode " + _episode + "/" + this.episodes + " done | Reached end = " + reachedEnd);
+
+            if ((_episode + 1) % 10 == 0){
+               if(_episode > this.episodes/2)
+                   this.epsilon = 0.5;
+               else
+                   this.epsilon = 0;
+            }
+            else
+                this.epsilon = 1;
+
+            if (_episode % 10 == 0 && _episode > 0) {
+                //Early stop
+                System.out.println("Validation Episode " + _episode + "/" + this.episodes + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Best validations steps = " + this.minimumValidationSteps + " | Early Stop Counter = " + early_stop_counter);
+//                System.out.println("Validation Episode steps = " + step + " | Best validations steps = " + this.minimumValidationSteps);
+                if (step < this.minimumValidationSteps)
+                    this.minimumValidationSteps = step;
+
+                if(step == this.minimumValidationSteps)
+                    early_stop_counter--;
+                else
+                    early_stop_counter = early_stop_counter_reset;
+
+                if (early_stop_counter == 0)
+                    break;
+            }
+
+        }
+//            printQTable();
+
+        //UNITY
+        /*
+        var environment = new LabRecruitsEnvironment(new EnvironmentConfig("bruno_" + scenario_filename));
+        // Create the agents
+        var agent0 = new LabRecruitsTestAgent("agent0")
+                .attachState(new BeliefState())
+                .attachEnvironment(environment);
+        agent0.setSamplingInterval(0);
+
+        var agent1 = new LabRecruitsTestAgent("agent1")
+                .attachState(new BeliefState())
+                .attachEnvironment(environment);
+        agent1.setSamplingInterval(0);
+        // press play in Unity
+        if (!environment.startSimulation())
+            throw new InterruptedException("Unity refuses to start the Simulation!");
+
+        if (!environment.close())
+            throw new InterruptedException("Unity refuses to close the Simulation!");
+
+         Train
+        for (int i = 0; i < episodes; i++) {
+            System.out.println("Episode " + i + " of " + (episodes - 1) + " epsilon " + epsilon);
+
+            CentralizedQtableObject currentState_qtableObj = new CentralizedQtableObject(new CentralizedState(agent0, agent1, this.existing_buttons));
+
+            double reward = 0;
+//            int action = getNextActionIndex(currentState_qtableObj.state, agent0, agent1);
+            int action = 0;
+
+            // Set initial goals to agents
+            var g0 = doNextAction(action, 0, agent0);
+            agent0.setGoal(g0);
+            var g1 = doNextAction(action, 1, agent1);
+            agent1.setGoal(g1);
+
+            // set up the initial state
+            while (agent0.getState().worldmodel.position == null && agent1.getState().worldmodel.position == null) {
+                agent0.update();
+                agent1.update();
+            }
+            currentState_qtableObj = new CentralizedQtableObject(new CentralizedState(agent0, agent1, this.existing_buttons));
+            Qtable_add(currentState_qtableObj);
+
+            CentralizedQtableObject nextState_qtableObj = new CentralizedQtableObject(new CentralizedState(agent0, agent1, this.existing_buttons));
+
+            int stuckTicks = 0;
+
+            long start = System.nanoTime();
+            long lasTime = System.nanoTime();
+            final double amountOfTicks = 5.0;  // update 5x per second
+            double ns = 1000000000 / amountOfTicks;
+            double delta = 0;
+
+            boolean target1_clicked = false;
+            boolean target2_clicked = false;
+
+            while (((System.nanoTime() - start) / 1_000_000_000) < max_time) {
+                long now = System.nanoTime();
+                delta += (now - lasTime) / ns;
+                lasTime = now;
+                if (delta >= 1) {
+
+                    if (this.actions.get(action)[0].equals("null"))
+                        reward -= 0;
+                    else
+                        reward -= 1;
+
+                    if (this.actions.get(action)[1].equals("null"))
+                        reward -= 0;
+                    else
+                        reward -= 1;
+
+
+                    //Update agents
+//                    if (!g0.getStatus().inProgress() && !g1.getStatus().inProgress()) {
+                    if ((!g0.getStatus().inProgress() && !g1.getStatus().inProgress()) || stuckTicks >= stuck_counter * amountOfTicks) {
+
+                        if (epsilon == 0 && g0.getStatus().success() && g1.getStatus().success())
+                            System.out.println(this.actions.get(action)[0] + "   " + this.actions.get(action)[1]);
+
+                        if (stuckTicks >= stuck_counter * amountOfTicks) {
+                            System.out.println("Stuck");
+                            System.out.println(this.actions.get(action)[0] + "   " + this.actions.get(action)[1]);
+                        }
+
+
+                        if (e1 != null && e1.getBooleanProperty("isOn") && this.actions.get(action)[0].equals(e1.id) && !target1_clicked) {
+                            reward += 100;
+                            target1_clicked = true;
+                        } else if (f1 != null && f1.getBooleanProperty("isOn") && this.actions.get(action)[1].equals(f1.id) && !target1_clicked) {
+                            reward += 100;
+                            target1_clicked = true;
+                        }
+                        if (e2 != null && e2.getBooleanProperty("isOn") && this.actions.get(action)[0].equals(e2.id) && !target2_clicked) {
+                            reward += 100;
+                            target2_clicked = true;
+                        } else if (f2 != null && f2.getBooleanProperty("isOn") && this.actions.get(action)[1].equals(f2.id) && !target2_clicked) {
+                            reward += 100;
+                            target2_clicked = true;
+                        }
+
+
+                        //Next state
+                        nextState_qtableObj = new CentralizedQtableObject(new CentralizedState(agent0, agent1, this.existing_buttons));
+                        Qtable_add(nextState_qtableObj);
+
+                        //Q-learning
+                        updateQtable(currentState_qtableObj, nextState_qtableObj, action, reward);
+
+
+                        //Dyna-Q
+                        CentralizedQtableObject _currentState_qtableObj = new CentralizedQtableObject(currentState_qtableObj);
+                        CentralizedQtableObject _nextState_qtableObj = new CentralizedQtableObject(nextState_qtableObj);
+                        int _action = action;
+                        double _reward = reward;
+
+                        for (int j = 0; j < 10; j++) {
+                            //          Update model
+                            //update T'[s,a,s']
+                            TransitionTable_update(_currentState_qtableObj.state, _nextState_qtableObj.state, _action);
+
+                            //udpate R'[s,a]
+                            RewardTable_update(_currentState_qtableObj.state, _nextState_qtableObj.state, _action, _reward);
+
+                            //          Hallucinate
+                            //s = random
+                            _currentState_qtableObj = new CentralizedQtableObject(this.TransitionTable.get(new Random().nextInt(this.TransitionTable.size())).currentState);
+                            //a = random
+                            _action = getPossibleAction_TransitiontTable(_currentState_qtableObj);
+                            //s' = infer from T[]
+                            _nextState_qtableObj = new CentralizedQtableObject(getNextState_TransitionTable(_currentState_qtableObj));
+                            //r = infer from R[s',a]
+                            _reward = getReward_RewardTable(_currentState_qtableObj, _nextState_qtableObj, _action);
+                            try {
+                                //          Q update
+                                updateQtable(_currentState_qtableObj, _nextState_qtableObj, _action, _reward);
+                            } catch (Exception o) {
+                            }
+
+                        }
+
+                        currentState_qtableObj = new CentralizedQtableObject(nextState_qtableObj);
+
+                        //Action
+                        action = getNextActionIndex(currentState_qtableObj.state, agent0, agent1);
+                        g0 = doNextAction(action, 0, agent0);
+                        agent0.setGoal(g0);
+                        g0.getStatus().resetToInProgress();
+                        g1 = doNextAction(action, 1, agent1);
+                        agent1.setGoal(g1);
+                        g1.getStatus().resetToInProgress();
+
+                        stuckTicks = 0;
+
+                        reward = 0;
+                    }
+
+
+                    // Check if the agents got stuck for too long
+                    stuckTicks++;
+
+                    // Check if the target button isOn to end the game - Tem que estar aqui para o reward ser válido
+//                    if ((e1 != null && e1.getBooleanProperty("isOn") || f1 != null && f1.getBooleanProperty("isOn")) &&
+//                            (e2 != null && e2.getBooleanProperty("isOn") || f2 != null && f2.getBooleanProperty("isOn"))) {
+                    if (target1_clicked && target2_clicked) {
+                        System.out.println("Objetive completed");
+                        break;
+                    }
+
+
+                    try {
+                        agent0.update();
+                        agent1.update();
+                    } catch (Exception ignored) {
+                    }
+
+                    delta--;
+                }
+            }
+
+            long episode_time = System.nanoTime() - start;
+            System.out.println(episode_time / 1_000_000_000);
+
+            if ((i + 1) % 10 == 0)
+                epsilon = 0;
+            else
+                epsilon = 1;
+
+            if (i % 10 == 0 && i > 0) {
+                long episodes_time_in_seconds = episode_time / 1_000_000_000;
+                this.TimePerEpisode.add(episodes_time_in_seconds);
+                System.out.println("added time");
+
+                //Early stop
+                if (episodes_time_in_seconds < best_time) {
+                    best_time = episodes_time_in_seconds;
+                    System.out.println("best time = " + best_time);
+                    early_stop_counter = early_stop_counter_reset;
+                }
+
+                if (episodes_time_in_seconds <= best_time + 1 && best_time != max_time) {
+                    early_stop_counter--;
+                    System.out.println("Early stop counter = " + early_stop_counter);
+                } else {
+                    early_stop_counter = early_stop_counter_reset;
+                    best_time = max_time;
+                }
+
+                if (early_stop_counter == 0)
+                    break;
+            }
+
+
         }
 
-        /**
-         * UNITY
+        printQtable();
+
+        savePolicyToFile("2agents_" + scenario_filename + "_centralized_agents");
+
          */
-//        var environment = new LabRecruitsEnvironment(new EnvironmentConfig("bruno_" + scenario_filename));
-//        // Create the agents
-//        var agent0 = new LabRecruitsTestAgent("agent0")
-//                .attachState(new BeliefState())
-//                .attachEnvironment(environment);
-//        agent0.setSamplingInterval(0);
-//
-//        var agent1 = new LabRecruitsTestAgent("agent1")
-//                .attachState(new BeliefState())
-//                .attachEnvironment(environment);
-//        agent1.setSamplingInterval(0);
-//        // press play in Unity
-//        if (!environment.startSimulation())
-//            throw new InterruptedException("Unity refuses to start the Simulation!");
-//
-//        if (!environment.close())
-//            throw new InterruptedException("Unity refuses to close the Simulation!");
-
-        // Train
-//        for (int i = 0; i < episodes; i++) {
-//            System.out.println("Episode " + i + " of " + (episodes - 1) + " epsilon " + epsilon);
-//
-//            CentralizedQtableObject currentState_qtableObj = new CentralizedQtableObject(new CentralizedState(agent0, agent1, this.existing_buttons));
-//
-//            double reward = 0;
-////            int action = getNextActionIndex(currentState_qtableObj.state, agent0, agent1);
-//            int action = 0;
-//
-//            // Set initial goals to agents
-//            var g0 = doNextAction(action, 0, agent0);
-//            agent0.setGoal(g0);
-//            var g1 = doNextAction(action, 1, agent1);
-//            agent1.setGoal(g1);
-//
-//            // set up the initial state
-//            while (agent0.getState().worldmodel.position == null && agent1.getState().worldmodel.position == null) {
-//                agent0.update();
-//                agent1.update();
-//            }
-//            currentState_qtableObj = new CentralizedQtableObject(new CentralizedState(agent0, agent1, this.existing_buttons));
-//            Qtable_add(currentState_qtableObj);
-//
-//            CentralizedQtableObject nextState_qtableObj = new CentralizedQtableObject(new CentralizedState(agent0, agent1, this.existing_buttons));
-//
-//            int stuckTicks = 0;
-//
-//            long start = System.nanoTime();
-//            long lasTime = System.nanoTime();
-//            final double amountOfTicks = 5.0;  // update 5x per second
-//            double ns = 1000000000 / amountOfTicks;
-//            double delta = 0;
-//
-//            boolean target1_clicked = false;
-//            boolean target2_clicked = false;
-//
-//            while (((System.nanoTime() - start) / 1_000_000_000) < max_time) {
-//                long now = System.nanoTime();
-//                delta += (now - lasTime) / ns;
-//                lasTime = now;
-//                if (delta >= 1) {
-//
-//                    if (this.actions.get(action)[0].equals("null"))
-//                        reward -= 0;
-//                    else
-//                        reward -= 1;
-//
-//                    if (this.actions.get(action)[1].equals("null"))
-//                        reward -= 0;
-//                    else
-//                        reward -= 1;
-//
-//
-//                    //Update agents
-////                    if (!g0.getStatus().inProgress() && !g1.getStatus().inProgress()) {
-//                    if ((!g0.getStatus().inProgress() && !g1.getStatus().inProgress()) || stuckTicks >= stuck_counter * amountOfTicks) {
-//
-//                        if (epsilon == 0 && g0.getStatus().success() && g1.getStatus().success())
-//                            System.out.println(this.actions.get(action)[0] + "   " + this.actions.get(action)[1]);
-//
-//                        if (stuckTicks >= stuck_counter * amountOfTicks) {
-//                            System.out.println("Stuck");
-//                            System.out.println(this.actions.get(action)[0] + "   " + this.actions.get(action)[1]);
-//                        }
-//
-//
-//                        if (e1 != null && e1.getBooleanProperty("isOn") && this.actions.get(action)[0].equals(e1.id) && !target1_clicked) {
-//                            reward += 100;
-//                            target1_clicked = true;
-//                        } else if (f1 != null && f1.getBooleanProperty("isOn") && this.actions.get(action)[1].equals(f1.id) && !target1_clicked) {
-//                            reward += 100;
-//                            target1_clicked = true;
-//                        }
-//                        if (e2 != null && e2.getBooleanProperty("isOn") && this.actions.get(action)[0].equals(e2.id) && !target2_clicked) {
-//                            reward += 100;
-//                            target2_clicked = true;
-//                        } else if (f2 != null && f2.getBooleanProperty("isOn") && this.actions.get(action)[1].equals(f2.id) && !target2_clicked) {
-//                            reward += 100;
-//                            target2_clicked = true;
-//                        }
-//
-//
-//                        //Next state
-//                        nextState_qtableObj = new CentralizedQtableObject(new CentralizedState(agent0, agent1, this.existing_buttons));
-//                        Qtable_add(nextState_qtableObj);
-//
-//                        //Q-learning
-//                        updateQtable(currentState_qtableObj, nextState_qtableObj, action, reward);
-//
-//
-//                        //Dyna-Q
-//                        CentralizedQtableObject _currentState_qtableObj = new CentralizedQtableObject(currentState_qtableObj);
-//                        CentralizedQtableObject _nextState_qtableObj = new CentralizedQtableObject(nextState_qtableObj);
-//                        int _action = action;
-//                        double _reward = reward;
-//
-//                        for (int j = 0; j < 10; j++) {
-//                            //          Update model
-//                            //update T'[s,a,s']
-//                            TransitionTable_update(_currentState_qtableObj.state, _nextState_qtableObj.state, _action);
-//
-//                            //udpate R'[s,a]
-//                            RewardTable_update(_currentState_qtableObj.state, _nextState_qtableObj.state, _action, _reward);
-//
-//                            //          Hallucinate
-//                            //s = random
-//                            _currentState_qtableObj = new CentralizedQtableObject(this.TransitionTable.get(new Random().nextInt(this.TransitionTable.size())).currentState);
-//                            //a = random
-//                            _action = getPossibleAction_TransitiontTable(_currentState_qtableObj);
-//                            //s' = infer from T[]
-//                            _nextState_qtableObj = new CentralizedQtableObject(getNextState_TransitionTable(_currentState_qtableObj));
-//                            //r = infer from R[s',a]
-//                            _reward = getReward_RewardTable(_currentState_qtableObj, _nextState_qtableObj, _action);
-//                            try {
-//                                //          Q update
-//                                updateQtable(_currentState_qtableObj, _nextState_qtableObj, _action, _reward);
-//                            } catch (Exception o) {
-//                            }
-//
-//                        }
-//
-//                        currentState_qtableObj = new CentralizedQtableObject(nextState_qtableObj);
-//
-//                        //Action
-//                        action = getNextActionIndex(currentState_qtableObj.state, agent0, agent1);
-//                        g0 = doNextAction(action, 0, agent0);
-//                        agent0.setGoal(g0);
-//                        g0.getStatus().resetToInProgress();
-//                        g1 = doNextAction(action, 1, agent1);
-//                        agent1.setGoal(g1);
-//                        g1.getStatus().resetToInProgress();
-//
-//                        stuckTicks = 0;
-//
-//                        reward = 0;
-//                    }
-//
-//
-//                    // Check if the agents got stuck for too long
-//                    stuckTicks++;
-//
-//                    // Check if the target button isOn to end the game - Tem que estar aqui para o reward ser válido
-////                    if ((e1 != null && e1.getBooleanProperty("isOn") || f1 != null && f1.getBooleanProperty("isOn")) &&
-////                            (e2 != null && e2.getBooleanProperty("isOn") || f2 != null && f2.getBooleanProperty("isOn"))) {
-//                    if (target1_clicked && target2_clicked) {
-//                        System.out.println("Objetive completed");
-//                        break;
-//                    }
-//
-//
-//                    try {
-//                        agent0.update();
-//                        agent1.update();
-//                    } catch (Exception ignored) {
-//                    }
-//
-//                    delta--;
-//                }
-//            }
-//
-//            long episode_time = System.nanoTime() - start;
-//            System.out.println(episode_time / 1_000_000_000);
-//
-//            if ((i + 1) % 10 == 0)
-//                epsilon = 0;
-//            else
-//                epsilon = 1;
-//
-//            if (i % 10 == 0 && i > 0) {
-//                long episodes_time_in_seconds = episode_time / 1_000_000_000;
-//                this.TimePerEpisode.add(episodes_time_in_seconds);
-//                System.out.println("added time");
-//
-//                //Early stop
-//                if (episodes_time_in_seconds < best_time) {
-//                    best_time = episodes_time_in_seconds;
-//                    System.out.println("best time = " + best_time);
-//                    early_stop_counter = early_stop_counter_reset;
-//                }
-//
-//                if (episodes_time_in_seconds <= best_time + 1 && best_time != max_time) {
-//                    early_stop_counter--;
-//                    System.out.println("Early stop counter = " + early_stop_counter);
-//                } else {
-//                    early_stop_counter = early_stop_counter_reset;
-//                    best_time = max_time;
-//                }
-//
-//                if (early_stop_counter == 0)
-//                    break;
-//            }
-//
-//
-//        }
-
-//        printQtable();
-
-//        savePolicyToFile("2agents_" + scenario_filename + "_centralized_agents");
 
     }
 
@@ -450,6 +491,12 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
         System.out.println();
     }
 
+    void printQTable() {
+        for (CentralizedQTableObj obj : this.QTable)
+            System.out.println(obj.toString());
+        System.out.println();
+    }
+
     int countApperancesOfWordOnInitialMap(String word) {
         int count = 0;
         for (String[] a : this.initialMapMatrix)
@@ -460,12 +507,20 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
         return count;
     }
 
-    int chooseAction() {
-        int action = -1;
+    int chooseAction(CentralizedState state, int agent) {
         Random r = new Random();
-        if (r.nextDouble() < epsilon)
-            action = r.nextInt(this.actions.length);
-        return action;
+        if (r.nextDouble() < this.epsilon)
+            return r.nextInt(this.actions.length);
+        else{
+            for(CentralizedQTableObj obj: this.QTable)
+                if(obj.state.equalsTo(state)){
+                    for(int i = 0; i < this.actions.length; i++)
+                        if (this.actions[i].equals(this.centralizedActions.get(obj.maxAction())[agent]))
+                            return i;
+                }
+            return 0;
+        }
+
     }
 
     RewardRewardStateObject actOnMap(CentralizedState currentState, int actionAgent0, int actionAgent1) {
@@ -590,17 +645,67 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
         }
     }
 
-    void updateQTable(CentralizedState currentState, int actionAgent0, int actionAgent1, int rewardAgent0, int rewardAgent1, CentralizedState nextState) {
-//        qtable[state][action] = (1 - learning_rate) * qtable[state, action] + learning_rate * (reward + gamma * Nd4j.max(qtable[next_state,:]));
-
-    }
-
     void resetMapMatrix(){
         this.mapMatrix = new ArrayList<String[]>();
         for (String[] a : this.initialMapMatrix)
             this.mapMatrix.add((String[])a.clone());
     }
 
+    void setupCentralizedActions(){
+        this.centralizedActions = new ArrayList<String[]>();
+        for(String action_agent0 : this.actions)
+            for (String action_agent1: this.actions)
+                this.centralizedActions.add(new String[]{action_agent0, action_agent1});
+    }
+
+    int getCentralizedAction(int actionAgent0, int actionAgent1){
+        for(int i = 0; i < this.centralizedActions.size(); i++)
+            if (Arrays.equals(this.centralizedActions.get(i), new String[]{this.actions[actionAgent0], this.actions[actionAgent1]}))
+                return i;
+        return -1;
+    }
+
+    void updateQTable(CentralizedState currentState, int action, int reward, CentralizedState nextState) {
+//        qtable[state][action] = (1 - learning_rate) * qtable[state, action] + learning_rate * (reward + gamma * Nd4j.max(qtable[next_state,:]));
+
+        CentralizedQTableObj obj = new CentralizedQTableObj(currentState);
+
+        if(this.QTable.size() == 0 || !objExistsInQTable(obj))
+            this.QTable.add(obj);
+
+        //Part1 = (1 - learning_rate) * qtable[state, action]
+        double part1 = (1 - this.learning_rate) * getQValueQTable(currentState, action);
+
+        //Part2 = learning_rate * (reward + gamma * Nd4j.max(qtable[next_state,:]));
+        double part2 = this.learning_rate * (reward + this.gamma * getQValueQTable(nextState, -1));
+
+
+
+        for(CentralizedQTableObj temp: this.QTable)
+            if(temp.equalsTo(obj)) {
+                temp.changeActionQValue(action, (part1 + part2));
+            }
+
+    }
+
+    boolean objExistsInQTable(CentralizedQTableObj obj){
+        for(CentralizedQTableObj temp: this.QTable)
+            if(temp.equalsTo(obj))
+                return true;
+        return false;
+    }
+
+    double getQValueQTable(CentralizedState state, int action){
+        for (CentralizedQTableObj temp : this.QTable) {
+            if (temp.state.equalsTo(state)) {
+                if (action != -1)
+                    return temp.actionsQValues[action];
+                else
+                    return temp.maxActionQValue();
+            }
+        }
+        return -1;
+    }
 }
 
 class CentralizedState implements Serializable {
@@ -636,6 +741,10 @@ class CentralizedState implements Serializable {
         this.buttonsState[buttonIndex - 1] = this.buttonsState[buttonIndex - 1] ^= 1;
     }
 
+    public boolean equalsTo(CentralizedState state){
+        return (Arrays.equals(this.agent0Pos, state.agent0Pos) && Arrays.equals(this.agent1Pos, state.agent1Pos) && Arrays.equals(this.buttonsState, state.buttonsState));
+    }
+
     @Override
     public String toString() {
         return "<(" + this.agent0Pos[1] + ", 0, " + this.agent0Pos[0] + "), (" + this.agent1Pos[1] + ", 0, " + this.agent1Pos[0] + "), " + Arrays.toString(this.buttonsState) + ">";
@@ -664,13 +773,46 @@ class RewardRewardStateObject {
 
 }
 
-class CentralizedQTable{
+class CentralizedQTableObj {
 
-    CentralizedState currentState;
-    int[] actionsQValues = new int[1];
+    CentralizedState state;
+    double[] actionsQValues = new double[36];  //number of centralized actions
 
-    public CentralizedQTable(){
+    public CentralizedQTableObj(CentralizedState state){
+        this.state = new CentralizedState(state);
+    }
 
+    public void changeActionQValue(int actionIndex, double value){
+        this.actionsQValues[actionIndex] += value;
+    }
+
+    public boolean equalsTo(CentralizedQTableObj obj){
+        return this.state.equalsTo(obj.state);
+    }
+
+    public double maxActionQValue(){
+        double maxValue = Double.NEGATIVE_INFINITY;
+        for(double v: this.actionsQValues)
+            if(v > maxValue)
+                maxValue = v;
+
+        return maxValue;
+    }
+
+    public int maxAction(){
+        int index = -1;
+        double maxValue = Double.NEGATIVE_INFINITY;
+        for(int i = 0; i< this.actionsQValues.length; i++)
+            if(this.actionsQValues[i] > maxValue) {
+                maxValue = this.actionsQValues[i];
+                index = i;
+            }
+        return index;
+    }
+
+    @Override
+    public String toString() {
+        return (state.toString() + Arrays.toString(actionsQValues));
     }
 
 }
