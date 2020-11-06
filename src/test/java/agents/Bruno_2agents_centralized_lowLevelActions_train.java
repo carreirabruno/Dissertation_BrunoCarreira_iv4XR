@@ -24,20 +24,23 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
 
     ArrayList<CentralizedQTableObj> bestQTableYet;
 
-    int episodes = 1000;
+    int episodes = 10_000_001;
 
     double epsilon = 1;
+
+    int epsilonRate = 1000; //Must be multiple of 10
 
     double learning_rate = 0.1;
     double gamma = 0.65;
 
     int max_steps;
-    long best_steps;
 
-    int early_stop_counter_reset = 1;
+    int early_stop_counter_reset = 5;
     int early_stop_counter = early_stop_counter_reset;
 
     int minimumValidationSteps;
+
+    boolean validationEpisode = false;
 
 
     @BeforeAll
@@ -63,9 +66,6 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
         this.targetButtons = targetButtons;
         this.actions = new String[]{"Nothing", "Up", "Down", "Left", "Right", "Press"};
         setupCentralizedActions();
-
-//        for(int i = 0; i < this.centralizedActions.size(); i++)
-//            System.out.println(i + "  " + Arrays.toString(this.centralizedActions.get(i)));
 
         max_steps = this.initialMapMatrix.size() * this.initialMapMatrix.get(0).length * this.actions.length;
         minimumValidationSteps = max_steps-1;  //Menos porque os agentes tem que conseguir resolver com menos ações dos que as totais possiveis
@@ -126,24 +126,28 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
 
                 //Set current State
                 currentState = new CentralizedState(nextState);
-
             }
 
 //            System.out.println("Episode " + _episode + "/" + this.episodes + " done | Reached end = " + reachedEnd);
 
-            if ((_episode + 1) % 10 == 0){
-               if(_episode > this.episodes/2)
-                   this.epsilon = 0.5;
-               else
-                   this.epsilon = 0;
-            }
-            else
-                this.epsilon = 1;
 
+            //Reset Epsilon
+            if((_episode + 1) % this.epsilonRate == 0){
+                this.epsilon = 1;
+            }
+
+            if ((_episode + 1) % 10 == 0){
+                this.validationEpisode = true;
+            }
+            else {
+                this.epsilon -= 1.0/this.epsilonRate;
+                this.validationEpisode = false;
+            }
+
+            //Early Stop
             if (_episode % 10 == 0 && _episode > 0) {
-                //Early stop
-//                System.out.println("Validation Episode steps = " + step + " | Best validations steps = " + this.minimumValidationSteps);
-                if (step < this.minimumValidationSteps) {
+
+             if (step < this.minimumValidationSteps) {
                     this.minimumValidationSteps = step;
                     this.bestQTableYet = new ArrayList<CentralizedQTableObj>();
                     for (CentralizedQTableObj a : this.QTable)
@@ -164,7 +168,8 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
         }
 //            printQTable();
 
-        savePolicyToFile("centralizedLowLevelActions_" + scenario_filename);
+        savePolicyToFile("centralizedLowLevelActions_" + scenario_filename, this.QTable);
+        savePolicyToFile("centralizedLowLevelActions_" + scenario_filename + "_bestQyet", this.bestQTableYet);
 
         //UNITY
         /*
@@ -514,17 +519,16 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
 
     int chooseAction(CentralizedState state, int agent) {
         Random r = new Random();
-        if (r.nextDouble() < this.epsilon)
-            return r.nextInt(this.actions.length);
-        else{
-            for(CentralizedQTableObj obj: this.QTable)
-                if(obj.state.equalsTo(state)){
-                    for(int i = 0; i < this.actions.length; i++)
+        if (r.nextDouble() > this.epsilon || this.validationEpisode) {
+            for (CentralizedQTableObj obj : this.QTable)
+                if (obj.state.equalsTo(state)) {
+                    for (int i = 0; i < this.actions.length; i++)
                         if (this.actions[i].equals(this.centralizedActions.get(obj.maxAction())[agent]))
                             return i;
                 }
             return 0;
         }
+        return r.nextInt(this.actions.length);
 
     }
 
@@ -712,7 +716,7 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
         return -1;
     }
 
-    public void savePolicyToFile(String filename) {
+    public void savePolicyToFile(String filename, ArrayList<CentralizedQTableObj> list) {
         // save the object to file
         FileOutputStream fos = null;
         ObjectOutputStream out = null;
@@ -720,7 +724,7 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
             fos = new FileOutputStream(filename);
             out = new ObjectOutputStream(fos);
 
-            for (CentralizedQTableObj obj : this.bestQTableYet)
+            for (CentralizedQTableObj obj : list)
                 out.writeObject(obj);
 
             out.close();
