@@ -18,18 +18,14 @@ import java.io.FileReader;
 
 public class Bruno_2agents_centralized_lowLevelActions_train {
 
-    private static LabRecruitsTestServer labRecruitsTestServer;
-
     String[] actions;
     String[] targetButtons;
     int[] doorsState;
-    ArrayList<String[]> initialMapMatrix = new ArrayList<String[]>();
+    ArrayList<String[]> initialMapMatrix;
     ArrayList<String[]> mapMatrix;
-    ArrayList<String[]> connectionButtonsDoors = new ArrayList<String[]>();
+    ArrayList<String[]> connectionButtonsDoors;
 
-    ArrayList<Number> TimePerEpisode = new ArrayList<Number>();
-
-    int episodes = 10001;
+    int episodes = 10;
 
     double epsilon = 1;
 
@@ -56,64 +52,84 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
      */
     @Test
     public void create_policy_train(String scenario_filename, String[] targetButtons) throws InterruptedException, IOException {
-        mapMatrix = new ArrayList<String[]>();
+
+        this.initialMapMatrix = new ArrayList<String[]>();
+        this.connectionButtonsDoors = new ArrayList<String[]>();
 
         setUpScenarioMatrix(scenario_filename);
 
         this.targetButtons = targetButtons;
-        this.doorsState = new int[countApperancesOfWordOnInitialMap("door")];
         this.actions = new String[]{"Nothing", "Up", "Down", "Left", "Right", "Press"};
 
-//        max_steps = mapMatrix.size() * mapMatrix.get(0).length + 10;
-        max_steps = 1;
-        best_steps = max_steps;
+        max_steps = this.initialMapMatrix.size() * this.initialMapMatrix.get(0).length * this.actions.length;
 
-        CentralizedState nextState = new CentralizedState(findTruePosInInitialMapMatrix("agent0"), findTruePosInInitialMapMatrix("agent1"), countApperancesOfWordOnInitialMap("button"));
-        CentralizedState currentState = null;
-        int actionAgent0;
-        int actionAgent1;
-        int rewardAgent0;
-        int rewardAgent1;
-        RewardRewardStateObject rewardRewardStateObject;
+        this.mapMatrix = new ArrayList<String[]>();
+        for (int _episode = 0; _episode < this.episodes; _episode++) {
 
-        printConnectionsButtonsDoors();
-        printInitialMapMatrix();
+            this.mapMatrix = new ArrayList<>(this.initialMapMatrix);  //ISTO NÃO ESTA A CRIAR UMA LISTA NOVA
 
+            //Criar função minha que copia os elementos da initialMapMatrix para a MapMatrix
+            printInvertedMapMatrix();
+            this.doorsState = new int[countApperancesOfWordOnInitialMap("door")];
 
-        for (int step = 0; step < max_steps; step++) {
-            //see current State
-            currentState = new CentralizedState(nextState);
-            //action Agent0
-            actionAgent0 = chooseAction();
-//            actionAgent0 = 4;
+            CentralizedState nextState = new CentralizedState(findTruePosInInitialMapMatrix("agent0"), findTruePosInInitialMapMatrix("agent1"), countApperancesOfWordOnInitialMap("button"));
+            CentralizedState currentState;
+            int actionAgent0;
+            int actionAgent1;
+            int rewardAgent0;
+            int rewardAgent1;
+            RewardRewardStateObject rewardRewardStateObject;
 
-            //action Agent1
-            actionAgent1 = chooseAction();
-//            actionAgent1 = 4;
+            boolean reachedEnd = false;
 
-            //Act on map
-            rewardRewardStateObject = new RewardRewardStateObject(actOnMap(currentState, actionAgent0, actionAgent1));
-            rewardAgent0 = rewardRewardStateObject.rewardAgent0;
-            rewardAgent1 = rewardRewardStateObject.rewardAgent1;
-            nextState = rewardRewardStateObject.state;
+//            int steps = 0;
+//            while (currentState.buttonsState[3] == 0) {
+//                steps++;
+            for (int step = 0; step < max_steps; step++) {
+                //see current State
+                currentState = new CentralizedState(nextState);
 
-            //Prints to understand whats is happening
-            System.out.println(currentState.toString());
-            System.out.println("Agent0, " + this.actions[actionAgent0] + ", " + rewardAgent0);
-            System.out.println("Agent1, " + this.actions[actionAgent1] + ", " + rewardAgent1);
-            System.out.println(Arrays.toString(this.doorsState));
-            System.out.println(nextState.toString());
-            System.out.println();
+                //action Agent0
+                actionAgent0 = chooseAction();
 
+                //action Agent1
+                actionAgent1 = chooseAction();
 
-            //Check if the target buttons have been clicked
-            if (checkIfEndend(nextState))
-                break;
+                System.out.println(currentState.toString());
+                System.out.println("Agent0, " + this.actions[actionAgent0]);
+                System.out.println("Agent1, " + this.actions[actionAgent1]);
+                printInvertedMapMatrix();
 
+                //Act on map, get rewards and nextState
+                rewardRewardStateObject = new RewardRewardStateObject(actOnMap(currentState, actionAgent0, actionAgent1));
+                rewardAgent0 = rewardRewardStateObject.rewardAgent0;
+                rewardAgent1 = rewardRewardStateObject.rewardAgent1;
+                nextState = rewardRewardStateObject.state;
+
+                //Prints to understand whats is happening
+//            System.out.println(currentState.toString());
+//            System.out.println("Agent0, " + this.actions[actionAgent0] + ", " + rewardAgent0);
+//            System.out.println("Agent1, " + this.actions[actionAgent1] + ", " + rewardAgent1);
+//            System.out.println(Arrays.toString(this.doorsState));
+//            System.out.println(nextState.toString());
+//            System.out.println();
+
+                //Update Q Table
+                updateQTable(currentState, actionAgent0, actionAgent1, rewardAgent0, rewardAgent1, nextState);
+
+                //Check if the target buttons have been clicked
+                if (checkIfEndend(nextState)) {
+                    reachedEnd = true;
+                    break;
+                }
+
+            }
+            System.out.println("Episode " + _episode + "/" + this.episodes + " done | Reached end = " + reachedEnd);
         }
 
-
-        //UNITY
+        /**
+         * UNITY
+         */
 //        var environment = new LabRecruitsEnvironment(new EnvironmentConfig("bruno_" + scenario_filename));
 //        // Create the agents
 //        var agent0 = new LabRecruitsTestAgent("agent0")
@@ -367,10 +383,9 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
                     tempLine += symbol + ",";
                 }
                 if (MappingMatrix) {
-                    initialMapMatrix.add(tempLine.split(cvsSplitBy));
-                    mapMatrix.add(tempLine.split(cvsSplitBy));
+                    this.initialMapMatrix.add(tempLine.split(cvsSplitBy));
                 } else
-                    connectionButtonsDoors.add(tempLine.split(cvsSplitBy));
+                    this.connectionButtonsDoors.add(tempLine.split(cvsSplitBy));
             }
 
         } catch (IOException e) {
@@ -420,6 +435,18 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
         System.out.println();
     }
 
+    /**
+     * Prints the map as inverted so its easier to see as a print
+     */
+    void printInvertedMapMatrix() {
+        for (int z = this.mapMatrix.size() - 1; z >= 0; z--) {
+            for (int x = this.mapMatrix.get(z).length - 1; x >= 0; x--)
+                System.out.print(" " + this.mapMatrix.get(z)[x] + " ");
+            System.out.println();
+        }
+        System.out.println();
+    }
+
     void printConnectionsButtonsDoors() {
         for (String[] a : connectionButtonsDoors) {
             for (String b : a)
@@ -431,7 +458,7 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
 
     int countApperancesOfWordOnInitialMap(String word) {
         int count = 0;
-        for (String[] a : initialMapMatrix)
+        for (String[] a : this.initialMapMatrix)
             for (String b : a)
                 if (b.contains(word))
                     count++;
@@ -451,77 +478,79 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
         CentralizedState nextState = new CentralizedState(currentState);
         int rewardAgent0 = 0;
         int rewardAgent1 = 0;
+        int[] newPos;
 
         //Agent0
         if (this.actions[actionAgent0].equals("Press")) {
-            if (mapMatrix.get(nextState.agent0Pos[0])[nextState.agent0Pos[1]].contains("button")) {
-                String buttonToClick = new String(mapMatrix.get(nextState.agent0Pos[0])[nextState.agent0Pos[1]]);
+            if (this.mapMatrix.get(nextState.agent0Pos[0])[nextState.agent0Pos[1]].contains("button")) {
+                String buttonToClick = new String(this.mapMatrix.get(nextState.agent0Pos[0])[nextState.agent0Pos[1]].substring(0, 7));
                 nextState.changeButtonState(Integer.parseInt(buttonToClick.substring(buttonToClick.length() - 1)));
                 rewardAgent0 = getRewardFromPressingButton(buttonToClick);
+                System.out.println("----------------0-----------------");
+                printInitialMapMatrix();
+                System.out.println("----------------0-----------------");
                 openCloseDoor(buttonToClick);
-                System.out.println("here");
             }
-        }
-        else {
-            int[] newPos = new int[]{nextState.agent0Pos[0], nextState.agent0Pos[1]};
+        } else {
+            newPos = new int[]{nextState.agent0Pos[0], nextState.agent0Pos[1]};
             if (this.actions[actionAgent0].equals("Nothing")) {
                 //Do Nothing
-            } else if (this.actions[actionAgent0].equals("Up")) {
-                if (checkCanMove(nextState.agent0Pos[0] + 1, nextState.agent0Pos[1]))
+            } else {
+                if (this.actions[actionAgent0].equals("Up"))
                     newPos = new int[]{nextState.agent0Pos[0] + 1, nextState.agent0Pos[1]};
-            } else if (this.actions[actionAgent0].equals("Down")) {
-                if (checkCanMove(nextState.agent0Pos[0] - 1, nextState.agent0Pos[1]))
+                else if (this.actions[actionAgent0].equals("Down"))
                     newPos = new int[]{nextState.agent0Pos[0] - 1, nextState.agent0Pos[1]};
-            } else if (this.actions[actionAgent0].equals("Left")) {
-                if (checkCanMove(nextState.agent0Pos[0], nextState.agent0Pos[1] - 1))
-                    newPos = new int[]{nextState.agent0Pos[0], nextState.agent0Pos[1] - 1};
-            } else if (this.actions[actionAgent0].equals("Right")) {
-                if (checkCanMove(nextState.agent0Pos[0], nextState.agent0Pos[1] + 1))
+                else if (this.actions[actionAgent0].equals("Left"))
                     newPos = new int[]{nextState.agent0Pos[0], nextState.agent0Pos[1] + 1};
+                else if (this.actions[actionAgent0].equals("Right"))
+                    newPos = new int[]{nextState.agent0Pos[0], nextState.agent0Pos[1] - 1};
+                if (checkCanMove(newPos[0], newPos[1])) {
+                    nextState.changeAgent0Pos(newPos[0], newPos[1]);
+                    rewardAgent0--;
+                    changeMapMatrixAgentPositions("agent0", currentState.agent0Pos[0], currentState.agent0Pos[1], newPos[0], newPos[1]);
+                }
             }
 
-            nextState.changeAgent0Pos(newPos[0], newPos[1]);
-            rewardAgent0--;
-            changeMapMatrixAgentPositions("agent0", currentState.agent0Pos[0], currentState.agent0Pos[1], newPos[0], newPos[1]);
+
         }
 
         //Agent1
         if (this.actions[actionAgent1].equals("Press")) {
             if (mapMatrix.get(nextState.agent1Pos[0])[nextState.agent1Pos[1]].contains("button")) {
-                String buttonToClick = new String(mapMatrix.get(nextState.agent1Pos[0])[nextState.agent1Pos[1]]);
+                String buttonToClick = new String(this.mapMatrix.get(nextState.agent1Pos[0])[nextState.agent1Pos[1]].substring(0, 7));
                 nextState.changeButtonState(Integer.parseInt(buttonToClick.substring(buttonToClick.length() - 1)));
                 rewardAgent1 = getRewardFromPressingButton(buttonToClick);
+                System.out.println("-----------------1----------------");
+                printInitialMapMatrix();
+                System.out.println("------------------1---------------");
                 openCloseDoor(buttonToClick);
             }
-        }
-        else {
-            int[] newPos = new int[]{nextState.agent1Pos[0], nextState.agent1Pos[1]};
+        } else {
+            newPos = new int[]{nextState.agent1Pos[0], nextState.agent1Pos[1]};
             if (this.actions[actionAgent1].equals("Nothing")) {
                 //Do Nothing
-            } else if (this.actions[actionAgent1].equals("Up")) {
-                if (checkCanMove(nextState.agent1Pos[0] + 1, nextState.agent1Pos[1]))
+            } else {
+                if (this.actions[actionAgent1].equals("Up"))
                     newPos = new int[]{nextState.agent1Pos[0] + 1, nextState.agent1Pos[1]};
-            } else if (this.actions[actionAgent1].equals("Down")) {
-                if (checkCanMove(nextState.agent1Pos[0] - 1, nextState.agent1Pos[1]))
+                else if (this.actions[actionAgent1].equals("Down"))
                     newPos = new int[]{nextState.agent1Pos[0] - 1, nextState.agent1Pos[1]};
-            } else if (this.actions[actionAgent1].equals("Left")) {
-                if (checkCanMove(nextState.agent1Pos[0], nextState.agent1Pos[1] - 1))
-                    newPos = new int[]{nextState.agent1Pos[0], nextState.agent1Pos[1] - 1};
-            } else if (this.actions[actionAgent1].equals("Right")) {
-                if (checkCanMove(nextState.agent1Pos[0], nextState.agent1Pos[1] + 1))
+                else if (this.actions[actionAgent1].equals("Left"))
                     newPos = new int[]{nextState.agent1Pos[0], nextState.agent1Pos[1] + 1};
+                else if (this.actions[actionAgent1].equals("Right"))
+                    newPos = new int[]{nextState.agent1Pos[0], nextState.agent1Pos[1] - 1};
+                if (checkCanMove(newPos[0], newPos[1])) {
+                    nextState.changeAgent1Pos(newPos[0], newPos[1]);
+                    rewardAgent1--;
+                    changeMapMatrixAgentPositions("agent1", currentState.agent1Pos[0], currentState.agent1Pos[1], newPos[0], newPos[1]);
+                }
             }
-
-            nextState.changeAgent1Pos(newPos[0], newPos[1]);
-            rewardAgent1--;
-            changeMapMatrixAgentPositions("agent1", currentState.agent1Pos[0], currentState.agent1Pos[1], newPos[0], newPos[1]);
         }
 
         return new RewardRewardStateObject(rewardAgent0, rewardAgent1, nextState);
     }
 
     boolean checkCanMove(int z, int x) {
-        return !initialMapMatrix.get(z)[x].equals("w") && !mapMatrix.get(z)[x].contains("door") && !mapMatrix.get(z)[x].contains("agent");
+        return !mapMatrix.get(z)[x].equals("w") && !mapMatrix.get(z)[x].contains("door") && !mapMatrix.get(z)[x].contains("agent");
     }
 
     boolean checkIfEndend(CentralizedState state) {
@@ -558,10 +587,24 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
     }
 
     void changeMapMatrixAgentPositions(String agent, int oldX, int oldZ, int newX, int newZ) {
-        if (this.mapMatrix.get(newX)[newZ].equals("f")) {
+        if (this.mapMatrix.get(newX)[newZ].equals("f") && !this.mapMatrix.get(oldX)[oldZ].contains("button")) {
             this.mapMatrix.get(oldX)[oldZ] = "f";
             this.mapMatrix.get(newX)[newZ] = agent;
+        } else if (this.mapMatrix.get(newX)[newZ].equals("f") && this.mapMatrix.get(oldX)[oldZ].contains("button")) {
+            this.mapMatrix.get(oldX)[oldZ] = this.mapMatrix.get(oldX)[oldZ].substring(0, 7);
+            this.mapMatrix.get(newX)[newZ] = agent;
+        } else if (this.mapMatrix.get(newX)[newZ].contains("button") && !this.mapMatrix.get(oldX)[oldZ].contains("button")) {
+            this.mapMatrix.get(oldX)[oldZ] = "f";
+            this.mapMatrix.get(newX)[newZ] = this.mapMatrix.get(newX)[newZ] + "|" + agent;
+        } else if (this.mapMatrix.get(newX)[newZ].contains("button") && this.mapMatrix.get(oldX)[oldZ].contains("button")) {
+            this.mapMatrix.get(oldX)[oldZ] = this.mapMatrix.get(oldX)[oldZ].substring(0, 7);
+            this.mapMatrix.get(newX)[newZ] = this.mapMatrix.get(newX)[newZ] + "|" + agent;
         }
+    }
+
+    void updateQTable(CentralizedState currentState, int actionAgent0, int actionAgent1, int rewardAgent0, int rewardAgent1, CentralizedState nextState){
+//        qtable[state][action] = (1 - learning_rate) * qtable[state, action] + learning_rate * (reward + gamma * Nd4j.max(qtable[next_state,:]));
+
     }
 
 }
@@ -624,6 +667,17 @@ class RewardRewardStateObject {
         this.state = new CentralizedState(obj.state);
     }
 
+
+}
+
+class CentralizedQTable{
+
+    CentralizedState currentState;
+    int[] actionsQValues = new int[1];
+
+    public CentralizedQTable(){
+
+    }
 
 }
 
