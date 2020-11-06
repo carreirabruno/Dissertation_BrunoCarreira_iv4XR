@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Random;
 
 import java.io.BufferedReader;
@@ -25,7 +26,7 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
     ArrayList<String[]> mapMatrix;
     ArrayList<String[]> connectionButtonsDoors;
 
-    int episodes = 10;
+    int episodes = 100;
 
     double epsilon = 1;
 
@@ -62,14 +63,11 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
         this.actions = new String[]{"Nothing", "Up", "Down", "Left", "Right", "Press"};
 
         max_steps = this.initialMapMatrix.size() * this.initialMapMatrix.get(0).length * this.actions.length;
+//        max_steps = 10;
 
-        this.mapMatrix = new ArrayList<String[]>();
         for (int _episode = 0; _episode < this.episodes; _episode++) {
 
-            this.mapMatrix = new ArrayList<>(this.initialMapMatrix);  //ISTO NÃO ESTA A CRIAR UMA LISTA NOVA
-
-            //Criar função minha que copia os elementos da initialMapMatrix para a MapMatrix
-            printInvertedMapMatrix();
+            resetMapMatrix();
             this.doorsState = new int[countApperancesOfWordOnInitialMap("door")];
 
             CentralizedState nextState = new CentralizedState(findTruePosInInitialMapMatrix("agent0"), findTruePosInInitialMapMatrix("agent1"), countApperancesOfWordOnInitialMap("button"));
@@ -95,16 +93,12 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
                 //action Agent1
                 actionAgent1 = chooseAction();
 
-                System.out.println(currentState.toString());
-                System.out.println("Agent0, " + this.actions[actionAgent0]);
-                System.out.println("Agent1, " + this.actions[actionAgent1]);
-                printInvertedMapMatrix();
-
                 //Act on map, get rewards and nextState
                 rewardRewardStateObject = new RewardRewardStateObject(actOnMap(currentState, actionAgent0, actionAgent1));
                 rewardAgent0 = rewardRewardStateObject.rewardAgent0;
                 rewardAgent1 = rewardRewardStateObject.rewardAgent1;
                 nextState = rewardRewardStateObject.state;
+
 
                 //Prints to understand whats is happening
 //            System.out.println(currentState.toString());
@@ -486,9 +480,6 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
                 String buttonToClick = new String(this.mapMatrix.get(nextState.agent0Pos[0])[nextState.agent0Pos[1]].substring(0, 7));
                 nextState.changeButtonState(Integer.parseInt(buttonToClick.substring(buttonToClick.length() - 1)));
                 rewardAgent0 = getRewardFromPressingButton(buttonToClick);
-                System.out.println("----------------0-----------------");
-                printInitialMapMatrix();
-                System.out.println("----------------0-----------------");
                 openCloseDoor(buttonToClick);
             }
         } else {
@@ -520,9 +511,6 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
                 String buttonToClick = new String(this.mapMatrix.get(nextState.agent1Pos[0])[nextState.agent1Pos[1]].substring(0, 7));
                 nextState.changeButtonState(Integer.parseInt(buttonToClick.substring(buttonToClick.length() - 1)));
                 rewardAgent1 = getRewardFromPressingButton(buttonToClick);
-                System.out.println("-----------------1----------------");
-                printInitialMapMatrix();
-                System.out.println("------------------1---------------");
                 openCloseDoor(buttonToClick);
             }
         } else {
@@ -602,9 +590,15 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
         }
     }
 
-    void updateQTable(CentralizedState currentState, int actionAgent0, int actionAgent1, int rewardAgent0, int rewardAgent1, CentralizedState nextState){
+    void updateQTable(CentralizedState currentState, int actionAgent0, int actionAgent1, int rewardAgent0, int rewardAgent1, CentralizedState nextState) {
 //        qtable[state][action] = (1 - learning_rate) * qtable[state, action] + learning_rate * (reward + gamma * Nd4j.max(qtable[next_state,:]));
 
+    }
+
+    void resetMapMatrix(){
+        this.mapMatrix = new ArrayList<String[]>();
+        for (String[] a : this.initialMapMatrix)
+            this.mapMatrix.add((String[])a.clone());
     }
 
 }
