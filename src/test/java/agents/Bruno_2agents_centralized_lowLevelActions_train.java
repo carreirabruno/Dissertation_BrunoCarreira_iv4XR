@@ -4,14 +4,10 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.io.Serializable;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
 
 
 public class Bruno_2agents_centralized_lowLevelActions_train {
@@ -26,6 +22,8 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
 
     ArrayList<CentralizedQTableObj> QTable;
 
+    ArrayList<CentralizedQTableObj> bestQTableYet;
+
     int episodes = 1000;
 
     double epsilon = 1;
@@ -36,7 +34,7 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
     int max_steps;
     long best_steps;
 
-    int early_stop_counter_reset = 5;
+    int early_stop_counter_reset = 1;
     int early_stop_counter = early_stop_counter_reset;
 
     int minimumValidationSteps;
@@ -144,15 +142,20 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
 
             if (_episode % 10 == 0 && _episode > 0) {
                 //Early stop
-                System.out.println("Validation Episode " + _episode + "/" + this.episodes + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Best validations steps = " + this.minimumValidationSteps + " | Early Stop Counter = " + early_stop_counter);
 //                System.out.println("Validation Episode steps = " + step + " | Best validations steps = " + this.minimumValidationSteps);
-                if (step < this.minimumValidationSteps)
+                if (step < this.minimumValidationSteps) {
                     this.minimumValidationSteps = step;
+                    this.bestQTableYet = new ArrayList<CentralizedQTableObj>();
+                    for (CentralizedQTableObj a : this.QTable)
+                        this.bestQTableYet.add(new CentralizedQTableObj(a));
+                }
 
                 if(step == this.minimumValidationSteps)
                     early_stop_counter--;
                 else
                     early_stop_counter = early_stop_counter_reset;
+
+                System.out.println("Validation Episode " + _episode + "/" + this.episodes + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Best validations steps = " + this.minimumValidationSteps + " | Early Stop Counter = " + early_stop_counter);
 
                 if (early_stop_counter == 0)
                     break;
@@ -160,6 +163,8 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
 
         }
 //            printQTable();
+
+        savePolicyToFile("centralizedLowLevelActions_" + scenario_filename);
 
         //UNITY
         /*
@@ -706,6 +711,25 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
         }
         return -1;
     }
+
+    public void savePolicyToFile(String filename) {
+        // save the object to file
+        FileOutputStream fos = null;
+        ObjectOutputStream out = null;
+        try {
+            fos = new FileOutputStream(filename);
+            out = new ObjectOutputStream(fos);
+
+            for (CentralizedQTableObj obj : this.bestQTableYet)
+                out.writeObject(obj);
+
+            out.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+    }
+
 }
 
 class CentralizedState implements Serializable {
@@ -773,13 +797,17 @@ class RewardRewardStateObject {
 
 }
 
-class CentralizedQTableObj {
+class CentralizedQTableObj implements Serializable {
 
     CentralizedState state;
     double[] actionsQValues = new double[36];  //number of centralized actions
 
     public CentralizedQTableObj(CentralizedState state){
         this.state = new CentralizedState(state);
+    }
+    public CentralizedQTableObj(CentralizedQTableObj obj){
+        this.state = new CentralizedState(obj.state);
+        actionsQValues = (double[])obj.actionsQValues.clone();
     }
 
     public void changeActionQValue(int actionIndex, double value){
