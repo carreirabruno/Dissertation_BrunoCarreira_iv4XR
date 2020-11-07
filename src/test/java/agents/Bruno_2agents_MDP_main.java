@@ -33,6 +33,7 @@ public class Bruno_2agents_MDP_main {
     @Test
     public void run() throws Exception {
 
+        /*
         // Set the possible buttons to act
 //        this.actions.add(new String[]{"null", "null"});
 //        this.actions.add(new String[]{"null", "button1"});
@@ -99,8 +100,15 @@ public class Bruno_2agents_MDP_main {
 //        this.existing_buttons.add("button5");
 //        this.existing_buttons.add("button6");
 
-        String scenario = "scenario1";
-        String[] targetButtons = new String[]{"button4"};
+         */
+
+//        String scenario = "scenario1";
+//        String[] targetButtons = new String[]{"button4"};
+
+        String scenario = "scenario2";
+        String[] targetButtons = new String[]{"button1" };
+
+        /*
 //        String target1 = "button4";
 //        String target2 = "button4";
 
@@ -116,7 +124,10 @@ public class Bruno_2agents_MDP_main {
 //        String target1 = "button5";
 //        String target2 = "button5";
 
+         */
+
         lowLevelCentralizedTraining(scenario, targetButtons);
+//        lowLevelCentralizedTesting(scenario, targetButtons);
 
 //      manualControl(scenario);
 
@@ -204,6 +215,13 @@ public class Bruno_2agents_MDP_main {
         Bruno_2agents_centralized_lowLevelActions_train lowLevelActionsCentralized_train = new Bruno_2agents_centralized_lowLevelActions_train();
         lowLevelActionsCentralized_train.create_policy_train(scenario, targetButtons);
         Bruno_2agents_centralized_lowLevelActions_train.close();
+    }
+
+    public void lowLevelCentralizedTesting(String scenario, String[] targetButtons) throws Exception {
+        Bruno_2agents_centralized_lowLevelActions_test.start();
+        Bruno_2agents_centralized_lowLevelActions_test lowLevelActionsCentralized_test = new Bruno_2agents_centralized_lowLevelActions_test();
+        lowLevelActionsCentralized_test.test(scenario, targetButtons);
+        Bruno_2agents_centralized_lowLevelActions_test.close();
     }
 
 }

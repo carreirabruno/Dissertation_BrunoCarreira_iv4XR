@@ -24,18 +24,18 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
 
     ArrayList<CentralizedQTableObj> bestQTableYet;
 
-    int episodes = 10_000_001;
+    long episodes = 1001;
 
     double epsilon = 1;
 
-    int epsilonRate = 1000; //Must be multiple of 10
+//    int epsilonRate = 1000; //Must be multiple of 10
 
     double learning_rate = 0.1;
     double gamma = 0.65;
 
     int max_steps;
 
-    int early_stop_counter_reset = 5;
+    int early_stop_counter_reset = 2;
     int early_stop_counter = early_stop_counter_reset;
 
     int minimumValidationSteps;
@@ -63,12 +63,19 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
 
         setUpScenarioMatrix(scenario_filename);
 
+        printInitialMapMatrix();
+
         this.targetButtons = targetButtons;
         this.actions = new String[]{"Nothing", "Up", "Down", "Left", "Right", "Press"};
         setupCentralizedActions();
 
-        max_steps = this.initialMapMatrix.size() * this.initialMapMatrix.get(0).length * this.actions.length;
-        minimumValidationSteps = max_steps-1;  //Menos porque os agentes tem que conseguir resolver com menos ações dos que as totais possiveis
+//        for(int i = 0; i <this.centralizedActions.size(); i++)
+//            System.out.println(i + "  " + Arrays.toString(this.centralizedActions.get(i)));
+
+        int w = countApperancesOfWordOnInitialMap("w");
+
+        max_steps = ((this.initialMapMatrix.size() * this.initialMapMatrix.get(0).length)-w) * this.actions.length;
+        minimumValidationSteps = max_steps;  //Menos porque os agentes tem que conseguir resolver com menos ações dos que as totais possiveis
 
         for (int _episode = 0; _episode < this.episodes; _episode++) {
 
@@ -90,7 +97,7 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
 
            int step;
 //            while(!reachedEnd){
-            for (step = 0; step < max_steps; step++) {
+            for (step = 1; step < max_steps + 1; step++) {
 
                 //action Agent0
                 actionAgent0 = chooseAction(currentState, 0);
@@ -131,42 +138,49 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
 //            System.out.println("Episode " + _episode + "/" + this.episodes + " done | Reached end = " + reachedEnd);
 
 
-            //Reset Epsilon
-            if((_episode + 1) % this.epsilonRate == 0){
-                this.epsilon = 1;
+//            //Reset Epsilon
+//            if((_episode + 1) % this.epsilonRate == 0){
+//                this.epsilon = 1;
+//            }
+
+
+
+            //Early Stop
+            if (this.validationEpisode) {
+
+             if (step < this.minimumValidationSteps) {
+                 this.minimumValidationSteps = step;
+                 this.bestQTableYet = new ArrayList<CentralizedQTableObj>();
+                 for (CentralizedQTableObj a : this.QTable)
+                     this.bestQTableYet.add(new CentralizedQTableObj(a));
+             }
+
+             if(step == this.minimumValidationSteps)
+                 early_stop_counter--;
+             else
+                 early_stop_counter = early_stop_counter_reset;
+
+             System.out.println("Validation Episode " + _episode + "/" + this.episodes + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Best validations steps = " + this.minimumValidationSteps + " | Early Stop Counter = " + early_stop_counter);
+//             System.out.println("Best initial action " + this.QTable.get(0).toString());
+
+             if (early_stop_counter == 0)
+                 break;
             }
+//            else
+//                System.out.println("Training Episode " + _episode + "/" + this.episodes + " done | Reached end = " + reachedEnd + " | #Steps = " + step);
+
 
             if ((_episode + 1) % 10 == 0){
                 this.validationEpisode = true;
             }
             else {
-                this.epsilon -= 1.0/this.epsilonRate;
+                this.epsilon -= 1.0/this.episodes;
                 this.validationEpisode = false;
             }
 
-            //Early Stop
-            if (_episode % 10 == 0 && _episode > 0) {
-
-             if (step < this.minimumValidationSteps) {
-                    this.minimumValidationSteps = step;
-                    this.bestQTableYet = new ArrayList<CentralizedQTableObj>();
-                    for (CentralizedQTableObj a : this.QTable)
-                        this.bestQTableYet.add(new CentralizedQTableObj(a));
-                }
-
-                if(step == this.minimumValidationSteps)
-                    early_stop_counter--;
-                else
-                    early_stop_counter = early_stop_counter_reset;
-
-                System.out.println("Validation Episode " + _episode + "/" + this.episodes + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Best validations steps = " + this.minimumValidationSteps + " | Early Stop Counter = " + early_stop_counter);
-
-                if (early_stop_counter == 0)
-                    break;
-            }
-
         }
-//            printQTable();
+
+            printQTable();
 
         savePolicyToFile("centralizedLowLevelActions_" + scenario_filename, this.QTable);
         savePolicyToFile("centralizedLowLevelActions_" + scenario_filename + "_bestQyet", this.bestQTableYet);
@@ -617,9 +631,9 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
     int getRewardFromPressingButton(String buttonPressed) {
         for (String targetBtn : targetButtons)
             if (targetBtn.equals(buttonPressed))
-                return 100;
+                return 5;
 
-        return 10;
+        return 1;
     }
 
     void openCloseDoor(String button) {
@@ -683,12 +697,10 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
             this.QTable.add(obj);
 
         //Part1 = (1 - learning_rate) * qtable[state, action]
-        double part1 = (1 - this.learning_rate) * getQValueQTable(currentState, action);
+        float part1 = (float) ((1 - this.learning_rate) * getQValueQTable(currentState, action));
 
         //Part2 = learning_rate * (reward + gamma * Nd4j.max(qtable[next_state,:]));
-        double part2 = this.learning_rate * (reward + this.gamma * getQValueQTable(nextState, -1));
-
-
+        float part2 = (float) (this.learning_rate * (reward + this.gamma * getQValueQTable(nextState, -1)));
 
         for(CentralizedQTableObj temp: this.QTable)
             if(temp.equalsTo(obj)) {
@@ -804,17 +816,21 @@ class RewardRewardStateObject {
 class CentralizedQTableObj implements Serializable {
 
     CentralizedState state;
-    double[] actionsQValues = new double[36];  //number of centralized actions
+    float[] actionsQValues = new float[36];  //number of centralized actions
 
     public CentralizedQTableObj(CentralizedState state){
         this.state = new CentralizedState(state);
     }
     public CentralizedQTableObj(CentralizedQTableObj obj){
         this.state = new CentralizedState(obj.state);
-        actionsQValues = (double[])obj.actionsQValues.clone();
+        actionsQValues = (float[])obj.actionsQValues.clone();
     }
 
-    public void changeActionQValue(int actionIndex, double value){
+    public void changeActionQValue(int actionIndex, float value){
+        if(Float.toString(this.actionsQValues[actionIndex] + value).equals("Infinity")) {
+            System.out.println("AQUIIIIIIIIII  " + this.actionsQValues[actionIndex] + "  " + value);
+            System.exit(112);
+        }
         this.actionsQValues[actionIndex] += value;
     }
 
@@ -822,9 +838,9 @@ class CentralizedQTableObj implements Serializable {
         return this.state.equalsTo(obj.state);
     }
 
-    public double maxActionQValue(){
-        double maxValue = Double.NEGATIVE_INFINITY;
-        for(double v: this.actionsQValues)
+    public float maxActionQValue(){
+        float maxValue = Float.NEGATIVE_INFINITY;
+        for(float v: this.actionsQValues)
             if(v > maxValue)
                 maxValue = v;
 
