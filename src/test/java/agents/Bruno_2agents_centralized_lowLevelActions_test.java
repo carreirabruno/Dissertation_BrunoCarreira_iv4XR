@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -42,6 +43,9 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
 //        this.QTable = getPolicy("centralizedLowLevelActions_" + scenario_filename + "bestQyet");
         this.QTable = getPolicy("centralizedLowLevelActions_" + scenario_filename);
 
+//        printQTable();
+//        System.exit(113);
+
         setUpScenarioMatrix(scenario_filename);
 
         this.targetButtons = targetButtons;
@@ -63,8 +67,10 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
 
         printInvertedMapMatrix();
 
-        int step = 1;
-        while (true) {
+        boolean ended = false;
+
+        int step = 0;
+        while (!ended) {
             step++;
             //action Agent0
             actionAgent0 = chooseAction(currentState, 0);
@@ -73,13 +79,12 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
             actionAgent1 = chooseAction(currentState, 1);
 
             //Act on map, get rewards and nextState
-            rewardRewardStateObject = new RewardRewardStateObject(actOnMap(currentState, actionAgent0, actionAgent1));
-            currentState = rewardRewardStateObject.state;
+            currentState= new CentralizedState(actOnMap(currentState, actionAgent0, actionAgent1));
 
             //Prints to understand whats is happening
-//            System.out.println(currentState.toString());
-//            System.out.println("Agent0, " + this.actions[actionAgent0] + ", " + rewardAgent0);
-//            System.out.println("Agent1, " + this.actions[actionAgent1] + ", " + rewardAgent1);
+            System.out.println(currentState.toString());
+            System.out.println("Agent0, " + this.actions[actionAgent0]);
+            System.out.println("Agent1, " + this.actions[actionAgent1]);
 //            System.out.println(Arrays.toString(this.doorsState));
 //            System.out.println(nextState.toString());
 //            System.out.println();
@@ -87,7 +92,7 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
 
             //Check if the target buttons have been clicked
             if (checkIfEndend(currentState)) {
-                break;
+                ended = true;
             }
         }
         System.out.println("Steps = " + step);
@@ -227,10 +232,8 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
         return -1;
     }
 
-    RewardRewardStateObject actOnMap(CentralizedState currentState, int actionAgent0, int actionAgent1) {
+    CentralizedState actOnMap(CentralizedState currentState, int actionAgent0, int actionAgent1) {
         CentralizedState nextState = new CentralizedState(currentState);
-        int rewardAgent0 = 0;
-        int rewardAgent1 = 0;
         int[] newPos;
 
         //Agent0
@@ -238,7 +241,6 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
             if (this.mapMatrix.get(nextState.agent0Pos[0])[nextState.agent0Pos[1]].contains("button")) {
                 String buttonToClick = new String(this.mapMatrix.get(nextState.agent0Pos[0])[nextState.agent0Pos[1]].substring(0, 7));
                 nextState.changeButtonState(Integer.parseInt(buttonToClick.substring(buttonToClick.length() - 1)));
-                rewardAgent0 = getRewardFromPressingButton(buttonToClick);
                 openCloseDoor(buttonToClick);
             }
         } else {
@@ -256,7 +258,6 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
                     newPos = new int[]{nextState.agent0Pos[0], nextState.agent0Pos[1] - 1};
                 if (checkCanMove(newPos[0], newPos[1])) {
                     nextState.changeAgent0Pos(newPos[0], newPos[1]);
-                    rewardAgent0--;
                     changeMapMatrixAgentPositions("agent0", currentState.agent0Pos[0], currentState.agent0Pos[1], newPos[0], newPos[1]);
                 }
             }
@@ -269,7 +270,6 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
             if (mapMatrix.get(nextState.agent1Pos[0])[nextState.agent1Pos[1]].contains("button")) {
                 String buttonToClick = new String(this.mapMatrix.get(nextState.agent1Pos[0])[nextState.agent1Pos[1]].substring(0, 7));
                 nextState.changeButtonState(Integer.parseInt(buttonToClick.substring(buttonToClick.length() - 1)));
-                rewardAgent1 = getRewardFromPressingButton(buttonToClick);
                 openCloseDoor(buttonToClick);
             }
         } else {
@@ -287,13 +287,12 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
                     newPos = new int[]{nextState.agent1Pos[0], nextState.agent1Pos[1] - 1};
                 if (checkCanMove(newPos[0], newPos[1])) {
                     nextState.changeAgent1Pos(newPos[0], newPos[1]);
-                    rewardAgent1--;
                     changeMapMatrixAgentPositions("agent1", currentState.agent1Pos[0], currentState.agent1Pos[1], newPos[0], newPos[1]);
                 }
             }
         }
 
-        return new RewardRewardStateObject(rewardAgent0, rewardAgent1, nextState);
+        return nextState;
     }
 
     boolean checkCanMove(int z, int x) {
