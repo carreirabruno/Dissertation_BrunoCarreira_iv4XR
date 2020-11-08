@@ -23,6 +23,8 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
 
     ArrayList<CentralizedQTableObj> QTable;
 
+    ArrayList<String> targetButtonsAlreadyClicked;
+
 
     @BeforeAll
     static void start() {
@@ -49,6 +51,7 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
         setUpScenarioMatrix(scenario_filename);
 
         this.targetButtons = targetButtons;
+        this.targetButtonsAlreadyClicked = new ArrayList<String>();
         this.actions = new String[]{"Nothing", "Up", "Down", "Left", "Right", "Press"};
         setupCentralizedActions();
 
@@ -70,7 +73,8 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
         boolean ended = false;
 
         int step = 0;
-        while (!ended) {
+//        while (!ended) {
+        while (step < 10) {
             step++;
             //action Agent0
             actionAgent0 = chooseAction(currentState, 0);
@@ -78,17 +82,23 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
             //action Agent1
             actionAgent1 = chooseAction(currentState, 1);
 
+            printInvertedMapMatrix();
+            System.out.println(currentState.toString());
+            System.out.println("Agent0, " + this.actions[actionAgent0]);
+            System.out.println("Agent1, " + this.actions[actionAgent1]);
+            System.out.println(Arrays.toString(this.targetButtonsAlreadyClicked.toArray()));
+
+
             //Act on map, get rewards and nextState
             currentState= new CentralizedState(actOnMap(currentState, actionAgent0, actionAgent1));
 
             //Prints to understand whats is happening
             System.out.println(currentState.toString());
-            System.out.println("Agent0, " + this.actions[actionAgent0]);
-            System.out.println("Agent1, " + this.actions[actionAgent1]);
 //            System.out.println(Arrays.toString(this.doorsState));
 //            System.out.println(nextState.toString());
 //            System.out.println();
             printInvertedMapMatrix();
+            System.out.println("-------------------------------");
 
             //Check if the target buttons have been clicked
             if (checkIfEndend(currentState)) {
@@ -97,6 +107,7 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
         }
         System.out.println("Steps = " + step);
 
+        System.out.println(this.QTable.get(0).toString());
     }
 
     void setUpScenarioMatrix(String scenario_filename) {
@@ -193,7 +204,6 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
                 System.out.print(" " + this.mapMatrix.get(z)[x] + " ");
             System.out.println();
         }
-        System.out.println();
     }
 
     void printConnectionsButtonsDoors() {
@@ -234,6 +244,8 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
 
     CentralizedState actOnMap(CentralizedState currentState, int actionAgent0, int actionAgent1) {
         CentralizedState nextState = new CentralizedState(currentState);
+        int rewardAgent0 = 0;
+        int rewardAgent1 = 0;
         int[] newPos;
 
         //Agent0
@@ -241,9 +253,17 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
             if (this.mapMatrix.get(nextState.agent0Pos[0])[nextState.agent0Pos[1]].contains("button")) {
                 String buttonToClick = new String(this.mapMatrix.get(nextState.agent0Pos[0])[nextState.agent0Pos[1]].substring(0, 7));
                 nextState.changeButtonState(Integer.parseInt(buttonToClick.substring(buttonToClick.length() - 1)));
+                rewardAgent0 = getRewardFromPressingButton(nextState,buttonToClick);
                 openCloseDoor(buttonToClick);
+
+//                printInvertedMapMatrix();
+//                System.out.println(nextState.toString());
+//                System.out.println("Agent0 buttonPressed " + buttonToClick + " | Reward " + rewardAgent0);
+//                System.out.println(this.targetButtonsAlreadyClicked.size() + " | " + Arrays.toString(this.targetButtonsAlreadyClicked.toArray()));
+//                System.out.println();
             }
-        } else {
+        }
+        else {
             newPos = new int[]{nextState.agent0Pos[0], nextState.agent0Pos[1]};
             if (this.actions[actionAgent0].equals("Nothing")) {
                 //Do Nothing
@@ -258,8 +278,10 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
                     newPos = new int[]{nextState.agent0Pos[0], nextState.agent0Pos[1] - 1};
                 if (checkCanMove(newPos[0], newPos[1])) {
                     nextState.changeAgent0Pos(newPos[0], newPos[1]);
+                    rewardAgent0--;
                     changeMapMatrixAgentPositions("agent0", currentState.agent0Pos[0], currentState.agent0Pos[1], newPos[0], newPos[1]);
                 }
+
             }
 
 
@@ -270,9 +292,17 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
             if (mapMatrix.get(nextState.agent1Pos[0])[nextState.agent1Pos[1]].contains("button")) {
                 String buttonToClick = new String(this.mapMatrix.get(nextState.agent1Pos[0])[nextState.agent1Pos[1]].substring(0, 7));
                 nextState.changeButtonState(Integer.parseInt(buttonToClick.substring(buttonToClick.length() - 1)));
+                rewardAgent1 = getRewardFromPressingButton(nextState, buttonToClick);
                 openCloseDoor(buttonToClick);
+
+//                printInvertedMapMatrix();
+//                System.out.println(nextState.toString());
+//                System.out.println("Agent1 buttonPressed " + buttonToClick + " | Reward " + rewardAgent1);
+//                System.out.println(this.targetButtonsAlreadyClicked.size() + " | " + Arrays.toString(this.targetButtonsAlreadyClicked.toArray()));
+//                System.out.println();
             }
-        } else {
+        }
+        else {
             newPos = new int[]{nextState.agent1Pos[0], nextState.agent1Pos[1]};
             if (this.actions[actionAgent1].equals("Nothing")) {
                 //Do Nothing
@@ -287,10 +317,15 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
                     newPos = new int[]{nextState.agent1Pos[0], nextState.agent1Pos[1] - 1};
                 if (checkCanMove(newPos[0], newPos[1])) {
                     nextState.changeAgent1Pos(newPos[0], newPos[1]);
+                    rewardAgent1--;
                     changeMapMatrixAgentPositions("agent1", currentState.agent1Pos[0], currentState.agent1Pos[1], newPos[0], newPos[1]);
                 }
+
             }
         }
+
+        System.out.println("Reward0 = " + rewardAgent0);
+        System.out.println("Reward1 = " + rewardAgent1);
 
         return nextState;
     }
@@ -308,11 +343,17 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
         return count == 0;
     }
 
-    int getRewardFromPressingButton(String buttonPressed) {
-        for (String targetBtn : targetButtons)
-            if (targetBtn.equals(buttonPressed))
-                return 10;
-
+    int getRewardFromPressingButton(CentralizedState state, String buttonPressed) {
+        if(state.buttonsState[Integer.parseInt(buttonPressed.substring(buttonPressed.length() - 1)) - 1] == 1) {  // Se o agent ligou
+            for (String targetBtn : targetButtons) {
+                if (targetBtn.equals(buttonPressed)) {
+                    if (!AlreadyClicked(buttonPressed))
+                        return 100;
+                    else
+                        return -1;
+                }
+            }
+        }
         return 1;
     }
 
@@ -411,6 +452,19 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
 
         return policy;
     }
+
+    boolean AlreadyClicked(String buttonPressed){
+       if (this.targetButtonsAlreadyClicked.size() == 0) {
+        }
+        else{
+            for (String btn : this.targetButtonsAlreadyClicked)
+                if (btn.equals(buttonPressed))
+                    return true;
+        }
+        this.targetButtonsAlreadyClicked.add(buttonPressed);
+        return false;
+    }
+
 }
 //class CentralizedQtableObject implements Serializable {
 //
