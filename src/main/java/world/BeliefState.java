@@ -378,7 +378,7 @@ public class BeliefState extends StateWithMessenger {
     	return e.alreadyInteracted();
     }
 
-    public static final float IN_RANGE = 1f ;
+    public static final float IN_RANGE = 0.25f ;
     public static final float CLOSE_RANGE = 0.6f ;
     public static final float UNIT_DISTANCE = 1f ;
 

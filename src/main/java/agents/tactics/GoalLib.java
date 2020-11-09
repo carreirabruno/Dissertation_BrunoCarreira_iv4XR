@@ -519,31 +519,20 @@ public class GoalLib {
 
         GoalStructure g1 = null;
 
-        Vec3 agent_pos = agent.getState().worldmodel.position;
+        Vec3 agent_pos = new Vec3((int) agent.getState().worldmodel.position.x, (int) agent.getState().worldmodel.position.y, (int) agent.getState().worldmodel.position.z);
 
-        if (agent_pos == null) {
-            Goal goal1 = goal(String.format("Lets Explore"))
-                    .toSolve((BeliefState belief) -> true);
+        Vec3 goalPosition = new Vec3((int) agent_pos.x + 1, (int) agent_pos.y, (int) agent_pos.z);
 
-            g1 = goal1.withTactic(
-                    FIRSTof( //the tactic used to solve the goal
-                            TacticLib.explore(), //explore if the goal position is unknown
-                            ABORT()))
-                    .lift();
-        } else {
-            Vec3 goalPosition = new Vec3((int) agent_pos.x - 2, (int) agent_pos.y, (int) agent_pos.z);
+        Goal goal1 = goal(String.format("Left"))
+                .toSolve((BeliefState belief) -> belief.withinRange(goalPosition));
 
-            Goal goal1 = goal(String.format("Left"))
-                    .toSolve((BeliefState belief) -> belief.withinRange(goalPosition));
+        g1 = goal1.withTactic(
+                FIRSTof( //the tactic used to solve the goal
+                        TacticLib.navigateTo(goalPosition),//move to the goal position
+                        TacticLib.explore())) //explore if the goal position is unknown
+//                        ABORT()))
+                .lift();
 
-            g1 = goal1.withTactic(
-                    FIRSTof( //the tactic used to solve the goal
-                            TacticLib.navigateTo(goalPosition),//move to the goal position
-                            TacticLib.explore(), //explore if the goal position is unknown
-                            ABORT()))
-                    .lift();
-
-        }
         return SEQ(g1);
     }
 
@@ -551,93 +540,62 @@ public class GoalLib {
 
         GoalStructure g1 = null;
 
-        Vec3 agent_pos = agent.getState().worldmodel.position;
+        Vec3 agent_pos = new Vec3((int) agent.getState().worldmodel.position.x, (int) agent.getState().worldmodel.position.y, (int) agent.getState().worldmodel.position.z);
 
-        if (agent_pos == null) {
-            Goal goal1 = goal(String.format("Lets Explore"))
-                    .toSolve((BeliefState belief) -> true);
+        Vec3 goalPosition = new Vec3((int) agent_pos.x - 1, (int) agent_pos.y, (int) agent_pos.z);
 
-            g1 = goal1.withTactic(
-                    FIRSTof( //the tactic used to solve the goal
-                            TacticLib.explore(), //explore if the goal position is unknown
-                            ABORT()))
-                    .lift();
-        } else {
-            Vec3 goalPosition = new Vec3((int) agent_pos.x + 2, (int) agent_pos.y, (int) agent_pos.z);
+        Goal goal1 = goal(String.format("Right"))
+                .toSolve((BeliefState belief) -> belief.withinRange(goalPosition));
 
-            Goal goal1 = goal(String.format("Right"))
-                    .toSolve((BeliefState belief) -> belief.withinRange(goalPosition));
+        g1 = goal1.withTactic(
+                FIRSTof( //the tactic used to solve the goal
+                        TacticLib.dynamicNavigateTo("Navigating to a reachable node close to the pos", goalPosition),//move to the goal position
+                        TacticLib.explore())) //explore if the goal position is unknown
+//                        ABORT()))
+                .lift();
 
-            g1 = goal1.withTactic(
-                    FIRSTof( //the tactic used to solve the goal
-                            TacticLib.dynamicNavigateTo("Navigating to a reachable node close to the pos", goalPosition),//move to the goal position
-                            TacticLib.explore(), //explore if the goal position is unknown
-                            ABORT()))
-                    .lift();
-
-        }
         return SEQ(g1);
     }
 
     public static GoalStructure Forward(LabRecruitsTestAgent agent) {
         GoalStructure g1 = null;
 
-        Vec3 agent_pos = agent.getState().worldmodel.position;
+        Vec3 agent_pos = new Vec3((int) agent.getState().worldmodel.position.x, (int) agent.getState().worldmodel.position.y, (int) agent.getState().worldmodel.position.z);
+        Vec3 goalPosition = new Vec3((int) agent_pos.x, (int) agent_pos.y, (int) agent_pos.z + 1);
+        System.out.println(goalPosition.toString());
 
-        if (agent_pos == null) {
-            Goal goal1 = goal(String.format("Lets Explore"))
-                    .toSolve((BeliefState belief) -> true);
+        //always true
+        Goal goal1 = goal(String.format("Forward"))
+                .toSolve((BeliefState belief) -> belief.withinRange(goalPosition));
 
-            g1 = goal1.withTactic(
-                    FIRSTof( //the tactic used to solve the goal
-                            TacticLib.explore(), //explore if the goal position is unknown
-                            ABORT()))
-                    .lift();
-        } else {
-            Vec3 goalPosition = new Vec3((int) agent_pos.x, (int) agent_pos.y, (int) agent_pos.z + 2);
+        //Set the tactics with which the goals will be solved
+        g1 = goal1.withTactic(
+                FIRSTof( //the tactic used to solve the goal
+                        TacticLib.navigateTo(goalPosition)))//move to the goal position
+//                        ABORT()))
+                .lift();
 
-            //always true
-            Goal goal1 = goal(String.format("Forward"))
-                    .toSolve((BeliefState belief) -> belief.withinRange(goalPosition));
-
-            //Set the tactics with which the goals will be solved
-            g1 = goal1.withTactic(
-                    FIRSTof( //the tactic used to solve the goal
-                            TacticLib.navigateTo(goalPosition),//move to the goal position
-                            ABORT()))
-                    .lift();
-        }
         return SEQ(g1);
     }
 
     public static GoalStructure Backward(LabRecruitsTestAgent agent) {
         GoalStructure g1 = null;
 
-        Vec3 agent_pos = agent.getState().worldmodel.position;
+        Vec3 agent_pos = new Vec3((int) agent.getState().worldmodel.position.x, (int) agent.getState().worldmodel.position.y, (int) agent.getState().worldmodel.position.z);
 
-        if (agent_pos == null) {
-            Goal goal1 = goal(String.format("Lets Explore"))
-                    .toSolve((BeliefState belief) -> true);
+        Vec3 goalPosition = new Vec3((int) agent_pos.x, (int) agent_pos.y, (int) agent_pos.z - 1);
 
-            g1 = goal1.withTactic(
-                    FIRSTof( //the tactic used to solve the goal
-                            TacticLib.explore(), //explore if the goal position is unknown
-                            ABORT()))
-                    .lift();
-        } else {
-            Vec3 goalPosition = new Vec3((int) agent_pos.x, (int) agent_pos.y, (int) agent_pos.z - 2);
+        //always true
+        Goal goal1 = goal(String.format("Backward"))
+                .toSolve((BeliefState belief) -> belief.withinRange(goalPosition));
 
-            //always true
-            Goal goal1 = goal(String.format("Backward"))
-                    .toSolve((BeliefState belief) -> belief.withinRange(goalPosition));
+        //Set the tactics with which the goals will be solved
+        g1 = goal1.withTactic(
+                FIRSTof( //the tactic used to solve the goal
+                        TacticLib.navigateTo(goalPosition)))//move to the goal position
+//                        ABORT()))
+                .lift();
 
-            //Set the tactics with which the goals will be solved
-            g1 = goal1.withTactic(
-                    FIRSTof( //the tactic used to solve the goal
-                            TacticLib.navigateTo(goalPosition),//move to the goal position
-                            ABORT()))
-                    .lift();
-        }
         return SEQ(g1);
     }
 

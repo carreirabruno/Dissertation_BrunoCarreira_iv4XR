@@ -4,6 +4,7 @@ import agents.tactics.GoalLib;
 import environments.EnvironmentConfig;
 import environments.LabRecruitsEnvironment;
 import game.LabRecruitsTestServer;
+import helperclasses.datastructures.Vec3;
 import nl.uu.cs.aplib.mainConcepts.GoalStructure;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -119,15 +120,26 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
             var g1 = doNextAction(actionAgent1, agent1);
             agent1.setGoal(g1);
 
+            CentralizedState tempState = new CentralizedState(currentState);
+
             while (!checkIfEndendLabRecruits(currentState, agent0, agent1)) {
 
+                posAgent0 = new int[]{(int)agent0.getState().worldmodel.position.z, (int) agent0.getState().worldmodel.position.x};
+                posAgent1 = new int[]{(int)agent1.getState().worldmodel.position.z, (int) agent1.getState().worldmodel.position.x};
 
-                if (!g0.getStatus().inProgress() && !g1.getStatus().inProgress()) {
+                tempState = new CentralizedState(posAgent0, posAgent1, countApperancesOfWordOnInitialMap("button"));
+
+                if (!currentState.equalsTo(tempState) && !g0.getStatus().inProgress() && !g1.getStatus().inProgress()) {
 
                     posAgent0 = new int[]{(int)agent0.getState().worldmodel.position.z, (int) agent0.getState().worldmodel.position.x};
                     posAgent1 = new int[]{(int)agent1.getState().worldmodel.position.z, (int) agent1.getState().worldmodel.position.x};
 
                     currentState = new CentralizedState(posAgent0, posAgent1, countApperancesOfWordOnInitialMap("button"));
+
+                    System.out.println("Agent0, " + this.actions[actionAgent0]);
+                    System.out.println("Agent1, " + this.actions[actionAgent1]);
+                    System.out.println(currentState.toString());
+                    System.out.println("-------------------------------");
 
                     // Set up the next action - agent0
                     actionAgent0 = chooseAction(currentState, 0);
@@ -167,14 +179,13 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
             int actionAgent1;
             RewardRewardStateObject rewardRewardStateObject;
 
-            boolean ended = false;
 
             System.out.println(currentState.toString());
 //            System.exit(123);
 
             int step = 0;
 
-            while (!ended) {
+            while (!checkIfEndendMatrix(currentState)) {
 
                 step++;
                 //action Agent0
@@ -183,7 +194,7 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
                 //action Agent1
                 actionAgent1 = chooseAction(currentState, 1);
 
-                printInvertedMapMatrix();
+//                printInvertedMapMatrix();
                 System.out.println(currentState.toString());
                 System.out.println("Agent0, " + this.actions[actionAgent0]);
                 System.out.println("Agent1, " + this.actions[actionAgent1]);
@@ -205,9 +216,7 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
 
 
                 //Check if the target buttons have been clicked
-                if (checkIfEndendMatrix(currentState)) {
-                    ended = true;
-                }
+
             }
             System.out.println("Steps = " + step);
         }
@@ -355,20 +364,23 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
         if (this.actions[action].equals("Nothing"))
             return GoalLib.doNothing();
         else if (this.actions[action].equals("Up")) {
-            System.out.println(this.actions[action] + " " + agent.getId());
-            return GoalLib.doNothing();
+//            System.out.println(this.actions[action] + " " + agent.getId());
+//            Vec3 agent_pos = new Vec3((int) agent.getState().worldmodel.position.x, (int) agent.getState().worldmodel.position.y, (int) agent.getState().worldmodel.position.z);
+//            System.out.println(new Vec3((int) agent_pos.x, (int) agent_pos.y, (int) agent_pos.z + 1).toString());
+//            System.exit(123);
+            return GoalLib.Forward(agent);
         }
         else if (this.actions[action].equals("Down")) {
-            System.out.println(this.actions[action] + " " + agent.getId());
-            return GoalLib.doNothing();
+//            System.out.println(this.actions[action] + " " + agent.getId());
+            return GoalLib.Backward(agent);
         }
         else if (this.actions[action].equals("Left")) {
-            System.out.println(this.actions[action] + " " + agent.getId());
-            return GoalLib.doNothing();
+//            System.out.println(this.actions[action] + " " + agent.getId());
+            return GoalLib.Left(agent);
         }
         else if (this.actions[action].equals("Right")) {
-            System.out.println(this.actions[action] + " " + agent.getId());
-            return GoalLib.doNothing();
+//            System.out.println(this.actions[action] + " " + agent.getId());
+            return GoalLib.Right(agent);
         }
         else if (this.actions[action].equals("Press")) {
             System.out.println(this.actions[action] + " " + agent.getId());
