@@ -184,11 +184,14 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
 //                System.out.println("Training Episode " + _episode + "/" + this.episodes + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Epsilon = " + this.epsilon);
 
 
+            if((_episode + 1) % 1000 == 0)
+                this.epsilon = 1;
+
             if ((_episode + 1) % 5 == 0){
                 this.validationEpisode = true;
             }
             else {
-//                this.epsilon -= 1.0/this.episodes;
+                this.epsilon -= 1.0/this.episodes;
                 this.validationEpisode = false;
             }
 
