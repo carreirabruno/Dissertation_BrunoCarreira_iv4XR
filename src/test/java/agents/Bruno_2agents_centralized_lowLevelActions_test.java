@@ -46,7 +46,9 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
         this.QTable = getPolicy("centralizedLowLevelActions_" + scenario_filename);
 
 //        printQTable();
+        verifyQable();
 //        System.exit(113);
+        printInitialMapMatrix();
 
         setUpScenarioMatrix(scenario_filename);
 
@@ -55,49 +57,62 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
         this.actions = new String[]{"Nothing", "Up", "Down", "Left", "Right", "Press"};
         setupCentralizedActions();
 
-//        for(int i = 0; i <this.centralizedActions.size(); i++)
-//            System.out.println(i + "  " + Arrays.toString(this.centralizedActions.get(i)));
+        for(int i = 0; i <this.centralizedActions.size(); i++)
+            System.out.println(i + "  " + Arrays.toString(this.centralizedActions.get(i)));
 
         resetMapMatrix();
         this.doorsState = new int[countApperancesOfWordOnInitialMap("door")];
 
         CentralizedState currentState = new CentralizedState(findTruePosInInitialMapMatrix("agent0"), findTruePosInInitialMapMatrix("agent1"), countApperancesOfWordOnInitialMap("button"));
 
-
         int actionAgent0;
         int actionAgent1;
         RewardRewardStateObject rewardRewardStateObject;
 
-        printInvertedMapMatrix();
 
         boolean ended = false;
 
+        int[] createdActionsAgent0 = new int[]{4, 5}; //Left, press
+
+        System.out.println(currentState.toString());
+
         int step = 0;
 //        while (!ended) {
-        while (step < 10) {
+        while (step < 10 && !ended) {
             step++;
             //action Agent0
             actionAgent0 = chooseAction(currentState, 0);
+//            actionAgent0 = createdActionsAgent0[step-1];
 
             //action Agent1
             actionAgent1 = chooseAction(currentState, 1);
 
             printInvertedMapMatrix();
             System.out.println(currentState.toString());
-            System.out.println("Agent0, " + this.actions[actionAgent0]);
-            System.out.println("Agent1, " + this.actions[actionAgent1]);
-            System.out.println(Arrays.toString(this.targetButtonsAlreadyClicked.toArray()));
+            printBestActionCurrentState(currentState);
+            printQTableObj(currentState);
+//            System.out.println(currentState.toString());
+//            System.out.println("Agent0, " + this.actions[actionAgent0]);
+//            System.out.println("Agent1, " + this.actions[actionAgent1]);
+//            printBestActionCurrentState(currentState);
+//            System.out.println("Already clicked target buttons = " + Arrays.toString(this.targetButtonsAlreadyClicked.toArray()));
 
-
-            //Act on map, get rewards and nextState
+//            printQTableObj(currentState);
+//            System.out.println(getQValueQTable(currentState, -1) + "   dsdfsdf" );
+                    //Act on map, get rewards and nextState
             currentState= new CentralizedState(actOnMap(currentState, actionAgent0, actionAgent1));
 
             //Prints to understand whats is happening
-            System.out.println(currentState.toString());
+//            System.out.println(currentState.toString());
 //            System.out.println(Arrays.toString(this.doorsState));
 //            System.out.println(nextState.toString());
 //            System.out.println();
-            printInvertedMapMatrix();
+//            printInvertedMapMatrix();
+
+//            printQTableObj(currentState);
+//            System.out.println(getQValueQTable(currentState, -1) + "   asasa" );
+//            System.out.println(getQValueQTable(currentState, -1));
+
             System.out.println("-------------------------------");
 
             //Check if the target buttons have been clicked
@@ -106,8 +121,6 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
             }
         }
         System.out.println("Steps = " + step);
-
-        System.out.println(this.QTable.get(0).toString());
     }
 
     void setUpScenarioMatrix(String scenario_filename) {
@@ -200,8 +213,12 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
      */
     void printInvertedMapMatrix() {
         for (int z = this.mapMatrix.size() - 1; z >= 0; z--) {
-            for (int x = this.mapMatrix.get(z).length - 1; x >= 0; x--)
-                System.out.print(" " + this.mapMatrix.get(z)[x] + " ");
+            for (int x = this.mapMatrix.get(z).length - 1; x >= 0; x--) {
+                String temp = new String(this.mapMatrix.get(z)[x]);
+                temp = temp.replace("gent", "");
+                temp = temp.replace("utton", "");
+                System.out.print(" " + temp + " ");
+            }
             System.out.println();
         }
     }
@@ -232,13 +249,12 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
     }
 
     int chooseAction(CentralizedState state, int agent) {
-        for (CentralizedQTableObj obj : this.QTable) {
+        for (CentralizedQTableObj obj : this.QTable)
             if (obj.state.equalsTo(state)) {
                 for (int i = 0; i < this.actions.length; i++)
                     if (this.actions[i].equals(this.centralizedActions.get(obj.maxAction())[agent]))
                         return i;
             }
-        }
         return -1;
     }
 
@@ -262,29 +278,25 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
 //                System.out.println(this.targetButtonsAlreadyClicked.size() + " | " + Arrays.toString(this.targetButtonsAlreadyClicked.toArray()));
 //                System.out.println();
             }
-        }
-        else {
+            else
+                rewardAgent0--;
+        } else {
             newPos = new int[]{nextState.agent0Pos[0], nextState.agent0Pos[1]};
-            if (this.actions[actionAgent0].equals("Nothing")) {
-                //Do Nothing
-            } else {
-                if (this.actions[actionAgent0].equals("Up"))
-                    newPos = new int[]{nextState.agent0Pos[0] + 1, nextState.agent0Pos[1]};
-                else if (this.actions[actionAgent0].equals("Down"))
-                    newPos = new int[]{nextState.agent0Pos[0] - 1, nextState.agent0Pos[1]};
-                else if (this.actions[actionAgent0].equals("Left"))
-                    newPos = new int[]{nextState.agent0Pos[0], nextState.agent0Pos[1] + 1};
-                else if (this.actions[actionAgent0].equals("Right"))
-                    newPos = new int[]{nextState.agent0Pos[0], nextState.agent0Pos[1] - 1};
-                if (checkCanMove(newPos[0], newPos[1])) {
-                    nextState.changeAgent0Pos(newPos[0], newPos[1]);
-                    rewardAgent0--;
-                    changeMapMatrixAgentPositions("agent0", currentState.agent0Pos[0], currentState.agent0Pos[1], newPos[0], newPos[1]);
-                }
 
+            if (this.actions[actionAgent0].equals("Up"))
+                newPos = new int[]{nextState.agent0Pos[0] + 1, nextState.agent0Pos[1]};
+            else if (this.actions[actionAgent0].equals("Down"))
+                newPos = new int[]{nextState.agent0Pos[0] - 1, nextState.agent0Pos[1]};
+            else if (this.actions[actionAgent0].equals("Left"))
+                newPos = new int[]{nextState.agent0Pos[0], nextState.agent0Pos[1] + 1};
+            else if (this.actions[actionAgent0].equals("Right"))
+                newPos = new int[]{nextState.agent0Pos[0], nextState.agent0Pos[1] - 1};
+            if (checkCanMove(newPos[0], newPos[1])) {
+                nextState.changeAgent0Pos(newPos[0], newPos[1]);
+
+                changeMapMatrixAgentPositions("agent0", currentState.agent0Pos[0], currentState.agent0Pos[1], newPos[0], newPos[1]);
             }
-
-
+            rewardAgent0--;
         }
 
         //Agent1
@@ -301,28 +313,27 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
 //                System.out.println(this.targetButtonsAlreadyClicked.size() + " | " + Arrays.toString(this.targetButtonsAlreadyClicked.toArray()));
 //                System.out.println();
             }
+            else
+                rewardAgent1--;
         }
         else {
             newPos = new int[]{nextState.agent1Pos[0], nextState.agent1Pos[1]};
-            if (this.actions[actionAgent1].equals("Nothing")) {
-                //Do Nothing
-            } else {
-                if (this.actions[actionAgent1].equals("Up"))
-                    newPos = new int[]{nextState.agent1Pos[0] + 1, nextState.agent1Pos[1]};
-                else if (this.actions[actionAgent1].equals("Down"))
-                    newPos = new int[]{nextState.agent1Pos[0] - 1, nextState.agent1Pos[1]};
-                else if (this.actions[actionAgent1].equals("Left"))
-                    newPos = new int[]{nextState.agent1Pos[0], nextState.agent1Pos[1] + 1};
-                else if (this.actions[actionAgent1].equals("Right"))
-                    newPos = new int[]{nextState.agent1Pos[0], nextState.agent1Pos[1] - 1};
-                if (checkCanMove(newPos[0], newPos[1])) {
-                    nextState.changeAgent1Pos(newPos[0], newPos[1]);
-                    rewardAgent1--;
-                    changeMapMatrixAgentPositions("agent1", currentState.agent1Pos[0], currentState.agent1Pos[1], newPos[0], newPos[1]);
-                }
+            if (this.actions[actionAgent1].equals("Up"))
+                newPos = new int[]{nextState.agent1Pos[0] + 1, nextState.agent1Pos[1]};
+            else if (this.actions[actionAgent1].equals("Down"))
+                newPos = new int[]{nextState.agent1Pos[0] - 1, nextState.agent1Pos[1]};
+            else if (this.actions[actionAgent1].equals("Left"))
+                newPos = new int[]{nextState.agent1Pos[0], nextState.agent1Pos[1] + 1};
+            else if (this.actions[actionAgent1].equals("Right"))
+                newPos = new int[]{nextState.agent1Pos[0], nextState.agent1Pos[1] - 1};
+            if (checkCanMove(newPos[0], newPos[1])) {
+                nextState.changeAgent1Pos(newPos[0], newPos[1]);
 
+                changeMapMatrixAgentPositions("agent1", currentState.agent1Pos[0], currentState.agent1Pos[1], newPos[0], newPos[1]);
             }
+            rewardAgent1--;
         }
+
 
         System.out.println("Reward0 = " + rewardAgent0);
         System.out.println("Reward1 = " + rewardAgent1);
@@ -344,17 +355,28 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
     }
 
     int getRewardFromPressingButton(CentralizedState state, String buttonPressed) {
-        if(state.buttonsState[Integer.parseInt(buttonPressed.substring(buttonPressed.length() - 1)) - 1] == 1) {  // Se o agent ligou
-            for (String targetBtn : targetButtons) {
-                if (targetBtn.equals(buttonPressed)) {
-                    if (!AlreadyClicked(buttonPressed))
-                        return 100;
-                    else
-                        return -1;
-                }
+//        if(state.buttonsState[Integer.parseInt(buttonPressed.substring(buttonPressed.length() - 1)) - 1] == 1) {  // Se o agent ligou
+//            for (String targetBtn : targetButtons) {
+//                if (targetBtn.equals(buttonPressed)) {
+//                    if (!AlreadyClicked(buttonPressed))
+//                        return 100;
+//                    else
+//                        return -10;
+//                }
+//            }
+//        }
+//        return -1;
+
+        for (String targetBtn : targetButtons) {
+            if (targetBtn.equals(buttonPressed)) {
+                if (!AlreadyClicked(buttonPressed))
+                    return 100;
+//                else if(AlreadyClicked(buttonPressed) && state.buttonsState[Integer.parseInt(buttonPressed.substring(buttonPressed.length() - 1)) - 1] == 1)
+//                    return 10;
             }
         }
-        return 1;
+        return -1;
+
     }
 
     void openCloseDoor(String button) {
@@ -463,6 +485,31 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
         }
         this.targetButtonsAlreadyClicked.add(buttonPressed);
         return false;
+    }
+
+    void printQTableObj(CentralizedState obj){
+        for (CentralizedQTableObj temp: this.QTable)
+            if(temp.state.equalsTo(obj))
+                System.out.println("aaa " + temp.toString());
+    }
+
+    void verifyQable(){
+
+        for (CentralizedQTableObj a : this.QTable) {
+            int count = 0;
+            for (CentralizedQTableObj b : this.QTable)
+                if (a.equalsTo(b))
+                    count++;
+            if(count > 1)
+                System.out.println("HEYHEYHEY " + a.toString());
+        }
+
+    }
+
+    void printBestActionCurrentState(CentralizedState state){
+        for(CentralizedQTableObj obj: this.QTable)
+            if (obj.state.equalsTo(state))
+                System.out.println("Best Action = " + Arrays.toString(this.centralizedActions.get(obj.maxAction())));
     }
 
 }
