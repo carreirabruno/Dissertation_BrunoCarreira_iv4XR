@@ -853,6 +853,7 @@ class CentralizedState implements Serializable {
         System.arraycopy(state.buttonsState, 0, this.buttonsState, 0, this.buttonsState.length);
     }
 
+
     public void changeAgent0Pos(int z, int x) {
         this.agent0Pos[0] = z;
         this.agent0Pos[1] = x;

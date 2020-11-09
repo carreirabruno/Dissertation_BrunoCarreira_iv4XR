@@ -130,7 +130,8 @@ public class Bruno_2agents_MDP_main {
          */
 
 //        lowLevelCentralizedTraining(scenario, targetButtons);
-        lowLevelCentralizedTesting(scenario, targetButtons);
+//        lowLevelCentralizedTesting(scenario, targetButtons, false);
+        lowLevelCentralizedTesting(scenario, targetButtons, true);
 
 //      manualControl(scenario);
 
@@ -220,11 +221,11 @@ public class Bruno_2agents_MDP_main {
         Bruno_2agents_centralized_lowLevelActions_train.close();
     }
 
-    public void lowLevelCentralizedTesting(String scenario, String[] targetButtons) throws Exception {
-        Bruno_2agents_centralized_lowLevelActions_test.start();
+    public void lowLevelCentralizedTesting(String scenario, String[] targetButtons, boolean useLabrecruits) throws Exception {
+        Bruno_2agents_centralized_lowLevelActions_test.start(useLabrecruits);
         Bruno_2agents_centralized_lowLevelActions_test lowLevelActionsCentralized_test = new Bruno_2agents_centralized_lowLevelActions_test();
-        lowLevelActionsCentralized_test.test(scenario, targetButtons);
-        Bruno_2agents_centralized_lowLevelActions_test.close();
+        lowLevelActionsCentralized_test.test(scenario, targetButtons, useLabrecruits);
+        Bruno_2agents_centralized_lowLevelActions_test.close(useLabrecruits);
     }
 
 }

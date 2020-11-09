@@ -1,17 +1,24 @@
 package agents;
 
+import agents.tactics.GoalLib;
+import environments.EnvironmentConfig;
+import environments.LabRecruitsEnvironment;
+import game.LabRecruitsTestServer;
+import nl.uu.cs.aplib.mainConcepts.GoalStructure;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import world.BeliefState;
+import world.LabEntity;
 
 import java.io.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
 
 
 public class Bruno_2agents_centralized_lowLevelActions_test {
+
+    private static LabRecruitsTestServer labRecruitsTestServer = null;
 
     String[] actions;
     ArrayList<String[]> centralizedActions;
@@ -27,18 +34,27 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
 
 
     @BeforeAll
-    static void start() {
+    static void start(boolean useLabRecruits) {
+        if (useLabRecruits) {
+            // Uncomment this to make the game's graphic visible:
+            TestSettings.USE_GRAPHICS = true;
+            String labRecruitsExeRootDir = System.getProperty("user.dir");
+            labRecruitsTestServer = TestSettings.start_LabRecruitsTestServer(labRecruitsExeRootDir);
+        }
     }
 
     @AfterAll
-    static void close() {
+    static void close(boolean useLabRecruits) {
+        if (useLabRecruits) {
+            if (labRecruitsTestServer != null) labRecruitsTestServer.close();
+        }
     }
 
     /**
      * Test that the agent can train in this scenario
      */
     @Test
-    public void test(String scenario_filename, String[] targetButtons) throws InterruptedException, IOException {
+    public void test(String scenario_filename, String[] targetButtons, boolean useLabRecruits) throws InterruptedException, IOException {
 
         this.initialMapMatrix = new ArrayList<String[]>();
         this.connectionButtonsDoors = new ArrayList<String[]>();
@@ -48,7 +64,7 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
 //        printQTable();
         verifyQable();
 //        System.exit(113);
-        printInitialMapMatrix();
+//        printInitialMapMatrix();
 
         setUpScenarioMatrix(scenario_filename);
 
@@ -57,52 +73,125 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
         this.actions = new String[]{"Nothing", "Up", "Down", "Left", "Right", "Press"};
         setupCentralizedActions();
 
-        for(int i = 0; i <this.centralizedActions.size(); i++)
-            System.out.println(i + "  " + Arrays.toString(this.centralizedActions.get(i)));
+        if(useLabRecruits){
+            var environment = new LabRecruitsEnvironment(new EnvironmentConfig("bruno_" + scenario_filename));
 
-        resetMapMatrix();
-        this.doorsState = new int[countApperancesOfWordOnInitialMap("door")];
+            // Create the agent
+            var agent0 = new LabRecruitsTestAgent("agent0")
+                    .attachState(new BeliefState())
+                    .attachEnvironment(environment);
+            agent0.setSamplingInterval(0);
 
-        CentralizedState currentState = new CentralizedState(findTruePosInInitialMapMatrix("agent0"), findTruePosInInitialMapMatrix("agent1"), countApperancesOfWordOnInitialMap("button"));
+            var agent1 = new LabRecruitsTestAgent("agent1")
+                    .attachState(new BeliefState())
+                    .attachEnvironment(environment);
+            agent1.setSamplingInterval(0);
 
-        int actionAgent0;
-        int actionAgent1;
-        RewardRewardStateObject rewardRewardStateObject;
 
+            // press play in Unity
+            if (!environment.startSimulation())
+                throw new InterruptedException("Unity refuses to start the Simulation!");
 
-        boolean ended = false;
+            // set up the initial state
+            while (agent0.getState().worldmodel.position == null || agent1.getState().worldmodel.position == null) {
+                var actionAgent0 = 0;
+                var g0 = doNextAction(actionAgent0, agent0);
+                agent0.setGoal(g0);
+                var actionAgent1 = 0;
+                var g1 = doNextAction(actionAgent1, agent1);
+                agent1.setGoal(g1);
 
-        int[] createdActionsAgent0 = new int[]{4, 5}; //Left, press
+                agent0.update();
+                agent1.update();
+            }
 
-        System.out.println(currentState.toString());
+            //Tem que ser assim porque se fizer isto no objeto CentralizedState criar problemas...
+            int[] posAgent0 = new int[]{(int)agent0.getState().worldmodel.position.z, (int) agent0.getState().worldmodel.position.x};
+            int[] posAgent1 = new int[]{(int)agent1.getState().worldmodel.position.z, (int) agent1.getState().worldmodel.position.x};
 
-        int step = 0;
-        while (!ended) {
-//        while (step < 10 && !ended) {
-            step++;
-            //action Agent0
-            actionAgent0 = chooseAction(currentState, 0);
-//            actionAgent0 = createdActionsAgent0[step-1];
-
-            //action Agent1
-            actionAgent1 = chooseAction(currentState, 1);
-
-            printInvertedMapMatrix();
+            CentralizedState currentState = new CentralizedState(posAgent0, posAgent1, countApperancesOfWordOnInitialMap("button"));
             System.out.println(currentState.toString());
-            printBestActionCurrentState(currentState);
-            printQTableObj(currentState);
-//            System.out.println(currentState.toString());
-//            System.out.println("Agent0, " + this.actions[actionAgent0]);
-//            System.out.println("Agent1, " + this.actions[actionAgent1]);
-//            printBestActionCurrentState(currentState);
-//            System.out.println("Already clicked target buttons = " + Arrays.toString(this.targetButtonsAlreadyClicked.toArray()));
+            // Set initial goals to agents
+            var actionAgent0 = chooseAction(currentState, 0);
+            var g0 = doNextAction(actionAgent0, agent0);
+            agent0.setGoal(g0);
+            var actionAgent1 = chooseAction(currentState, 1);
+            var g1 = doNextAction(actionAgent1, agent1);
+            agent1.setGoal(g1);
 
-//            printQTableObj(currentState);
-//            System.out.println(getQValueQTable(currentState, -1) + "   dsdfsdf" );
-                    //Act on map, get rewards and nextState
-            currentState= new CentralizedState(actOnMap(currentState, actionAgent0, actionAgent1));
+            while (!checkIfEndendLabRecruits(currentState, agent0, agent1)) {
 
-            //Prints to understand whats is happening
+
+                if (!g0.getStatus().inProgress() && !g1.getStatus().inProgress()) {
+
+                    posAgent0 = new int[]{(int)agent0.getState().worldmodel.position.z, (int) agent0.getState().worldmodel.position.x};
+                    posAgent1 = new int[]{(int)agent1.getState().worldmodel.position.z, (int) agent1.getState().worldmodel.position.x};
+
+                    currentState = new CentralizedState(posAgent0, posAgent1, countApperancesOfWordOnInitialMap("button"));
+
+                    // Set up the next action - agent0
+                    actionAgent0 = chooseAction(currentState, 0);
+                    g0 = doNextAction(actionAgent0, agent0);
+                    agent0.setGoal(g0);
+                    g0.getStatus().resetToInProgress();
+
+                    // Set up the next action - agent1
+                    actionAgent1 = chooseAction(currentState, 1);
+                    g1 = doNextAction(actionAgent1, agent1);
+                    agent1.setGoal(g1);
+                    g1.getStatus().resetToInProgress();
+
+                }
+
+                try {
+                    agent0.update();
+                    agent1.update();
+                } catch (Exception ignored) {
+                }
+
+            }
+
+            if (!environment.close())
+                throw new InterruptedException("Unity refuses to close the Simulation!");
+        }
+        else {
+            for(int i = 0; i <this.centralizedActions.size(); i++)
+                System.out.println(i + "  " + Arrays.toString(this.centralizedActions.get(i)));
+
+            resetMapMatrix();
+            this.doorsState = new int[countApperancesOfWordOnInitialMap("door")];
+
+            CentralizedState currentState = new CentralizedState(findTruePosInInitialMapMatrix("agent0"), findTruePosInInitialMapMatrix("agent1"), countApperancesOfWordOnInitialMap("button"));
+
+            int actionAgent0;
+            int actionAgent1;
+            RewardRewardStateObject rewardRewardStateObject;
+
+            boolean ended = false;
+
+            System.out.println(currentState.toString());
+//            System.exit(123);
+
+            int step = 0;
+
+            while (!ended) {
+
+                step++;
+                //action Agent0
+                actionAgent0 = chooseAction(currentState, 0);
+
+                //action Agent1
+                actionAgent1 = chooseAction(currentState, 1);
+
+                printInvertedMapMatrix();
+                System.out.println(currentState.toString());
+                System.out.println("Agent0, " + this.actions[actionAgent0]);
+                System.out.println("Agent1, " + this.actions[actionAgent1]);
+                System.out.println("-------------------------------");
+                //Act on map, get rewards and nextState
+                currentState = new CentralizedState(actOnMap(currentState, actionAgent0, actionAgent1));
+
+                //Prints to understand whats is happening
 //            System.out.println(currentState.toString());
 //            System.out.println(Arrays.toString(this.doorsState));
 //            System.out.println(nextState.toString());
@@ -113,14 +202,15 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
 //            System.out.println(getQValueQTable(currentState, -1) + "   asasa" );
 //            System.out.println(getQValueQTable(currentState, -1));
 
-            System.out.println("-------------------------------");
 
-            //Check if the target buttons have been clicked
-            if (checkIfEndend(currentState)) {
-                ended = true;
+
+                //Check if the target buttons have been clicked
+                if (checkIfEndendMatrix(currentState)) {
+                    ended = true;
+                }
             }
+            System.out.println("Steps = " + step);
         }
-        System.out.println("Steps = " + step);
     }
 
     void setUpScenarioMatrix(String scenario_filename) {
@@ -260,6 +350,34 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
         return -1;
     }
 
+    public GoalStructure doNextAction(int action, LabRecruitsTestAgent agent) {
+        String action_object = this.actions[action];
+        if (this.actions[action].equals("Nothing"))
+            return GoalLib.doNothing();
+        else if (this.actions[action].equals("Up")) {
+            System.out.println(this.actions[action] + " " + agent.getId());
+            return GoalLib.doNothing();
+        }
+        else if (this.actions[action].equals("Down")) {
+            System.out.println(this.actions[action] + " " + agent.getId());
+            return GoalLib.doNothing();
+        }
+        else if (this.actions[action].equals("Left")) {
+            System.out.println(this.actions[action] + " " + agent.getId());
+            return GoalLib.doNothing();
+        }
+        else if (this.actions[action].equals("Right")) {
+            System.out.println(this.actions[action] + " " + agent.getId());
+            return GoalLib.doNothing();
+        }
+        else if (this.actions[action].equals("Press")) {
+            System.out.println(this.actions[action] + " " + agent.getId());
+            return GoalLib.doNothing();
+        }
+        return null;
+
+    }
+
     CentralizedState actOnMap(CentralizedState currentState, int actionAgent0, int actionAgent1) {
         CentralizedState nextState = new CentralizedState(currentState);
         int rewardAgent0 = 0;
@@ -347,13 +465,31 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
         return !mapMatrix.get(z)[x].equals("w") && !mapMatrix.get(z)[x].contains("door") && !mapMatrix.get(z)[x].contains("agent");
     }
 
-    boolean checkIfEndend(CentralizedState state) {
+    boolean checkIfEndendMatrix(CentralizedState state) {
         int count = targetButtons.length;
         for (String button : targetButtons) {
             if ((state.buttonsState[Integer.parseInt(new String(button.substring(button.length() - 1))) - 1]) == 1)
                 count--;
         }
         return count == 0;
+    }
+
+    boolean checkIfEndendLabRecruits(CentralizedState state, LabRecruitsTestAgent agent0, LabRecruitsTestAgent agent1) {
+        ArrayList<LabEntity> targetButtonsEntities = new ArrayList<LabEntity>();
+        for (String targetBtn: this.targetButtons){
+            if(agent0.getState().worldmodel.getElement(targetBtn) !=null)
+                targetButtonsEntities.add(agent0.getState().worldmodel.getElement(targetBtn));
+            else if(agent1.getState().worldmodel.getElement(targetBtn) != null)
+                targetButtonsEntities.add(agent1.getState().worldmodel.getElement(targetBtn));
+            else
+                targetButtonsEntities.add(null);
+        }
+
+        for (LabEntity entity: targetButtonsEntities)
+            if (entity == null || !entity.getBooleanProperty("isOn"))
+                return false;
+
+        return true;
     }
 
     int getRewardFromPressingButton(CentralizedState state, String buttonPressed) {
@@ -464,13 +600,12 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
             for (; ; ) {
                 obj = in.readObject();
                 policy.add((CentralizedQTableObj) obj);
-//                System.out.println(obj.toString());
             }
 
         } catch (Exception ignored) {
         }
 
-//        System.out.println();
+
         assert in != null;
         in.close();
 
@@ -478,7 +613,7 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
     }
 
     boolean AlreadyClicked(String buttonPressed){
-       if (this.targetButtonsAlreadyClicked.size() == 0) {
+        if (this.targetButtonsAlreadyClicked.size() == 0) {
         }
         else{
             for (String btn : this.targetButtonsAlreadyClicked)
