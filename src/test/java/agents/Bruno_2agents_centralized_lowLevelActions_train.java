@@ -27,6 +27,7 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
     ArrayList<String> targetButtonsAlreadyClicked;
 
     long episodes = 100_000_001;
+//    long episodes = 1;
 
     double epsilon = 1;
 
@@ -37,7 +38,7 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
 
     int max_steps;
 
-    int early_stop_counter_reset = 5;
+    int early_stop_counter_reset = 3;
     int early_stop_counter = early_stop_counter_reset;
 
     int minimumValidationSteps;
@@ -78,6 +79,7 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
         int w = countApperancesOfWordOnInitialMap("w");
 
         max_steps = ((this.initialMapMatrix.size() * this.initialMapMatrix.get(0).length)-w) * this.actions.length;
+//        max_steps = 10;
         minimumValidationSteps = max_steps;  //Menos porque os agentes tem que conseguir resolver com menos ações dos que as totais possiveis
 
         for (int _episode = 0; _episode < this.episodes; _episode++) {
@@ -130,6 +132,7 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
 //                System.out.println(currentState.toString());
 //                System.out.println("Agent0, " + this.actions[actionAgent0] + ", " + rewardAgent0);
 //                System.out.println("Agent1, " + this.actions[actionAgent1] + ", " + rewardAgent1);
+//                System.out.println("----------------------------------");
 //                System.out.println(Arrays.toString(this.targetButtonsAlreadyClicked.toArray()));
 //                System.out.println(nextState.toString());
 //                System.out.println();
@@ -180,8 +183,8 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
                 if (early_stop_counter == 0)
                     break;
             }
-//            else
-//                System.out.println("Training Episode " + _episode + "/" + this.episodes + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Epsilon = " + this.epsilon);
+            else
+                System.out.println("Training Episode " + _episode + "/" + this.episodes + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Epsilon = " + this.epsilon);
 
 
             if((_episode + 1) % 1000 == 0)
@@ -430,6 +433,8 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
 
     void setUpScenarioMatrix(String scenario_filename) {
         String csvFile = "D:/GitHub/Tese_iv4XR_Pessoal/src/test/resources/levels/bruno_" + scenario_filename + ".csv";
+//        String csvFile = "C:\\Users\\Beatriz Carreirer\\Documents\\Bruno_Programas\\GitHub\\Tese_iv4XR_Pessoal\\src\\test\\resources\\levels\\bruno_" + scenario_filename + ".csv";
+
         String line = "";
         String cvsSplitBy = ",";
 

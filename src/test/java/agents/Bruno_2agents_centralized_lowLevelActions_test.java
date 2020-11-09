@@ -77,8 +77,8 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
         System.out.println(currentState.toString());
 
         int step = 0;
-//        while (!ended) {
-        while (step < 10 && !ended) {
+        while (!ended) {
+//        while (step < 10 && !ended) {
             step++;
             //action Agent0
             actionAgent0 = chooseAction(currentState, 0);
@@ -125,6 +125,8 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
 
     void setUpScenarioMatrix(String scenario_filename) {
         String csvFile = "D:/GitHub/Tese_iv4XR_Pessoal/src/test/resources/levels/bruno_" + scenario_filename + ".csv";
+//        String csvFile = "C:\\Users\\Beatriz Carreirer\\Documents\\Bruno_Programas\\GitHub\\Tese_iv4XR_Pessoal\\src\\test\\resources\\levels\\bruno_" + scenario_filename + ".csv";
+
         String line = "";
         String cvsSplitBy = ",";
 
