@@ -31,7 +31,7 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
 
     double epsilon = 1;
 
-//    int epsilonRate = 1000; //Must be multiple of 10
+    int epsilonRate = 1000; //Must be multiple of 10
 
     float learning_rate = 0.2f;
     float gamma = 0.65f;
@@ -187,14 +187,14 @@ public class Bruno_2agents_centralized_lowLevelActions_train {
                 System.out.println("Training Episode " + _episode + "/" + this.episodes + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Epsilon = " + this.epsilon);
 
 
-            if((_episode + 1) % 1000 == 0)
+            if((_episode + 1) % this.epsilonRate == 0)
                 this.epsilon = 1;
 
             if ((_episode + 1) % 5 == 0){
                 this.validationEpisode = true;
             }
             else {
-                this.epsilon -= 1.0/this.episodes;
+                this.epsilon -= 1.0/this.epsilonRate;
                 this.validationEpisode = false;
             }
 

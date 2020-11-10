@@ -131,8 +131,12 @@ public class Bruno_2agents_MDP_main {
 
 //        lowLevelCentralizedTraining(scenario, targetButtons);
 //        lowLevelCentralizedTesting(scenario, targetButtons, false);
-        lowLevelCentralizedTesting(scenario, targetButtons, true);
+//        lowLevelCentralizedTesting(scenario, targetButtons, true);
 
+         lowLevelIndividualTraining(scenario, targetButtons);
+//        lowLevelIndividualTesting(scenario, targetButtons, false);
+//        lowLevelIndividualTesting(scenario, targetButtons, true);
+        
 //      manualControl(scenario);
 
 //        centralizedTraining(scenario, target1, target2, this.actions, this.singular_actions, this.existing_buttons);
@@ -219,6 +223,13 @@ public class Bruno_2agents_MDP_main {
         Bruno_2agents_centralized_lowLevelActions_train lowLevelActionsCentralized_train = new Bruno_2agents_centralized_lowLevelActions_train();
         lowLevelActionsCentralized_train.create_policy_train(scenario, targetButtons);
         Bruno_2agents_centralized_lowLevelActions_train.close();
+    }
+
+    public void lowLevelIndividualTraining(String scenario, String[] targetButtons) throws Exception {
+        Bruno_2agents_individual_lowLevelActions_train.start();
+        Bruno_2agents_individual_lowLevelActions_train lowLevelActionsIndividual_train = new Bruno_2agents_individual_lowLevelActions_train();
+        lowLevelActionsIndividual_train.create_policy_train(scenario, targetButtons);
+        Bruno_2agents_individual_lowLevelActions_train.close();
     }
 
     public void lowLevelCentralizedTesting(String scenario, String[] targetButtons, boolean useLabrecruits) throws Exception {
