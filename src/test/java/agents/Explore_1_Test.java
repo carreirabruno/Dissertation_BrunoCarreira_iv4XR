@@ -74,7 +74,7 @@ public class Explore_1_Test {
         
     	if(TestSettings.USE_GRAPHICS) {
     		System.out.println("You can drag then game window elsewhere for beter viewing. Then hit RETURN to continue.") ;
-//    		new Scanner(System.in) . nextLine() ;
+    		new Scanner(System.in) . nextLine() ;
     	}
 
         // press play in Unity

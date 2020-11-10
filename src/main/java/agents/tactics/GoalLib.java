@@ -23,6 +23,7 @@ import world.LegacyEntity;
 
 import java.util.ArrayList;
 import java.util.function.Predicate;
+import java.lang.Math;
 
 import static nl.uu.cs.aplib.AplibEDSL.*;
 
@@ -519,9 +520,8 @@ public class GoalLib {
 
         GoalStructure g1 = null;
 
-        Vec3 agent_pos = new Vec3((int) agent.getState().worldmodel.position.x, (int) agent.getState().worldmodel.position.y, (int) agent.getState().worldmodel.position.z);
-
-        Vec3 goalPosition = new Vec3((int) agent_pos.x + 1, (int) agent_pos.y, (int) agent_pos.z);
+        Vec3 agent_pos = new Vec3((int) Math.round(agent.getState().worldmodel.position.x), (int) agent.getState().worldmodel.position.y, (int) Math.round(agent.getState().worldmodel.position.z));
+        Vec3 goalPosition = new Vec3( agent_pos.x + 1, agent_pos.y, agent_pos.z);
 
         Goal goal1 = goal(String.format("Left"))
                 .toSolve((BeliefState belief) -> belief.withinRange(goalPosition));
@@ -529,8 +529,8 @@ public class GoalLib {
         g1 = goal1.withTactic(
                 FIRSTof( //the tactic used to solve the goal
                         TacticLib.navigateTo(goalPosition),//move to the goal position
-                        TacticLib.explore())) //explore if the goal position is unknown
-//                        ABORT()))
+//                        TacticLib.explore())) //explore if the goal position is unknown
+                        ABORT()))
                 .lift();
 
         return SEQ(g1);
@@ -540,17 +540,16 @@ public class GoalLib {
 
         GoalStructure g1 = null;
 
-        Vec3 agent_pos = new Vec3((int) agent.getState().worldmodel.position.x, (int) agent.getState().worldmodel.position.y, (int) agent.getState().worldmodel.position.z);
-
-        Vec3 goalPosition = new Vec3((int) agent_pos.x - 1, (int) agent_pos.y, (int) agent_pos.z);
+        Vec3 agent_pos = new Vec3((int) Math.round(agent.getState().worldmodel.position.x), (int) agent.getState().worldmodel.position.y, (int) Math.round(agent.getState().worldmodel.position.z));
+        Vec3 goalPosition = new Vec3(agent_pos.x - 1, agent_pos.y, agent_pos.z);
 
         Goal goal1 = goal(String.format("Right"))
                 .toSolve((BeliefState belief) -> belief.withinRange(goalPosition));
 
         g1 = goal1.withTactic(
                 FIRSTof( //the tactic used to solve the goal
-                        TacticLib.dynamicNavigateTo("Navigating to a reachable node close to the pos", goalPosition),//move to the goal position
-                        TacticLib.explore())) //explore if the goal position is unknown
+                        TacticLib.navigateTo(goalPosition)))//move to the goal position
+        //                TacticLib.explore(), //explore if the goal position is unknown
 //                        ABORT()))
                 .lift();
 
@@ -560,9 +559,8 @@ public class GoalLib {
     public static GoalStructure Forward(LabRecruitsTestAgent agent) {
         GoalStructure g1 = null;
 
-        Vec3 agent_pos = new Vec3((int) agent.getState().worldmodel.position.x, (int) agent.getState().worldmodel.position.y, (int) agent.getState().worldmodel.position.z);
-        Vec3 goalPosition = new Vec3((int) agent_pos.x, (int) agent_pos.y, (int) agent_pos.z + 1);
-        System.out.println(goalPosition.toString());
+        Vec3 agent_pos = new Vec3((int) Math.round(agent.getState().worldmodel.position.x), (int) agent.getState().worldmodel.position.y, (int) Math.round(agent.getState().worldmodel.position.z));
+        Vec3 goalPosition = new Vec3(agent_pos.x, agent_pos.y, agent_pos.z + 1);
 
         //always true
         Goal goal1 = goal(String.format("Forward"))
@@ -581,9 +579,8 @@ public class GoalLib {
     public static GoalStructure Backward(LabRecruitsTestAgent agent) {
         GoalStructure g1 = null;
 
-        Vec3 agent_pos = new Vec3((int) agent.getState().worldmodel.position.x, (int) agent.getState().worldmodel.position.y, (int) agent.getState().worldmodel.position.z);
-
-        Vec3 goalPosition = new Vec3((int) agent_pos.x, (int) agent_pos.y, (int) agent_pos.z - 1);
+        Vec3 agent_pos = new Vec3((int) Math.round(agent.getState().worldmodel.position.x), (int) agent.getState().worldmodel.position.y, (int) Math.round(agent.getState().worldmodel.position.z));
+        Vec3 goalPosition = new Vec3(agent_pos.x, agent_pos.y, agent_pos.z - 1);
 
         //always true
         Goal goal1 = goal(String.format("Backward"))
@@ -599,13 +596,13 @@ public class GoalLib {
         return SEQ(g1);
     }
 
-    public static GoalStructure interactWithButton(LabRecruitsTestAgent agent, ArrayList<String> button_list) {
+    public static GoalStructure Press(LabRecruitsTestAgent agent, ArrayList<String> existingButtons) {
         GoalStructure g1 = null;
 
         Vec3 goalPosition = null;
         String buttonID = null;
 
-        for (String button : button_list) {
+        for (String button : existingButtons) {
             var e = (LabEntity) agent.getState().worldmodel.getElement(button);
             if (agent.getState().worldmodel.position != null && e != null && agent.getState().withinRange(e.position)) {
                 goalPosition = e.position;
@@ -613,15 +610,18 @@ public class GoalLib {
                 break;
             }
         }
+
         if (goalPosition == null) {
-            Goal goal1 = goal(String.format("Lets Explore"))
+            //always true
+            Goal goal1 = goal(String.format("No button here, lets do nothing"))
                     .toSolve((BeliefState belief) -> true);
 
+            //Set the tactics with which the goals will be solved
             g1 = goal1.withTactic(
                     FIRSTof( //the tactic used to solve the goal
-                            TacticLib.explore(), //explore if the goal position is unknown
                             ABORT()))
                     .lift();
+            return SEQ(g1);
         } else {
             Vec3 finalGoalPosition = goalPosition;
             Goal goal1 = goal(String.format("This entity is in interaction distance: [%s]", buttonID))
@@ -638,17 +638,12 @@ public class GoalLib {
 
             GoalStructure g2 = goal2.withTactic(
                     FIRSTof( //the tactic used to solve the goal
-//                        TacticLib.explore(),
-                            TacticLib.interact(buttonID),// interact with the entity
-                            ABORT())) // observe the objects
+                            TacticLib.interact(buttonID)))// interact with the entity
+//                            ABORT())) // observe the objects
                     .lift();
 
             return SEQ(g1, g2);
-
         }
-
-        return SEQ(g1);
-
     }
 
     public static final float DISTANCE_TO_TRAVEL = 1.0f;
