@@ -105,7 +105,7 @@ public class Bruno_2agents_MDP_main {
 //        String scenario = "scenario1";
 //        String[] targetButtons = new String[]{"button4"};
 
-        String scenario = "scenario2";
+        String scenario = "scenario2_1";
         String[] targetButtons = new String[]{"button4"};
 
 //        String scenario = "scenario4";
@@ -130,10 +130,11 @@ public class Bruno_2agents_MDP_main {
          */
 
 //        lowLevelCentralizedTraining(scenario, targetButtons);
+        hashCentralizedTraining(scenario, targetButtons);
 //        lowLevelCentralizedTesting(scenario, targetButtons, false);
 //        lowLevelCentralizedTesting(scenario, targetButtons, true);
 
-         lowLevelIndividualTraining(scenario, targetButtons);
+//         lowLevelIndividualTraining(scenario, targetButtons);
 //        lowLevelIndividualTesting(scenario, targetButtons, false);
 //        lowLevelIndividualTesting(scenario, targetButtons, true);
         
@@ -223,6 +224,13 @@ public class Bruno_2agents_MDP_main {
         Bruno_2agents_centralized_lowLevelActions_train lowLevelActionsCentralized_train = new Bruno_2agents_centralized_lowLevelActions_train();
         lowLevelActionsCentralized_train.create_policy_train(scenario, targetButtons);
         Bruno_2agents_centralized_lowLevelActions_train.close();
+    }
+
+    public void hashCentralizedTraining(String scenario, String[] targetButtons) throws Exception {
+        Bruno_2agents_centralized_Hash_train.start();
+        Bruno_2agents_centralized_Hash_train HashCentralized_train = new Bruno_2agents_centralized_Hash_train();
+        HashCentralized_train.create_policy_train(scenario, targetButtons);
+        Bruno_2agents_centralized_Hash_train.close();
     }
 
     public void lowLevelIndividualTraining(String scenario, String[] targetButtons) throws Exception {

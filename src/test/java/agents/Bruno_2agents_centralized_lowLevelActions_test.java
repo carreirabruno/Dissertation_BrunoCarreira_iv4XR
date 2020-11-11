@@ -75,6 +75,7 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
         setupCentralizedActions();
 
         if (useLabRecruits) {
+
             var environment = new LabRecruitsEnvironment(new EnvironmentConfig("bruno_" + scenario_filename));
 
             // Create the agent
@@ -87,7 +88,6 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
                     .attachState(new BeliefState())
                     .attachEnvironment(environment);
             agent1.setSamplingInterval(0);
-
 
             // press play in Unity
             if (!environment.startSimulation())
@@ -574,6 +574,7 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
 
     ArrayList<CentralizedQTableObj> getPolicy(String filename) throws IOException {
         ArrayList<CentralizedQTableObj> policy = new ArrayList<CentralizedQTableObj>();
+        System.out.println(filename);
         // read the object from file
         FileInputStream fis = null;
         ObjectInputStream in = null;
@@ -592,6 +593,7 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
 
         assert in != null;
         in.close();
+
 
         return policy;
     }
