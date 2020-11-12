@@ -105,11 +105,12 @@ public class Bruno_2agents_MDP_main {
 //        String scenario = "scenario1";
 //        String[] targetButtons = new String[]{"button4"};
 
-        String scenario = "scenario2_1";
-        String[] targetButtons = new String[]{"button4"};
+//        String scenario = "scenario2_1";
+//        String[] targetButtons = new String[]{"button4"};
 
 //        String scenario = "scenario4";
-//        String[] targetButtons = new String[]{"button5", "button6"};
+        String scenario = "scenario4_2";
+        String[] targetButtons = new String[]{"button5", "button6"};
 
         /*
 //        String target1 = "button4";
@@ -137,8 +138,10 @@ public class Bruno_2agents_MDP_main {
 //         lowLevelIndividualTraining(scenario, targetButtons);
 //        lowLevelIndividualTesting(scenario, targetButtons, false);
 //        lowLevelIndividualTesting(scenario, targetButtons, true);
-        
+
+
 //      manualControl(scenario);
+        /*
 
 //        centralizedTraining(scenario, target1, target2, this.actions, this.singular_actions, this.existing_buttons);
 //        positions = centralizedTesting_positions(scenario, target1, target2, this.actions, this.existing_buttons);
@@ -152,6 +155,8 @@ public class Bruno_2agents_MDP_main {
 //        saveToTXT("C:/Users/bruno/Desktop/Ambiente de Trabalho/" + scenario + "_individual_agent1.txt", positions.object2);
 
 //        comparePolicies(pressedButtons_centralized, pressedButtons_individual);
+
+         */
     }
 
     public void centralizedTraining(String scenario, String target1, String target2, ArrayList<String[]> actions, ArrayList<String> singular_actions, ArrayList<String> existing_buttons) throws Exception {

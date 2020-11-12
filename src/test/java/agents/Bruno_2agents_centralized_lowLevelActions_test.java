@@ -62,7 +62,8 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
 
         this.initialMapMatrix = new ArrayList<String[]>();
         this.connectionButtonsDoors = new ArrayList<String[]>();
-        this.QTable = getPolicy("centralizedLowLevelActions_" + scenario_filename);
+//        this.QTable = getPolicy("centralizedLowLevelActions_" + scenario_filename);
+        this.QTable = getPolicy("centralizedHash_" + scenario_filename);
 
         verifyQable();
 
