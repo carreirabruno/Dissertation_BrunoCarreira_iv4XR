@@ -23,8 +23,6 @@ public class Bruno_2agents_centralized_Hash_train {
     //    ArrayList<CentralizedTransitionObj> TransitionTable;
     LinkedHashMap<Integer, CentralizedTransitionObj> TransitionTable;
 
-    LinkedHashMap<Integer, CentralizedState> initialPositions;
-
 //    ArrayList<CentralizedQTableObj> bestQTableYet;
 
     ArrayList<String> targetButtonsAlreadyClicked;
@@ -61,7 +59,6 @@ public class Bruno_2agents_centralized_Hash_train {
         this.initialMapMatrix = new ArrayList<String[]>();
         this.connectionButtonsDoors = new ArrayList<String[]>();
         this.QTable = new ArrayList<CentralizedQTableObj>();
-        this.initialPositions = new LinkedHashMap<Integer, CentralizedState>();
 
         setUpScenarioMatrix(scenario_filename);
 
@@ -73,20 +70,20 @@ public class Bruno_2agents_centralized_Hash_train {
         this.TransitionTable = new LinkedHashMap<Integer, CentralizedTransitionObj>();
 //        this.TransitionTable = getTransitionTable("centralizedHashTransitionTable_" + scenario_filename);
 
-        saveTransitionTableToFile("centralizedHashTransitionTable_" + scenario_filename);
 
 //        for (int i = 0; i< this.centralizedActions.size(); i++)
 //            System.out.println(i + " " + Arrays.toString(this.centralizedActions.get(i)));
 
         runTraining(1_000_001);
 
+        saveTransitionTableToFile("centralizedHashTransitionTable_" + scenario_filename);
         savePolicyToFile("centralizedHash_" + scenario_filename, this.QTable);
 
     }
 
     void setUpScenarioMatrix(String scenario_filename) {
-        String csvFile = "D:/GitHub/Tese_iv4XR_Pessoal/src/test/resources/levels/bruno_" + scenario_filename + ".csv";
-//        String csvFile = "C:\\Users\\Beatriz Carreirer\\Documents\\Bruno_Programas\\GitHub\\Tese_iv4XR_Pessoal\\src\\test\\resources\\levels\\bruno_" + scenario_filename + ".csv";
+//        String csvFile = "D:/GitHub/Tese_iv4XR_Pessoal/src/test/resources/levels/bruno_" + scenario_filename + ".csv";
+        String csvFile = "C:\\Users\\Beatriz Carreirer\\Documents\\Bruno_Programas\\GitHub\\Tese_iv4XR_Pessoal\\src\\test\\resources\\levels\\bruno_" + scenario_filename + ".csv";
 
         String line = "";
         String cvsSplitBy = ",";
@@ -397,20 +394,13 @@ public class Bruno_2agents_centralized_Hash_train {
         int[] newAgent1Pos = findTruePosInInitialMapMatrix("agent1");
         this.mapMatrix.get(newAgent0Pos[0])[newAgent0Pos[1]] = "f";
         this.mapMatrix.get(newAgent1Pos[0])[newAgent1Pos[1]] = "f";
+        newAgent0Pos = new int[]{r.nextInt(this.mapMatrix.size()), r.nextInt(this.mapMatrix.get(0).length)};
+        newAgent1Pos = new int[]{r.nextInt(this.mapMatrix.size()), r.nextInt(this.mapMatrix.get(0).length)};
 
-        int hash = Objects.hash(newAgent0Pos[0], newAgent0Pos[1], newAgent1Pos[0], newAgent1Pos[1]);
-        while (this.initialPositions.size() != 0 && this.initialPositions.containsKey(hash)) {
+        while (!this.mapMatrix.get(newAgent0Pos[0])[newAgent0Pos[1]].equals("f") || !this.mapMatrix.get(newAgent1Pos[0])[newAgent1Pos[1]].equals("f") || Arrays.equals(newAgent0Pos, newAgent1Pos)) {
             newAgent0Pos = new int[]{r.nextInt(this.mapMatrix.size()), r.nextInt(this.mapMatrix.get(0).length)};
             newAgent1Pos = new int[]{r.nextInt(this.mapMatrix.size()), r.nextInt(this.mapMatrix.get(0).length)};
-
-            while (!this.mapMatrix.get(newAgent0Pos[0])[newAgent0Pos[1]].equals("f") || !this.mapMatrix.get(newAgent1Pos[0])[newAgent1Pos[1]].equals("f") || Arrays.equals(newAgent0Pos, newAgent1Pos)) {
-                newAgent0Pos = new int[]{r.nextInt(this.mapMatrix.size()), r.nextInt(this.mapMatrix.get(0).length)};
-                newAgent1Pos = new int[]{r.nextInt(this.mapMatrix.size()), r.nextInt(this.mapMatrix.get(0).length)};
-            }
-            hash = Objects.hash(newAgent0Pos[0], newAgent0Pos[1], newAgent1Pos[0], newAgent1Pos[1]);
         }
-
-        this.initialPositions.put(hash, new CentralizedState(newAgent0Pos, newAgent1Pos, countApperancesOfWordOnInitialMap("button")));
         this.mapMatrix.get(newAgent0Pos[0])[newAgent0Pos[1]] = "agent0";
         this.mapMatrix.get(newAgent1Pos[0])[newAgent1Pos[1]] = "agent1";
     }
@@ -550,12 +540,24 @@ public class Bruno_2agents_centralized_Hash_train {
         int minimumValidationSteps = max_steps;  //Menos 1 porque os agentes tem que conseguir resolver com menos ações dos que as totais possiveis
 
         for(int _episode = 0; _episode < maxEpisodes; _episode++){
+            if ((_episode + 1) % 10 == 0 && _episode!=0) {
+                this.validationEpisode = true;
+            }
+            else {
+                this.validationEpisode = false;
+            }
+
 //            createCurrentMapMatrix();
             resetMapMatrix();
+
             this.doorsState = new int[countApperancesOfWordOnInitialMap("door")];
 
             CentralizedState nextState = new CentralizedState(findTruePosInCurrentMapMatrix("agent0"), findTruePosInCurrentMapMatrix("agent1"), countApperancesOfWordOnInitialMap("button"));
             CentralizedState currentState = new CentralizedState(nextState);
+
+//            if (this.validationEpisode)
+//                System.out.println(this.QTable.get(0).toString());
+
             int actionAgent0;
             int actionAgent1;
             int rewardAgent0;
@@ -565,11 +567,6 @@ public class Bruno_2agents_centralized_Hash_train {
             RewardRewardStateObject rewardRewardStateObject;
 
             boolean reachedEnd = false;
-
-            if ((_episode + 1) % 10 == 0 && _episode!=0)
-                this.validationEpisode = true;
-            else
-                this.validationEpisode = false;
 
             int step;
             for (step = 0; step < max_steps + 1; step++) {
@@ -610,7 +607,6 @@ public class Bruno_2agents_centralized_Hash_train {
             //Dyna-Q
             if(!this.validationEpisode)
                 runDynaQ(1_000);
-
 
             //Early Stop
             if (this.validationEpisode) {

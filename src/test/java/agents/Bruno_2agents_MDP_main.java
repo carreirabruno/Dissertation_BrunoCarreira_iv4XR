@@ -107,10 +107,14 @@ public class Bruno_2agents_MDP_main {
 
 //        String scenario = "scenario2_1";
 //        String[] targetButtons = new String[]{"button4"};
+        String scenario = "scenario3_1";
+        String[] targetButtons = new String[]{"button3"};
+//        String scenario = "scenario4_1";
+//        String[] targetButtons = new String[]{"button1", "button2", "button3", "button4"};
 
 //        String scenario = "scenario4";
-        String scenario = "scenario4_2";
-        String[] targetButtons = new String[]{"button5", "button6"};
+//        String[] targetButtons = new String[]{"button5", "button6"};
+
 
         /*
 //        String target1 = "button4";
