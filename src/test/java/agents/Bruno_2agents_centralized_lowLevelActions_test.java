@@ -187,8 +187,8 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
                 //action Agent1
                 actionAgent1 = chooseAction(currentState, 1);
 
-//                printInvertedMapMatrix();
-                System.out.println(currentState.toString());
+                printInvertedMapMatrix();
+//                System.out.println(currentState.toString());
                 System.out.println("Agent0, " + this.actions[actionAgent0]);
                 System.out.println("Agent1, " + this.actions[actionAgent1]);
                 System.out.println("-------------------------------");
@@ -440,8 +440,8 @@ public class Bruno_2agents_centralized_lowLevelActions_test {
         }
 
 
-        System.out.println("Reward0 = " + rewardAgent0);
-        System.out.println("Reward1 = " + rewardAgent1);
+//        System.out.println("Reward0 = " + rewardAgent0);
+//        System.out.println("Reward1 = " + rewardAgent1);
 
         return nextState;
     }

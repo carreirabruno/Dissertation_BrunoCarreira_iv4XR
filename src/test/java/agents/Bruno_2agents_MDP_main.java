@@ -105,12 +105,12 @@ public class Bruno_2agents_MDP_main {
 //        String scenario = "scenario1";
 //        String[] targetButtons = new String[]{"button4"};
 
-//        String scenario = "scenario2_1";
-//        String[] targetButtons = new String[]{"button4"};
-        String scenario = "scenario3_1";
-        String[] targetButtons = new String[]{"button3"};
+        String scenario = "scenario2_1";
+        String[] targetButtons = new String[]{"button4"};
+//        String scenario = "scenario3_1";
+//        String[] targetButtons = new String[]{"button3"};
 //        String scenario = "scenario4_1";
-//        String[] targetButtons = new String[]{"button1", "button2", "button3", "button4"};
+//        String[] targetButtons = new String[]{"button3", "button4"};
 
 //        String scenario = "scenario4";
 //        String[] targetButtons = new String[]{"button5", "button6"};
@@ -135,11 +135,12 @@ public class Bruno_2agents_MDP_main {
          */
 
 //        lowLevelCentralizedTraining(scenario, targetButtons);
-        hashCentralizedTraining(scenario, targetButtons);
+//        hashCentralizedTraining(scenario, targetButtons);
 //        lowLevelCentralizedTesting(scenario, targetButtons, false);
 //        lowLevelCentralizedTesting(scenario, targetButtons, true);
 
 //         lowLevelIndividualTraining(scenario, targetButtons);
+        hashIndividualTraining(scenario, targetButtons);
 //        lowLevelIndividualTesting(scenario, targetButtons, false);
 //        lowLevelIndividualTesting(scenario, targetButtons, true);
 
@@ -255,5 +256,13 @@ public class Bruno_2agents_MDP_main {
         lowLevelActionsCentralized_test.test(scenario, targetButtons, useLabrecruits);
         Bruno_2agents_centralized_lowLevelActions_test.close(useLabrecruits);
     }
+
+    public void hashIndividualTraining(String scenario, String[] targetButtons) throws Exception {
+        Bruno_2agents_individual_Hash_train.start();
+        Bruno_2agents_individual_Hash_train HashIndividual_train = new Bruno_2agents_individual_Hash_train();
+        HashIndividual_train.create_policy_train(scenario, targetButtons);
+        Bruno_2agents_individual_Hash_train.close();
+    }
+
 
 }

@@ -538,123 +538,123 @@ public class Bruno_2agents_individual_lowLevelActions_train {
 
 }
 
-class IndividualState implements Serializable {
-
-    int[] agentPos;
-    int[] buttonsState;
-
-    public IndividualState (int[] agent_pos, int numberExistingButtons) {
-        this.agentPos = new int[]{agent_pos[0], agent_pos[1]};
-        this.buttonsState = new int[numberExistingButtons];
-    }
-
-    public IndividualState (IndividualState  state) {
-        this.agentPos = new int[]{state.agentPos[0], state.agentPos[1]};
-        this.buttonsState = new int[state.buttonsState.length];
-        System.arraycopy(state.buttonsState, 0, this.buttonsState, 0, this.buttonsState.length);
-    }
-
-    public IndividualState (int[] agent_pos, int[] _buttonsState) {
-        this.agentPos = new int[]{agent_pos[0], agent_pos[1]};
-        this.buttonsState = new int[_buttonsState.length];
-        System.arraycopy(_buttonsState, 0, this.buttonsState, 0, this.buttonsState.length);
-    }
-
-
-    public void changeAgentPos(int z, int x) {
-        this.agentPos[0] = z;
-        this.agentPos[1] = x;
-    }
-    
-
-    public void changeButtonState(int buttonIndex) {
-        this.buttonsState[buttonIndex - 1] = this.buttonsState[buttonIndex - 1] ^= 1;
-    }
-
-    public boolean equalsTo(IndividualState state){
-        return (Arrays.equals(this.agentPos, state.agentPos) && Arrays.equals(this.buttonsState, state.buttonsState));
-    }
-
-    @Override
-    public String toString() {
-        return "<(" + this.agentPos[1] + ", 0, " + this.agentPos[0] + "), " + Arrays.toString(this.buttonsState) + ">";
-    }
-
-}
-
-class RewardRewardStateStateObject {
-
-    int rewardAgent0;
-    int rewardAgent1;
-    IndividualState stateAgent0;
-    IndividualState stateAgent1;
-
-    public RewardRewardStateStateObject(int rewardAgent0, int rewardAgent1, IndividualState stateAgent0, IndividualState stateAgent1) {
-        this.rewardAgent0 = rewardAgent0;
-        this.rewardAgent1 = rewardAgent1;
-        this.stateAgent0 = new IndividualState(stateAgent0);
-        this.stateAgent1 = new IndividualState(stateAgent1);
-    }
-
-    public RewardRewardStateStateObject(RewardRewardStateStateObject obj) {
-        this.rewardAgent0 = obj.rewardAgent0;
-        this.rewardAgent1 = obj.rewardAgent1;
-        this.stateAgent0 = new IndividualState(obj.stateAgent0);
-        this.stateAgent1 = new IndividualState(obj.stateAgent1);
-    }
-
-
-}
-
-class IndividualQTableObj implements Serializable {
-
-    IndividualState state;
-    float[] actionsQValues = new float[6];  //number of centralized actions
-
-    public IndividualQTableObj(IndividualState state){
-        this.state = new IndividualState(state);
-    }
-
-    public IndividualQTableObj(IndividualQTableObj obj){
-        this.state = new IndividualState(obj.state);
-        actionsQValues = (float[])obj.actionsQValues.clone();
-    }
-
-    public void changeActionQValue(int actionIndex, float value){
-        if(Float.toString(this.actionsQValues[actionIndex] + value).equals("Infinity")) {
-            System.out.println("AQUIIIIIIIIII  " + this.actionsQValues[actionIndex] + "  " + value);
-            System.exit(112);
-        }
-        this.actionsQValues[actionIndex] += value;
-    }
-
-    public boolean equalsTo(IndividualQTableObj obj){
-        return this.state.equalsTo(obj.state);
-    }
-
-    public float maxActionQValue(){
-        float maxValue = Float.NEGATIVE_INFINITY;
-        for(float v: this.actionsQValues)
-            if(v > maxValue)
-                maxValue = v;
-
-        return maxValue;
-    }
-
-    public int maxAction(){
-        int index = -1;
-        double maxValue = Double.NEGATIVE_INFINITY;
-        for(int i = 0; i< this.actionsQValues.length; i++)
-            if(this.actionsQValues[i] > maxValue) {
-                maxValue = this.actionsQValues[i];
-                index = i;
-            }
-        return index;
-    }
-
-    @Override
-    public String toString() {
-        return (state.toString() + Arrays.toString(actionsQValues));
-    }
-
-}
+//class IndividualState implements Serializable {
+//
+//    int[] agentPos;
+//    int[] buttonsState;
+//
+//    public IndividualState (int[] agent_pos, int numberExistingButtons) {
+//        this.agentPos = new int[]{agent_pos[0], agent_pos[1]};
+//        this.buttonsState = new int[numberExistingButtons];
+//    }
+//
+//    public IndividualState (IndividualState  state) {
+//        this.agentPos = new int[]{state.agentPos[0], state.agentPos[1]};
+//        this.buttonsState = new int[state.buttonsState.length];
+//        System.arraycopy(state.buttonsState, 0, this.buttonsState, 0, this.buttonsState.length);
+//    }
+//
+//    public IndividualState (int[] agent_pos, int[] _buttonsState) {
+//        this.agentPos = new int[]{agent_pos[0], agent_pos[1]};
+//        this.buttonsState = new int[_buttonsState.length];
+//        System.arraycopy(_buttonsState, 0, this.buttonsState, 0, this.buttonsState.length);
+//    }
+//
+//
+//    public void changeAgentPos(int z, int x) {
+//        this.agentPos[0] = z;
+//        this.agentPos[1] = x;
+//    }
+//
+//
+//    public void changeButtonState(int buttonIndex) {
+//        this.buttonsState[buttonIndex - 1] = this.buttonsState[buttonIndex - 1] ^= 1;
+//    }
+//
+//    public boolean equalsTo(IndividualState state){
+//        return (Arrays.equals(this.agentPos, state.agentPos) && Arrays.equals(this.buttonsState, state.buttonsState));
+//    }
+//
+//    @Override
+//    public String toString() {
+//        return "<(" + this.agentPos[1] + ", 0, " + this.agentPos[0] + "), " + Arrays.toString(this.buttonsState) + ">";
+//    }
+//
+//}
+//
+//class RewardRewardStateStateObject {
+//
+//    int rewardAgent0;
+//    int rewardAgent1;
+//    IndividualState stateAgent0;
+//    IndividualState stateAgent1;
+//
+//    public RewardRewardStateStateObject(int rewardAgent0, int rewardAgent1, IndividualState stateAgent0, IndividualState stateAgent1) {
+//        this.rewardAgent0 = rewardAgent0;
+//        this.rewardAgent1 = rewardAgent1;
+//        this.stateAgent0 = new IndividualState(stateAgent0);
+//        this.stateAgent1 = new IndividualState(stateAgent1);
+//    }
+//
+//    public RewardRewardStateStateObject(RewardRewardStateStateObject obj) {
+//        this.rewardAgent0 = obj.rewardAgent0;
+//        this.rewardAgent1 = obj.rewardAgent1;
+//        this.stateAgent0 = new IndividualState(obj.stateAgent0);
+//        this.stateAgent1 = new IndividualState(obj.stateAgent1);
+//    }
+//
+//
+//}
+//
+//class IndividualQTableObj implements Serializable {
+//
+//    IndividualState state;
+//    float[] actionsQValues = new float[6];  //number of centralized actions
+//
+//    public IndividualQTableObj(IndividualState state){
+//        this.state = new IndividualState(state);
+//    }
+//
+//    public IndividualQTableObj(IndividualQTableObj obj){
+//        this.state = new IndividualState(obj.state);
+//        actionsQValues = (float[])obj.actionsQValues.clone();
+//    }
+//
+//    public void changeActionQValue(int actionIndex, float value){
+//        if(Float.toString(this.actionsQValues[actionIndex] + value).equals("Infinity")) {
+//            System.out.println("AQUIIIIIIIIII  " + this.actionsQValues[actionIndex] + "  " + value);
+//            System.exit(112);
+//        }
+//        this.actionsQValues[actionIndex] += value;
+//    }
+//
+//    public boolean equalsTo(IndividualQTableObj obj){
+//        return this.state.equalsTo(obj.state);
+//    }
+//
+//    public float maxActionQValue(){
+//        float maxValue = Float.NEGATIVE_INFINITY;
+//        for(float v: this.actionsQValues)
+//            if(v > maxValue)
+//                maxValue = v;
+//
+//        return maxValue;
+//    }
+//
+//    public int maxAction(){
+//        int index = -1;
+//        double maxValue = Double.NEGATIVE_INFINITY;
+//        for(int i = 0; i< this.actionsQValues.length; i++)
+//            if(this.actionsQValues[i] > maxValue) {
+//                maxValue = this.actionsQValues[i];
+//                index = i;
+//            }
+//        return index;
+//    }
+//
+//    @Override
+//    public String toString() {
+//        return (state.toString() + Arrays.toString(actionsQValues));
+//    }
+//
+//}
