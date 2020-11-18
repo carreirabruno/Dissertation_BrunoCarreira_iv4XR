@@ -105,7 +105,7 @@ public class Bruno_2agents_MDP_main {
 //        String scenario = "scenario1";
 //        String[] targetButtons = new String[]{"button4"};
 
-//        String scenario = "scenario2_1";
+//        String scenario = "scenario2_2";
 //        String[] targetButtons = new String[]{"button4"};
 //        String scenario = "scenario3_1";
 //        String[] targetButtons = new String[]{"button3"};
@@ -139,7 +139,7 @@ public class Bruno_2agents_MDP_main {
 //        lowLevelCentralizedTesting(scenario, targetButtons, false);
 
 //         lowLevelIndividualTraining(scenario, targetButtons);
-        hashIndividualTraining(scenario, targetButtons);
+//        hashIndividualTraining(scenario, targetButtons);
         lowLevelIndividualTesting(scenario, targetButtons, false);
 
 //      manualControl(scenario);
