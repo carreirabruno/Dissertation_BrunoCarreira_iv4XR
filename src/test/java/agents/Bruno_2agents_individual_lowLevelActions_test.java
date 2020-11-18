@@ -53,7 +53,7 @@ public class Bruno_2agents_individual_lowLevelActions_test {
     }
 
     /**
-     * Test that the agent can train in this scenario
+     * Test that the agent can test this scenario
      */
     @Test
     public void test(String scenario_filename, String[] targetButtons, boolean useLabRecruits) throws InterruptedException, IOException {
@@ -175,7 +175,6 @@ public class Bruno_2agents_individual_lowLevelActions_test {
 
             while ((!EndendMatrix(currentStateAgent0, currentStateAgent1))) {
 
-                step++;
                 //action Agent0
                 actionAgent0 = chooseAction(currentStateAgent0, this.QTableAgent0);
 
@@ -205,9 +204,7 @@ public class Bruno_2agents_individual_lowLevelActions_test {
 //            System.out.println(getQValueQTable(currentState, -1) + "   asasa" );
 //            System.out.println(getQValueQTable(currentState, -1));
 
-
-                //Check if the target buttons have been clicked
-
+                step++;
             }
             System.out.println("Steps = " + step);
         }

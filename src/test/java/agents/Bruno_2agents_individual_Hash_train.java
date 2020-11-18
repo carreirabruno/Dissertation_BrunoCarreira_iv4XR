@@ -294,6 +294,7 @@ public class Bruno_2agents_individual_Hash_train {
 
     boolean checkIfEndend(IndividualState stateAgent0, IndividualState stateAgent1) {
         int count = targetButtons.length;
+//        System.out.println("count = " + count);
         for (String button : targetButtons) {
             if ((stateAgent0.buttonsState[Integer.parseInt(new String(button.substring(button.length() - 1))) - 1]) == 1 && (stateAgent1.buttonsState[Integer.parseInt(new String(button.substring(button.length() - 1))) - 1]) == 1)
                 count--;
@@ -502,7 +503,7 @@ public class Bruno_2agents_individual_Hash_train {
         int w = countApperancesOfWordOnInitialMap("w");
 
         int max_steps = ((this.initialMapMatrix.size() * this.initialMapMatrix.get(0).length) - w) * this.actions.length;
-//        max_steps = 5;
+//        max_steps = 100;
         int minimumValidationSteps = max_steps;  //Menos 1 porque os agentes tem que conseguir resolver com menos ações dos que as totais possiveis
 
         for(int _episode = 0; _episode < maxEpisodes; _episode++) {
@@ -532,7 +533,7 @@ public class Bruno_2agents_individual_Hash_train {
             boolean reachedEnd = false;
 
             int step;
-            for (step = 0; step < max_steps + 1; step++) {
+            for (step = 0; step < max_steps; step++) {
 
                 //action Agent0
                 actionAgent0 = chooseAction(currentStateAgent0, 0, this.QTableAgent0);
@@ -548,23 +549,26 @@ public class Bruno_2agents_individual_Hash_train {
                 nextStateAgent1 = rewardRewardStateStateObject.stateAgent1;
 
 //                //Update Q Table
-//                if (!this.validationEpisode) {
+                if (!this.validationEpisode) {
                     updateQTable(currentStateAgent0, actionAgent0, rewardAgent0, nextStateAgent0, this.QTableAgent0);
                     updateQTable(currentStateAgent1, actionAgent1, rewardAgent1, nextStateAgent1, this.QTableAgent1);
 
                     //Update Transition table
                     updateTransitionTable(currentStateAgent0, actionAgent0, rewardAgent0, nextStateAgent0);
                     updateTransitionTable(currentStateAgent1, actionAgent1, rewardAgent1, nextStateAgent1);
-//                }
+                }
 
 //                System.out.println(currentStateAgent0.toString() + " " + this.actions[actionAgent0] + " " + rewardAgent0 + " " + nextStateAgent0.toString());
-//                System.out.println(currentStateAgent1.toString() + " " + this.actions[actionAgent1] + " " + rewardAgent1 + " " + nextStateAgent1.toString());
-//                printInvertedMapMatrix();
+//                System.out.println(currentStateAgent1.toString() + " " + this.actions[actionAgent1] + " " +
+//                rewardAgent1 + " " + nextStateAgent1.toString());
+////                printInvertedMapMatrix();
 //                System.out.println("----------------------------");
 
 
                 //Check if the target buttons have been clicked
                 if (checkIfEndend(nextStateAgent0, nextStateAgent1)) {
+//                    System.out.println(nextStateAgent0.toString() + " " + this.actions[actionAgent0]);
+//                    System.out.println(nextStateAgent1.toString() + " " + this.actions[actionAgent1] );
                     reachedEnd = true;
                     break;
                 }
@@ -593,13 +597,13 @@ public class Bruno_2agents_individual_Hash_train {
             //Early Stop
             if (this.validationEpisode) {
 
-                if (step == minimumValidationSteps)
+                if (step < max_steps && step == minimumValidationSteps)
                     early_stop_counter--;
                 else if (step < minimumValidationSteps)
                     minimumValidationSteps = step;
                 else {
                     early_stop_counter = early_stop_counter_reset;
-                    minimumValidationSteps = max_steps;
+//                    minimumValidationSteps = max_steps;
                 }
 
                 System.out.println("Validation Episode " + _episode + "/" + (maxEpisodes-1) + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Best validations steps = " + minimumValidationSteps + " | Early Stop Counter = " + early_stop_counter);
