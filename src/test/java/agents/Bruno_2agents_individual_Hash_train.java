@@ -31,7 +31,7 @@ public class Bruno_2agents_individual_Hash_train {
     float learning_rate = 0.2f;
     float gamma = 0.65f;
 
-    int early_stop_counter_reset = 3;
+    int early_stop_counter_reset = 5;
     int early_stop_counter = early_stop_counter_reset;
 
     boolean validationEpisode = false;
@@ -64,7 +64,7 @@ public class Bruno_2agents_individual_Hash_train {
 
         this.TransitionTable = new LinkedHashMap<Integer, IndividualTransitionObj>();
 
-        runTraining(1_000_001);
+        runTraining(1_000_000);
 
         saveTransitionTableToFile("individualHashTransitionTable_" + scenario_filename);
         savePolicyToFile("individualHash_" + scenario_filename + "_agent0", this.QTableAgent0);
@@ -219,19 +219,18 @@ public class Bruno_2agents_individual_Hash_train {
     }
 
     RewardRewardStateStateObject actOnMap(IndividualState currentStateAgent0, int actionAgent0, IndividualState currentStateAgent1, int actionAgent1) {
+        int[] newPos;
+        //Agent0
         IndividualState nextStateAgent0 = new IndividualState(currentStateAgent0);
         int rewardAgent0 = 0;
-        IndividualState nextStateAgent1 = new IndividualState(currentStateAgent1);
-        int rewardAgent1 = 0;
-        int[] newPos;
 
-        //Agent0
         if (this.actions[actionAgent0].equals("Press")) {
             if (this.mapMatrix.get(nextStateAgent0.agentPos[0])[nextStateAgent0.agentPos[1]].contains("button")) {
                 String buttonToClick = new String(this.mapMatrix.get(nextStateAgent0.agentPos[0])[nextStateAgent0.agentPos[1]].substring(0, 7));
                 nextStateAgent0.changeButtonState(Integer.parseInt(buttonToClick.substring(buttonToClick.length() - 1)));
                 rewardAgent0 = getRewardFromPressingButton(buttonToClick);
                 openCloseDoor(buttonToClick);
+
             } else
                 rewardAgent0--;
         } else {
@@ -253,12 +252,17 @@ public class Bruno_2agents_individual_Hash_train {
         }
 
         //Agent1
+        IndividualState nextStateAgent1 = new IndividualState(currentStateAgent1);
+        nextStateAgent1.copyAllButtonsState(nextStateAgent0.buttonsState);
+        int rewardAgent1 = 0;
+
         if (this.actions[actionAgent1].equals("Press")) {
             if (mapMatrix.get(nextStateAgent1.agentPos[0])[nextStateAgent1.agentPos[1]].contains("button")) {
                 String buttonToClick = new String(this.mapMatrix.get(nextStateAgent1.agentPos[0])[nextStateAgent1.agentPos[1]].substring(0, 7));
                 nextStateAgent1.changeButtonState(Integer.parseInt(buttonToClick.substring(buttonToClick.length() - 1)));
                 rewardAgent1 = getRewardFromPressingButton(buttonToClick);
                 openCloseDoor(buttonToClick);
+
             } else
                 rewardAgent1--;
         } else {
@@ -278,6 +282,8 @@ public class Bruno_2agents_individual_Hash_train {
             }
             rewardAgent1--;
         }
+
+        nextStateAgent0.copyAllButtonsState(nextStateAgent1.buttonsState);
 
         return new RewardRewardStateStateObject(rewardAgent0, rewardAgent1, nextStateAgent0, nextStateAgent1);
     }
@@ -499,11 +505,10 @@ public class Bruno_2agents_individual_Hash_train {
 //        max_steps = 5;
         int minimumValidationSteps = max_steps;  //Menos 1 porque os agentes tem que conseguir resolver com menos ações dos que as totais possiveis
 
-        for(int _episode = 0; _episode < maxEpisodes; _episode++){
-            if ((_episode + 1) % 10 == 0 && _episode!=0) {
+        for(int _episode = 0; _episode < maxEpisodes; _episode++) {
+            if ((_episode + 1) % 10 == 0 && _episode != 0) {
                 this.validationEpisode = true;
-            }
-            else {
+            } else {
                 this.validationEpisode = false;
             }
 
@@ -542,15 +547,15 @@ public class Bruno_2agents_individual_Hash_train {
                 nextStateAgent0 = rewardRewardStateStateObject.stateAgent0;
                 nextStateAgent1 = rewardRewardStateStateObject.stateAgent1;
 
-                //Update Q Table
-                if (!this.validationEpisode) {
+//                //Update Q Table
+//                if (!this.validationEpisode) {
                     updateQTable(currentStateAgent0, actionAgent0, rewardAgent0, nextStateAgent0, this.QTableAgent0);
                     updateQTable(currentStateAgent1, actionAgent1, rewardAgent1, nextStateAgent1, this.QTableAgent1);
 
                     //Update Transition table
                     updateTransitionTable(currentStateAgent0, actionAgent0, rewardAgent0, nextStateAgent0);
                     updateTransitionTable(currentStateAgent1, actionAgent1, rewardAgent1, nextStateAgent1);
-                }
+//                }
 
 //                System.out.println(currentStateAgent0.toString() + " " + this.actions[actionAgent0] + " " + rewardAgent0 + " " + nextStateAgent0.toString());
 //                System.out.println(currentStateAgent1.toString() + " " + this.actions[actionAgent1] + " " + rewardAgent1 + " " + nextStateAgent1.toString());
@@ -570,8 +575,14 @@ public class Bruno_2agents_individual_Hash_train {
             }
 
             //Dyna-Q
-            if(!this.validationEpisode)
+            if (!this.validationEpisode)
                 runDynaQ(1000);
+
+            if (_episode % 1000 == 0 && _episode != 0) {
+                printQTable(this.QTableAgent0);
+                System.out.println("-------------");
+                printQTable(this.QTableAgent1);
+            }
 
 //            printQTable(this.QTableAgent0);
 //            System.out.println();
@@ -588,16 +599,16 @@ public class Bruno_2agents_individual_Hash_train {
                     minimumValidationSteps = step;
                 else {
                     early_stop_counter = early_stop_counter_reset;
-//                    minimumValidationSteps = max_steps;
+                    minimumValidationSteps = max_steps;
                 }
 
-                System.out.println("Validation Episode " + _episode + "/" + maxEpisodes + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Best validations steps = " + minimumValidationSteps + " | Early Stop Counter = " + early_stop_counter);
+                System.out.println("Validation Episode " + _episode + "/" + (maxEpisodes-1) + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Best validations steps = " + minimumValidationSteps + " | Early Stop Counter = " + early_stop_counter);
 
                 if (early_stop_counter == 0)
                     break;
             }
 //            else
-//                System.out.println("Training Episode " + _episode + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Transition Size = " + this.TransitionTable.size());
+//                System.out.println("Training Episode " + _episode + " done | Reached end = " + reachedEnd + " | #Steps = " + step);
         }
     }
 
@@ -697,6 +708,11 @@ class IndividualState implements Serializable {
     
     public void changeButtonState(int buttonIndex) {
         this.buttonsState[buttonIndex - 1] = this.buttonsState[buttonIndex - 1] ^= 1;
+    }
+
+    public void copyAllButtonsState(int[] newButtonsState) {
+        for(int i = 0; i < this.buttonsState.length; i++)
+            this.buttonsState[i] = newButtonsState[i];
     }
 
     public boolean equalsTo(IndividualState state){

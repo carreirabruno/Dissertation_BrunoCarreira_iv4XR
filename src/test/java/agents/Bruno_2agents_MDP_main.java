@@ -137,12 +137,10 @@ public class Bruno_2agents_MDP_main {
 //        lowLevelCentralizedTraining(scenario, targetButtons);
 //        hashCentralizedTraining(scenario, targetButtons);
 //        lowLevelCentralizedTesting(scenario, targetButtons, false);
-//        lowLevelCentralizedTesting(scenario, targetButtons, true);
 
 //         lowLevelIndividualTraining(scenario, targetButtons);
         hashIndividualTraining(scenario, targetButtons);
 //        lowLevelIndividualTesting(scenario, targetButtons, false);
-//        lowLevelIndividualTesting(scenario, targetButtons, true);
 
 
 //      manualControl(scenario);
@@ -262,6 +260,13 @@ public class Bruno_2agents_MDP_main {
         Bruno_2agents_individual_Hash_train HashIndividual_train = new Bruno_2agents_individual_Hash_train();
         HashIndividual_train.create_policy_train(scenario, targetButtons);
         Bruno_2agents_individual_Hash_train.close();
+    }
+
+    public void lowLevelIndividualTesting(String scenario, String[] targetButtons, boolean useLabrecruits) throws Exception {
+        Bruno_2agents_individual_lowLevelActions_test.start(useLabrecruits);
+        Bruno_2agents_individual_lowLevelActions_test lowLevelActionsIndividual_test = new Bruno_2agents_individual_lowLevelActions_test();
+        lowLevelActionsIndividual_test.test(scenario, targetButtons, useLabrecruits);
+        Bruno_2agents_individual_lowLevelActions_test.close(useLabrecruits);
     }
 
 
