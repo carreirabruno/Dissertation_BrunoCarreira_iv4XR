@@ -63,7 +63,6 @@ public class Bruno_2agents_centralized_Hash_train {
         setUpScenarioMatrix(scenario_filename);
 
         this.targetButtons = targetButtons;
-        this.targetButtonsAlreadyClicked = new ArrayList<String>();
         this.actions = new String[]{"Nothing", "Up", "Down", "Left", "Right", "Press"};
         setupCentralizedActions();
 
@@ -71,12 +70,11 @@ public class Bruno_2agents_centralized_Hash_train {
 //        this.TransitionTable = getTransitionTable("centralizedHashTransitionTable_" + scenario_filename);
 
 
-//        for (int i = 0; i< this.centralizedActions.size(); i++)
-//            System.out.println(i + " " + Arrays.toString(this.centralizedActions.get(i)));
+        runTraining();
+//        runCreateTransitionTable();
+//        runTrainingDynaQ();
 
-        runTraining(1_000_001);
-
-        saveTransitionTableToFile("centralizedHashTransitionTable_" + scenario_filename);
+//        saveTransitionTableToFile("centralizedHashTransitionTable_" + scenario_filename);
         savePolicyToFile("centralizedHash_" + scenario_filename, this.QTable);
 
     }
@@ -508,8 +506,10 @@ public class Bruno_2agents_centralized_Hash_train {
 
     void updateTransitionTable(CentralizedState currentState, int action, int reward, CentralizedState nextState) {
         String currentStateHash = "" + currentState.agent0Pos[0] + currentState.agent0Pos[1] + currentState.agent1Pos[0] + currentState.agent1Pos[1];
+
         for (int btn: currentState.buttonsState)
             currentStateHash += "" + btn;
+
         currentStateHash += "" + action;
         int hash = Objects.hash(currentStateHash);
 
@@ -533,30 +533,24 @@ public class Bruno_2agents_centralized_Hash_train {
         }
     }
 
-    void runTraining(long maxEpisodes){
+    void runTraining(){
         int w = countApperancesOfWordOnInitialMap("w");
 
         int max_steps = ((this.initialMapMatrix.size() * this.initialMapMatrix.get(0).length) - w) * this.actions.length;
-        int minimumValidationSteps = max_steps;  //Menos 1 porque os agentes tem que conseguir resolver com menos ações dos que as totais possiveis
+        int minimumValidationSteps = max_steps;
 
-        for(int _episode = 0; _episode < maxEpisodes; _episode++){
-            if ((_episode + 1) % 10 == 0 && _episode!=0) {
-                this.validationEpisode = true;
-            }
-            else {
-                this.validationEpisode = false;
-            }
+        int _episode = 0;
+        while(early_stop_counter >= 0){
+            _episode ++;
+            this.validationEpisode = (_episode) % 10 == 0;
 
-//            createCurrentMapMatrix();
             resetMapMatrix();
 
             this.doorsState = new int[countApperancesOfWordOnInitialMap("door")];
+            this.targetButtonsAlreadyClicked = new ArrayList<String>();
 
             CentralizedState nextState = new CentralizedState(findTruePosInCurrentMapMatrix("agent0"), findTruePosInCurrentMapMatrix("agent1"), countApperancesOfWordOnInitialMap("button"));
             CentralizedState currentState = new CentralizedState(nextState);
-
-//            if (this.validationEpisode)
-//                System.out.println(this.QTable.get(0).toString());
 
             int actionAgent0;
             int actionAgent1;
@@ -585,14 +579,14 @@ public class Bruno_2agents_centralized_Hash_train {
                 reward = rewardAgent0 + rewardAgent1;
 
                 //Update Q Table
-                if (!this.validationEpisode) {
+//                if (!this.validationEpisode) {
                     action = getCentralizedAction(actionAgent0, actionAgent1);
 
-                    updateQTable(currentState, action, reward, nextState);
+//                    updateQTable(currentState, action, reward, nextState);
 
                     //Update Transition table
                     updateTransitionTable(currentState, action, reward, nextState);
-                }
+//                }
 
                 //Check if the target buttons have been clicked
                 if (checkIfEndend(nextState)) {
@@ -605,27 +599,185 @@ public class Bruno_2agents_centralized_Hash_train {
             }
 
             //Dyna-Q
-            if(!this.validationEpisode)
-                runDynaQ(1_000);
+//            if(!this.validationEpisode)
+//                runDynaQ(1_000);
 
             //Early Stop
             if (this.validationEpisode) {
 
-                if (step == minimumValidationSteps)
+                if (step < max_steps && step == minimumValidationSteps)
                     early_stop_counter--;
                 else if (step < minimumValidationSteps)
                     minimumValidationSteps = step;
                 else
                     early_stop_counter = early_stop_counter_reset;
 
-                System.out.println("Validation Episode " + _episode + "/" + maxEpisodes + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Best validations steps = " + minimumValidationSteps + " | Early Stop Counter = " + early_stop_counter);
+                System.out.println("Validation Episode " + _episode + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Best validations steps = " + minimumValidationSteps + " | Early Stop Counter = " + early_stop_counter);
 
                 if (early_stop_counter == 0)
                     break;
             }
 //            else
 //                System.out.println("Training Episode " + _episode + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Transition Size = " + this.TransitionTable.size());
+
         }
+
+    }
+
+    void runTrainingDynaQ(){
+        int w = countApperancesOfWordOnInitialMap("w");
+
+        int max_steps = ((this.initialMapMatrix.size() * this.initialMapMatrix.get(0).length) - w) * this.actions.length;
+        int minimumValidationSteps = max_steps;
+
+        int episode = 0;
+
+        while(this.early_stop_counter > 0){
+            if ((episode) % 10 == 0 && episode != 0)
+                this.validationEpisode = true;
+            else
+                this.validationEpisode = false;
+
+            if (this.validationEpisode) {
+                resetMapMatrix();
+
+                this.doorsState = new int[countApperancesOfWordOnInitialMap("door")];
+
+                CentralizedState nextState = new CentralizedState(findTruePosInCurrentMapMatrix("agent0"), findTruePosInCurrentMapMatrix("agent1"), countApperancesOfWordOnInitialMap("button"));
+                CentralizedState currentState = new CentralizedState(nextState);
+
+                int actionAgent0;
+                int actionAgent1;
+                int rewardAgent0;
+                int rewardAgent1;
+                int reward;
+                int action;
+                RewardRewardStateObject rewardRewardStateObject;
+
+                boolean reachedEnd = false;
+
+                int step;
+                for (step = 0; step < max_steps + 1; step++) {
+
+                    //action Agent0
+                    actionAgent0 = chooseAction(currentState, 0);
+
+                    //action Agent1
+                    actionAgent1 = chooseAction(currentState, 1);
+
+                    //Act on map, get rewards and nextState
+                    rewardRewardStateObject = new RewardRewardStateObject(actOnMap(currentState, actionAgent0, actionAgent1));
+                    rewardAgent0 = rewardRewardStateObject.rewardAgent0;
+                    rewardAgent1 = rewardRewardStateObject.rewardAgent1;
+                    nextState = rewardRewardStateObject.state;
+                    reward = rewardAgent0 + rewardAgent1;
+                    action = getCentralizedAction(actionAgent0, actionAgent1);
+
+                    //Update Q Table
+                    updateQTable(currentState, action, reward, nextState);
+
+                    //Check if the target buttons have been clicked
+                    if (checkIfEndend(nextState)) {
+                        reachedEnd = true;
+                        break;
+                    }
+
+                    //Set current State
+                    currentState = new CentralizedState(nextState);
+                }
+
+                //Early Stop
+                if (step < max_steps && step == minimumValidationSteps)
+                    early_stop_counter--;
+                else if (step < minimumValidationSteps)
+                    minimumValidationSteps = step;
+                else
+                    early_stop_counter = early_stop_counter_reset;
+
+                System.out.println("Validation Episode " + episode + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Best validations steps = " + minimumValidationSteps + " | Early Stop Counter = " + early_stop_counter);
+
+            }else
+                runDynaQ(10000);
+
+            episode++;
+
+        }
+    }
+
+    void runCreateTransitionTable(){
+        int w = countApperancesOfWordOnInitialMap("w");
+
+        int max_steps = ((this.initialMapMatrix.size() * this.initialMapMatrix.get(0).length) - w) * this.actions.length;
+
+        int sameSize = 100;
+        int maxTransitionSize = 0;
+
+        int episode = 0;
+
+        while (sameSize > 0){
+            createCurrentMapMatrix();
+
+            this.doorsState = new int[countApperancesOfWordOnInitialMap("door")];
+
+            CentralizedState nextState = new CentralizedState(findTruePosInCurrentMapMatrix("agent0"), findTruePosInCurrentMapMatrix("agent1"), countApperancesOfWordOnInitialMap("button"));
+            CentralizedState currentState = new CentralizedState(nextState);
+
+            int actionAgent0;
+            int actionAgent1;
+            int rewardAgent0;
+            int rewardAgent1;
+            int reward;
+            int action;
+            RewardRewardStateObject rewardRewardStateObject;
+
+            boolean reachedEnd = false;
+
+            int step;
+            for (step = 0; step < max_steps + 1; step++) {
+
+                //action Agent0
+                actionAgent0 = chooseAction(currentState, 0);
+
+                //action Agent1
+                actionAgent1 = chooseAction(currentState, 1);
+
+                //Act on map, get rewards and nextState
+                rewardRewardStateObject = new RewardRewardStateObject(actOnMap(currentState, actionAgent0, actionAgent1));
+                rewardAgent0 = rewardRewardStateObject.rewardAgent0;
+                rewardAgent1 = rewardRewardStateObject.rewardAgent1;
+                nextState = rewardRewardStateObject.state;
+                reward = rewardAgent0 + rewardAgent1;
+
+                action = getCentralizedAction(actionAgent0, actionAgent1);
+
+                //Update Transition table
+                updateTransitionTable(currentState, action, reward, nextState);
+
+                //Check if the target buttons have been clicked
+                if (checkIfEndend(nextState)) {
+                    reachedEnd = true;
+                    break;
+                }
+
+                //Set current State
+                currentState = new CentralizedState(nextState);
+            }
+                episode++;
+
+            if (episode %1000 == 0)
+                System.out.println("Training Episode " + episode + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Transition Size = " + this.TransitionTable.size());
+
+
+            if(this.TransitionTable.size() == maxTransitionSize)
+                sameSize --;
+            else if (this.TransitionTable.size() > maxTransitionSize) {
+                maxTransitionSize = this.TransitionTable.size();
+                sameSize = 100;
+            }
+
+        }
+
+        System.out.println("FINISHED TRANSITION");
     }
 
     void saveTransitionTableToFile(String filename) {
@@ -664,6 +816,23 @@ public class Bruno_2agents_centralized_Hash_train {
         }
 
         return table;
+    }
+
+    void verifyTransitionTable() {
+
+        for (CentralizedTransitionObj obj1 : this.TransitionTable.values()){
+            int count = 0;
+            for (CentralizedTransitionObj obj2 : this.TransitionTable.values()) {
+                if (obj1.currentState.equalsTo(obj2.currentState) && obj1.action==obj2.action && obj1.reward==obj2.reward && obj1.nextState.equalsTo(obj2.nextState))
+                    count++;
+                if (count>1) {
+                    System.out.println(obj1.toString());
+                    System.out.println(obj2.toString());
+                    System.exit(400);
+                }
+            }
+        }
+
     }
 
 }

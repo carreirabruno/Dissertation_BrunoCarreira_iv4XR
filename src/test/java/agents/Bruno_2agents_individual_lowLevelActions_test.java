@@ -69,6 +69,9 @@ public class Bruno_2agents_individual_lowLevelActions_test {
 
         setUpScenarioMatrix(scenario_filename);
 
+        printQTable(this.QTableAgent0);
+        System.exit(123);
+
         this.targetButtons = targetButtons;
         this.targetButtonsAlreadyClicked = new ArrayList<String>();
         this.existingButtons = getAllExistingButtons();

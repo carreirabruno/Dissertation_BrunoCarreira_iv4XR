@@ -105,12 +105,18 @@ public class Bruno_2agents_MDP_main {
 //        String scenario = "scenario1";
 //        String[] targetButtons = new String[]{"button4"};
 
-//        String scenario = "scenario2_2";
-//        String[] targetButtons = new String[]{"button4"};
+        String scenario = "scenario2_2";
+        String[] targetButtons = new String[]{"button4"};
+
+        hashHash(true, true, scenario, targetButtons);
+
+//        manualControl(scenario);
+
+
 //        String scenario = "scenario3_1";
 //        String[] targetButtons = new String[]{"button3"};
-        String scenario = "scenario4_2";
-        String[] targetButtons = new String[]{"button3", "button4"};
+//        String scenario = "scenario4_2";
+//        String[] targetButtons = new String[]{"button3", "button4"};
 
 //        String scenario = "scenario4";
 //        String[] targetButtons = new String[]{"button5", "button6"};
@@ -140,9 +146,8 @@ public class Bruno_2agents_MDP_main {
 
 //         lowLevelIndividualTraining(scenario, targetButtons);
 //        hashIndividualTraining(scenario, targetButtons);
-        lowLevelIndividualTesting(scenario, targetButtons, false);
+//        lowLevelIndividualTesting(scenario, targetButtons, false);
 
-//      manualControl(scenario);
 
         /*
 
@@ -241,6 +246,15 @@ public class Bruno_2agents_MDP_main {
         Bruno_2agents_centralized_Hash_train.close();
     }
 
+    public void hashHash(boolean centralized, boolean train, String scenario, String[] targetButtons) throws Exception {
+        if (centralized) {
+            Bruno_2agents_centralized_HashHash.start();
+            Bruno_2agents_centralized_HashHash hashHashCentralized = new Bruno_2agents_centralized_HashHash();
+            hashHashCentralized.run(train, scenario, targetButtons);
+            Bruno_2agents_centralized_HashHash.close();
+        }
+    }
+
     public void lowLevelIndividualTraining(String scenario, String[] targetButtons) throws Exception {
         Bruno_2agents_individual_lowLevelActions_train.start();
         Bruno_2agents_individual_lowLevelActions_train lowLevelActionsIndividual_train = new Bruno_2agents_individual_lowLevelActions_train();
@@ -268,6 +282,5 @@ public class Bruno_2agents_MDP_main {
         lowLevelActionsIndividual_test.test(scenario, targetButtons, useLabrecruits);
         Bruno_2agents_individual_lowLevelActions_test.close(useLabrecruits);
     }
-
 
 }

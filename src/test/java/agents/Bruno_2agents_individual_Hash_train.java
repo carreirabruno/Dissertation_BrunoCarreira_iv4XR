@@ -31,7 +31,7 @@ public class Bruno_2agents_individual_Hash_train {
     float learning_rate = 0.2f;
     float gamma = 0.65f;
 
-    int early_stop_counter_reset = 5;
+    int early_stop_counter_reset = 3;
     int early_stop_counter = early_stop_counter_reset;
 
     boolean validationEpisode = false;
@@ -64,7 +64,7 @@ public class Bruno_2agents_individual_Hash_train {
 
         this.TransitionTable = new LinkedHashMap<Integer, IndividualTransitionObj>();
 
-        runTraining(1_000_000);
+        runTraining(5_000);
 
         saveTransitionTableToFile("individualHashTransitionTable_" + scenario_filename);
         savePolicyToFile("individualHash_" + scenario_filename + "_agent0", this.QTableAgent0);
@@ -503,15 +503,13 @@ public class Bruno_2agents_individual_Hash_train {
         int w = countApperancesOfWordOnInitialMap("w");
 
         int max_steps = ((this.initialMapMatrix.size() * this.initialMapMatrix.get(0).length) - w) * this.actions.length;
-//        max_steps = 100;
-        int minimumValidationSteps = max_steps;  //Menos 1 porque os agentes tem que conseguir resolver com menos ações dos que as totais possiveis
+        int minimumValidationSteps = max_steps;
 
         for(int _episode = 0; _episode < maxEpisodes; _episode++) {
-            if ((_episode + 1) % 10 == 0 && _episode != 0) {
+            if ((_episode + 1) % 10 == 0 && _episode != 0)
                 this.validationEpisode = true;
-            } else {
+            else
                 this.validationEpisode = false;
-            }
 
 //            createCurrentMapMatrix();
             resetMapMatrix();
@@ -588,12 +586,6 @@ public class Bruno_2agents_individual_Hash_train {
                 printQTable(this.QTableAgent1);
             }
 
-//            printQTable(this.QTableAgent0);
-//            System.out.println();
-//            printTransitionTable(this.TransitionTable);
-//            System.out.println();
-//            printQTable(this.QTableAgent1);
-
             //Early Stop
             if (this.validationEpisode) {
 
@@ -603,7 +595,7 @@ public class Bruno_2agents_individual_Hash_train {
                     minimumValidationSteps = step;
                 else {
                     early_stop_counter = early_stop_counter_reset;
-//                    minimumValidationSteps = max_steps;
+                    minimumValidationSteps = max_steps;
                 }
 
                 System.out.println("Validation Episode " + _episode + "/" + (maxEpisodes-1) + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Best validations steps = " + minimumValidationSteps + " | Early Stop Counter = " + early_stop_counter);
