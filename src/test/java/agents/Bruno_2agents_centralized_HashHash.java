@@ -21,7 +21,7 @@ public class Bruno_2agents_centralized_HashHash {
 
     LinkedHashMap<Integer, DoorCentralizedQTableObj> QTable;
 
-    LinkedHashMap<Integer, CentralizedTransitionObj> TransitionTable;
+    LinkedHashMap<Integer, DoorCentralizedTransitionObj> TransitionTable;
 
     ArrayList<String> targetButtonsAlreadyClicked;
 
@@ -55,7 +55,7 @@ public class Bruno_2agents_centralized_HashHash {
 
         if (train) {
             this.QTable = new LinkedHashMap<Integer, DoorCentralizedQTableObj>();
-            this.TransitionTable = new LinkedHashMap<Integer, CentralizedTransitionObj>();
+            this.TransitionTable = new LinkedHashMap<Integer, DoorCentralizedTransitionObj>();
 
             runTraining();
 
@@ -126,15 +126,11 @@ public class Bruno_2agents_centralized_HashHash {
                 reward = rewardAgent0 + rewardAgent1;
 
 
-
                 //Update Q Table
                 updateQTable(currentState, action, reward, nextState);
 
-
                 //Update Transition table
-//                updateTransitionTable(currentState, action, reward, nextState);
-
-
+                updateTransitionTable(currentState, action, reward, nextState);
 
                 //Set new currentState
                 currentState = new DoorCentralizedState(nextState);
@@ -144,11 +140,7 @@ public class Bruno_2agents_centralized_HashHash {
                 System.out.println("--------------------");
 
             //Dyna-Q
-//            runDynaQ(max_steps);
-
-
-
-
+            runDynaQ(max_steps);
 
             //Early Stop
             if (step < minimumValidationSteps)
@@ -170,8 +162,6 @@ public class Bruno_2agents_centralized_HashHash {
 
 
         }
-
-//        printQTable();
 
     }
 
@@ -302,7 +292,7 @@ public class Bruno_2agents_centralized_HashHash {
     }
 
     void printTransitionTable() {
-        for (CentralizedTransitionObj a : this.TransitionTable.values())
+        for (DoorCentralizedTransitionObj a : this.TransitionTable.values())
             System.out.println(a.toString());
         System.out.println();
     }
@@ -600,34 +590,34 @@ public class Bruno_2agents_centralized_HashHash {
                 System.out.println("Best Action = " + Arrays.toString(this.centralizedActions.get(obj.maxAction())));
     }
 
-    void updateTransitionTable(CentralizedState currentState, int action, int reward, CentralizedState nextState) {
+    void updateTransitionTable(DoorCentralizedState currentState, int action, int reward, DoorCentralizedState nextState) {
         String currentStateHash = "" + currentState.agent0Pos[0] + currentState.agent0Pos[1] + currentState.agent1Pos[0] + currentState.agent1Pos[1];
 
-        for (int btn : currentState.buttonsState)
-            currentStateHash += "" + btn;
+        for (int d : currentState.doorsState)
+            currentStateHash += "" + d;
 
         currentStateHash += "" + action;
         int hash = Objects.hash(currentStateHash);
 
         if (this.TransitionTable.isEmpty() || !this.TransitionTable.containsKey(hash)) {
-            CentralizedTransitionObj temp = new CentralizedTransitionObj(currentState, action, reward, nextState);
-            this.TransitionTable.put(hash, temp);
+            this.TransitionTable.put(hash, new DoorCentralizedTransitionObj(currentState, action, reward, nextState));
         }
     }
 
-//    void runDynaQ(int DynaQSteps) {
-////        System.out.println("RUN DYNA");
-//
-//        List<Integer> keysAsArray = new ArrayList<Integer>(this.TransitionTable.keySet());
-//        Random r = new Random();
-//
-//        CentralizedTransitionObj transitionObj;
-//
-//        for (float dynaStep = 0; dynaStep < DynaQSteps; dynaStep++) {
-//            transitionObj = this.TransitionTable.get(keysAsArray.get(r.nextInt(keysAsArray.size())));
-//            updateQTable(transitionObj.currentState, transitionObj.action, transitionObj.reward, transitionObj.nextState);
-//        }
-//    }
+    void runDynaQ(int DynaQSteps) {
+//        System.out.println("RUN DYNA");
+
+        List<Integer> keysAsArray = new ArrayList<Integer>(this.TransitionTable.keySet());
+        Random r = new Random();
+
+        DoorCentralizedTransitionObj transitionObj;
+
+        for (float dynaStep = 0; dynaStep < DynaQSteps; dynaStep++) {
+            transitionObj = this.TransitionTable.get(keysAsArray.get(r.nextInt(keysAsArray.size())));
+            updateQTable(transitionObj.currentState, transitionObj.action, transitionObj.reward, transitionObj.nextState);
+        }
+    }
+
 
     void saveTransitionTableToFile(String filename) {
         try {
@@ -641,23 +631,6 @@ public class Bruno_2agents_centralized_HashHash {
             out.close();
         } catch (Exception ex) {
             ex.printStackTrace();
-        }
-
-    }
-
-    void verifyTransitionTable() {
-
-        for (CentralizedTransitionObj obj1 : this.TransitionTable.values()) {
-            int count = 0;
-            for (CentralizedTransitionObj obj2 : this.TransitionTable.values()) {
-                if (obj1.currentState.equalsTo(obj2.currentState) && obj1.action == obj2.action && obj1.reward == obj2.reward && obj1.nextState.equalsTo(obj2.nextState))
-                    count++;
-                if (count > 1) {
-                    System.out.println(obj1.toString());
-                    System.out.println(obj2.toString());
-                    System.exit(400);
-                }
-            }
         }
 
     }
@@ -767,6 +740,32 @@ class DoorCentralizedQTableObj implements Serializable {
         return (state.toString() + Arrays.toString(actionsQValues));
     }
 
+}
+
+class DoorCentralizedTransitionObj implements Serializable {
+    DoorCentralizedState currentState;
+    int action;
+    int reward;
+    DoorCentralizedState nextState;
+
+    public DoorCentralizedTransitionObj(DoorCentralizedState currentState, int action, int reward, DoorCentralizedState nextState) {
+        this.currentState = new DoorCentralizedState(currentState);
+        this.action = action;
+        this.reward = reward;
+        this.nextState = new DoorCentralizedState(nextState);
+    }
+
+    public DoorCentralizedTransitionObj(DoorCentralizedTransitionObj transition) {
+        this.currentState = new DoorCentralizedState(transition.currentState);
+        this.action = transition.action;
+        this.reward = transition.reward;
+        this.nextState = new DoorCentralizedState(transition.nextState);
+    }
+
+    @Override
+    public String toString() {
+        return this.currentState.toString() + " | " + action + " | " + reward + " | " + nextState.toString();
+    }
 }
 
 class DoorRewardRewardStateObject {
