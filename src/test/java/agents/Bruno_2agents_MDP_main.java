@@ -106,9 +106,9 @@ public class Bruno_2agents_MDP_main {
 //        String[] targetButtons = new String[]{"button4"};
 
         String scenario = "scenario2_2";
-        String[] targetButtons = new String[]{"button3", "button4"};
+        String[] targetButtons = new String[]{"button3"};
 
-        hashHash(true, true, scenario, targetButtons);
+        hashHash(false, true, scenario, targetButtons);
 
 //        manualControl(scenario);
 
@@ -252,6 +252,11 @@ public class Bruno_2agents_MDP_main {
             Bruno_2agents_centralized_HashHash hashHashCentralized = new Bruno_2agents_centralized_HashHash();
             hashHashCentralized.run(train, scenario, targetButtons);
             Bruno_2agents_centralized_HashHash.close();
+        }else{
+            Bruno_2agents_individual_HashHash.start();
+            Bruno_2agents_individual_HashHash hashHashindividual = new Bruno_2agents_individual_HashHash();
+            hashHashindividual.run(train, scenario, targetButtons);
+            Bruno_2agents_individual_HashHash.close();
         }
     }
 
