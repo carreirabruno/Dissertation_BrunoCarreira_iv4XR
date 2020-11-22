@@ -33,6 +33,7 @@ public class Bruno_2agents_centralized_HashHash {
 
 
     float epsilon = 1.0f;
+    float epsilonRate = 0.001f;
 
 
     @BeforeAll
@@ -155,11 +156,10 @@ public class Bruno_2agents_centralized_HashHash {
             if (early_stop_counter == 0)
                 break;
 
-            this.epsilon -= 0.001f;
+            this.epsilon -= this.epsilonRate;
 
             if (this.epsilon <= -0.01f)
                 this.epsilon = 1.0f;
-
 
         }
 
@@ -654,7 +654,6 @@ class DoorCentralizedState implements Serializable {
         this.doorsState = new int[state.doorsState.length];
         System.arraycopy(state.doorsState, 0, this.doorsState, 0, this.doorsState.length);
     }
-
 
     public void changeAgent0Pos(int z, int x) {
         this.agent0Pos[0] = z;
