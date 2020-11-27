@@ -182,8 +182,12 @@ public class Bruno_2agents_individual_HashHash {
 
 //            System.out.println("Training Episode " + _episode + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Epsilon = " + this.epsilon);
 
-            if (temp < max_steps)
+            if (temp < max_steps) {
                 this.epsilon -= this.epsilonRate;
+                if (this.epsilon > 0.1f)
+                    System.out.println(this.epsilon);
+            }
+
 //            if (this.epsilon < -2*this.epsilonRate)
 //                this.epsilon = 1.0f;
 //            this.validationEpisode = this.epsilon < 0;

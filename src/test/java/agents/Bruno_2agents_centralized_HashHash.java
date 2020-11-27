@@ -35,8 +35,6 @@ public class Bruno_2agents_centralized_HashHash {
     float epsilon = 1.0f;
     float epsilonRate = 0.0001f;
 
-    boolean _reach =true;
-
     boolean validationEpisode = false;
 
 
@@ -178,7 +176,6 @@ public class Bruno_2agents_centralized_HashHash {
                 this.epsilon -= this.epsilonRate;
                 if (this.epsilon > 0.1f)
                     System.out.println(this.epsilon);
-                _reach = false;
             }
 //            if (this.epsilon < -2*this.epsilonRate)
 //                this.epsilon = 1.0f;
