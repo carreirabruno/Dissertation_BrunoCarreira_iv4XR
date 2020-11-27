@@ -26,14 +26,14 @@ public class Bruno_2agents_individual_HashHash {
     ArrayList<String> targetButtonsAlreadyClicked;
 
     float learning_rate = 0.1f;
-    float gamma = 0.1f;
+    float gamma = 0.95f;
 
     int early_stop_counter_reset = 5;
     int early_stop_counter = early_stop_counter_reset;
 
 
     float epsilon = 1.0f;
-    float epsilonRate = 0.001f;
+    float epsilonRate = 0.0001f;
 
     boolean validationEpisode = false;
 
@@ -63,16 +63,21 @@ public class Bruno_2agents_individual_HashHash {
             runTraining();
 
 //            saveTransitionTableToFile("individualHashHashTransitionTable_" + scenario_filename);
-//            savePolicyToFile("individualHashHash_" + scenario_filename + "_agent0", this.QTableAgent0);
-//            savePolicyToFile("individualHashHash_" + scenario_filename + "_agent1", this.QTableAgent1);
+            savePolicyToFile("individualHashHash_" + scenario_filename + "_agent0", this.QTableAgent0);
+            savePolicyToFile("individualHashHash_" + scenario_filename + "_agent1", this.QTableAgent1);
 
         } else {
-            //TODO: testing
+            this.epsilon = 0;
+
+            this.QTableAgent0 = getPolicyFromFile("individualHashHash_" + scenario_filename + "_agent0");
+            this.QTableAgent1 = getPolicyFromFile("individualHashHash_" + scenario_filename + "_agent1");
+
+            runVisualize();
         }
 
-        printQTable(this.QTableAgent0);
-        System.out.println("--------");
-        printQTable(this.QTableAgent1);
+//        printQTable(this.QTableAgent0);
+//        System.out.println("--------");
+//        printQTable(this.QTableAgent1);
 
 
     }
@@ -110,7 +115,7 @@ public class Bruno_2agents_individual_HashHash {
             for (step = 0; step < max_steps; step++) {
 
                 //Prints para parceber o que acontece
-                if (early_stop_counter == 1) {
+                if (early_stop_counter == 1 && this.validationEpisode) {
                 System.out.println(currentStateAgent0.toString());
                 System.out.println(currentStateAgent1.toString());
                 printInvertedMapMatrix();
@@ -157,7 +162,7 @@ public class Bruno_2agents_individual_HashHash {
                 temp = step;
 
             //Early Stop
-//            if(this.validationEpisode) {
+            if(this.validationEpisode) {
 
                 if (step < minimumValidationSteps) {
                     minimumValidationSteps = step;
@@ -172,27 +177,75 @@ public class Bruno_2agents_individual_HashHash {
 
                 if (early_stop_counter == 0)
                     break;
-//            }
+            }
 
 
 //            System.out.println("Training Episode " + _episode + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Epsilon = " + this.epsilon);
 
-
-            this.epsilon -= this.epsilonRate;
-            if (this.epsilon < -this.early_stop_counter_reset*this.epsilonRate)
-                this.epsilon = 1.0f;
-
-            this.validationEpisode = this.epsilon < 0.2f ;
-
-//            if(this.validationEpisode){
+            if (temp < max_steps)
+                this.epsilon -= this.epsilonRate;
+//            if (this.epsilon < -2*this.epsilonRate)
 //                this.epsilon = 1.0f;
-//                this.validationEpisode = false;
-//            }
-//            if (this.epsilon <= 0 ){
-//                this.validationEpisode = true;
-//            }
+//            this.validationEpisode = this.epsilon < 0;
+
+            if (this.epsilon <= 0)
+                this.epsilon = 0.1f;
+
+            this.validationEpisode = this.epsilon < 0.1f;
 
         }
+    }
+
+    void runVisualize(){
+        resetMapMatrix();
+
+        this.doorsState = new int[countApperancesOfWordOnInitialMap("door")];
+        this.buttonsState = new int[countApperancesOfWordOnInitialMap("button")];
+        this.targetButtonsAlreadyClicked = new ArrayList<String>();
+
+        DoorIndividualState currentStateAgent0 = new DoorIndividualState(findTruePosInCurrentMapMatrix("agent0"), countApperancesOfWordOnInitialMap("door"));
+        DoorIndividualState currentStateAgent1 = new DoorIndividualState(findTruePosInCurrentMapMatrix("agent1"), countApperancesOfWordOnInitialMap("door"));
+
+        DoorIndividualState nextStateAgent0;
+        DoorIndividualState nextStateAgent1;
+
+        int actionAgent0;
+        int actionAgent1;
+
+        DoorRewardRewardStateStateObject doorRewardRewardStateStateObject;
+
+        int step = 0;
+        while(!checkIfEndend()){
+
+            //Prints para parceber o que acontece
+            if (early_stop_counter == 1 && this.validationEpisode) {
+                System.out.println(currentStateAgent0.toString());
+                System.out.println(currentStateAgent1.toString());
+                printInvertedMapMatrix();
+            }
+
+            //Get action Agent0
+            actionAgent0 = chooseAction(currentStateAgent0, this.QTableAgent0);
+
+            //Get action Agent1
+            actionAgent1 = chooseAction(currentStateAgent1, this.QTableAgent1);
+
+            //Prints to see
+            printInvertedMapMatrix();
+            System.out.println(currentStateAgent0.toString() + " " + this.actions[actionAgent0]);
+            System.out.println(currentStateAgent1.toString() + " " + this.actions[actionAgent1]);
+            System.out.println();
+
+            //Act on map, get rewards and nextState
+            doorRewardRewardStateStateObject = new DoorRewardRewardStateStateObject(actOnMap(currentStateAgent0, actionAgent0, currentStateAgent1, actionAgent1));
+            nextStateAgent0 = doorRewardRewardStateStateObject.stateAgent0;
+            nextStateAgent1 = doorRewardRewardStateStateObject.stateAgent1;
+
+            //Set new currentState
+            currentStateAgent0 = new DoorIndividualState(nextStateAgent0);
+            currentStateAgent1 = new DoorIndividualState(nextStateAgent1);
+        }
+
     }
 
     void setUpScenarioMatrix(String scenario_filename) {
@@ -294,7 +347,7 @@ public class Bruno_2agents_individual_HashHash {
      */
     void printInvertedMapMatrix() {
         for (int z = this.mapMatrix.size() - 1; z >= 0; z--) {
-            for (int x = this.mapMatrix.get(z).length - 1; x >= 0; x--) {
+            for (int x = 0; x < this.mapMatrix.get(z).length; x++) {
                 String temp = new String(this.mapMatrix.get(z)[x]);
                 temp = temp.replace("gent", "");
                 temp = temp.replace("utton", "");
@@ -303,7 +356,6 @@ public class Bruno_2agents_individual_HashHash {
             }
             System.out.println();
         }
-        System.out.println("--------------------");
     }
 
     void printConnectionsButtonsDoors() {
@@ -374,8 +426,9 @@ public class Bruno_2agents_individual_HashHash {
 
                 clicked = true;
 
-            } //else
-//                rewardAgent0--;
+            }
+            else
+                rewardAgent0--;
         } else if(!this.actions[actionAgent0].equals("Nothing")) {
             newPos = new int[]{nextStateAgent0.agentPos[0], nextStateAgent0.agentPos[1]};
 
@@ -384,14 +437,14 @@ public class Bruno_2agents_individual_HashHash {
             else if (this.actions[actionAgent0].equals("Down"))
                 newPos = new int[]{nextStateAgent0.agentPos[0] - 1, nextStateAgent0.agentPos[1]};
             else if (this.actions[actionAgent0].equals("Left"))
-                newPos = new int[]{nextStateAgent0.agentPos[0], nextStateAgent0.agentPos[1] + 1};
-            else if (this.actions[actionAgent0].equals("Right"))
                 newPos = new int[]{nextStateAgent0.agentPos[0], nextStateAgent0.agentPos[1] - 1};
+            else if (this.actions[actionAgent0].equals("Right"))
+                newPos = new int[]{nextStateAgent0.agentPos[0], nextStateAgent0.agentPos[1] + 1};
             if (checkCanMove(newPos[0], newPos[1])) {
                 nextStateAgent0.changeAgentPos(newPos[0], newPos[1]);
                 changeMapMatrixAgentPositions("agent0", currentStateAgent0.agentPos[0], currentStateAgent0.agentPos[1], newPos[0], newPos[1]);
             }
-//            rewardAgent0--;
+            rewardAgent0--;
         }
 
         //Agent1
@@ -418,8 +471,9 @@ public class Bruno_2agents_individual_HashHash {
 
                 clicked = true;
 
-            } //else
-                //rewardAgent1--;
+            }
+            else
+                rewardAgent1--;
         }
         else if(!this.actions[actionAgent1].equals("Nothing")) {
             newPos = new int[]{nextStateAgent1.agentPos[0], nextStateAgent1.agentPos[1]};
@@ -428,15 +482,15 @@ public class Bruno_2agents_individual_HashHash {
             else if (this.actions[actionAgent1].equals("Down"))
                 newPos = new int[]{nextStateAgent1.agentPos[0] - 1, nextStateAgent1.agentPos[1]};
             else if (this.actions[actionAgent1].equals("Left"))
-                newPos = new int[]{nextStateAgent1.agentPos[0], nextStateAgent1.agentPos[1] + 1};
-            else if (this.actions[actionAgent1].equals("Right"))
                 newPos = new int[]{nextStateAgent1.agentPos[0], nextStateAgent1.agentPos[1] - 1};
+            else if (this.actions[actionAgent1].equals("Right"))
+                newPos = new int[]{nextStateAgent1.agentPos[0], nextStateAgent1.agentPos[1] + 1};
             if (checkCanMove(newPos[0], newPos[1])) {
                 nextStateAgent1.changeAgentPos(newPos[0], newPos[1]);
 
                 changeMapMatrixAgentPositions("agent1", currentStateAgent1.agentPos[0], currentStateAgent1.agentPos[1], newPos[0], newPos[1]);
             }
-//            rewardAgent1--;
+            rewardAgent1--;
         }
         nextStateAgent1.copyAllDoorsState(this.doorsState);
         nextStateAgent0.copyAllDoorsState(this.doorsState);
@@ -454,12 +508,14 @@ public class Bruno_2agents_individual_HashHash {
     }
 
     boolean checkIfEndend() {
-        int count = targetButtons.length;
-        for (String button : targetButtons) {
-            if (this.buttonsState[(Integer.parseInt(new String(button.substring(button.length() - 1))) - 1)] == 1)
-                count--;
-        }
-        return count == 0;
+//        int count = targetButtons.length;
+//        for (String button : targetButtons) {
+//            if (this.buttonsState[(Integer.parseInt(new String(button.substring(button.length() - 1))) - 1)] == 1)
+//                count--;
+//        }
+//        return count == 0;
+
+        return this.targetButtonsAlreadyClicked.size()==this.targetButtons.length;
     }
 
     int getRewardFromPressingButton(String buttonPressed) {
@@ -469,7 +525,7 @@ public class Bruno_2agents_individual_HashHash {
                     return 100;
             }
         }
-        return 0;
+        return -1;
 
     }
 
@@ -553,6 +609,22 @@ public class Bruno_2agents_individual_HashHash {
             ex.printStackTrace();
         }
 
+    }
+
+    LinkedHashMap<Integer, DoorIndividualQTableObj> getPolicyFromFile(String filename) {
+        LinkedHashMap<Integer, DoorIndividualQTableObj> table = null;
+        try {
+            FileInputStream fis = new FileInputStream(filename);
+            ObjectInputStream in = new ObjectInputStream(fis);
+
+            table = (LinkedHashMap<Integer, DoorIndividualQTableObj>) in.readObject();
+
+            in.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        return table;
     }
 
     boolean AlreadyClicked(String buttonPressed) {

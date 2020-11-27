@@ -11,12 +11,12 @@ import java.util.ArrayList;
 
 public class Bruno_2agents_MDP_main {
 
-    ArrayList<String[]> actions = new ArrayList<String[]>();
-    ArrayList<String> singular_actions = new ArrayList<String>();
-    ArrayList<String> existing_buttons = new ArrayList<String>();
-
-    ArrayList<String[]> pressedButtons_centralized = new ArrayList<String[]>();
-    ArrayList<String[]> pressedButtons_individual = new ArrayList<String[]>();
+//    ArrayList<String[]> actions = new ArrayList<String[]>();
+//    ArrayList<String> singular_actions = new ArrayList<String>();
+//    ArrayList<String> existing_buttons = new ArrayList<String>();
+//
+//    ArrayList<String[]> pressedButtons_centralized = new ArrayList<String[]>();
+//    ArrayList<String[]> pressedButtons_individual = new ArrayList<String[]>();
 
     @BeforeAll
     static void start() {
@@ -105,13 +105,11 @@ public class Bruno_2agents_MDP_main {
 //        String scenario = "scenario1";
 //        String[] targetButtons = new String[]{"button4"};
 
-        String scenario = "scenario2_2";
-        String[] targetButtons = new String[]{"button5"};
+        String scenario = "realScenario2";
+        String[] targetButtons = new String[]{"button3", "button4"};
 
-        hashHash(false, true, scenario, targetButtons);
-
+        hashHash(true, true, scenario, targetButtons);
 //        manualControl(scenario);
-
 
 //        String scenario = "scenario3_1";
 //        String[] targetButtons = new String[]{"button3"};
@@ -120,7 +118,6 @@ public class Bruno_2agents_MDP_main {
 
 //        String scenario = "scenario4";
 //        String[] targetButtons = new String[]{"button5", "button6"};
-
 
         /*
 //        String target1 = "button4";

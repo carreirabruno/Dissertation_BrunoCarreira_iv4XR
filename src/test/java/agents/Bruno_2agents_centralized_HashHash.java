@@ -26,14 +26,18 @@ public class Bruno_2agents_centralized_HashHash {
     ArrayList<String> targetButtonsAlreadyClicked;
 
     float learning_rate = 0.1f;
-    float gamma = 0.65f;
+    float gamma = 0.95f;
 
     int early_stop_counter_reset = 5;
     int early_stop_counter = early_stop_counter_reset;
 
 
     float epsilon = 1.0f;
-    float epsilonRate = 0.001f;
+    float epsilonRate = 0.0001f;
+
+    boolean _reach =true;
+
+    boolean validationEpisode = false;
 
 
     @BeforeAll
@@ -53,17 +57,18 @@ public class Bruno_2agents_centralized_HashHash {
 
         setUpScenarioMatrix(scenario_filename);
 
-
         if (train) {
             this.QTable = new LinkedHashMap<Integer, DoorCentralizedQTableObj>();
             this.TransitionTable = new LinkedHashMap<Integer, DoorCentralizedTransitionObj>();
 
             runTraining();
 
-//            savePolicyToFile("centralizedHashHash_" + scenario_filename);
+            savePolicyToFile("centralizedHashHash_" + scenario_filename);
 //            saveTransitionTableToFile("centralizedHashHashTransition_" + scenario_filename);
         } else {
-            //TODO: testing
+            this.epsilon = 0;
+            getPolicyFromFile("centralizedHashHash_" + scenario_filename);
+            runVisualize();
         }
 
 
@@ -71,8 +76,8 @@ public class Bruno_2agents_centralized_HashHash {
 
     void runTraining() {
         int max_steps = ((this.initialMapMatrix.size() * this.initialMapMatrix.get(0).length) - countApperancesOfWordOnInitialMap("w")) * this.actions.length;
-//        max_steps = 1;
         int minimumValidationSteps = max_steps;
+        int temp = max_steps;
 
         int _episode = 0;
         while (early_stop_counter >= 0) {
@@ -102,6 +107,7 @@ public class Bruno_2agents_centralized_HashHash {
 
                 //Prints para parceber o que acontece
                 if (early_stop_counter == 1)
+//                    printMapMatrix();
                     printInvertedMapMatrix();
 
                 //Check if the target buttons have been clicked
@@ -115,6 +121,7 @@ public class Bruno_2agents_centralized_HashHash {
 
                 //Get action Agent1
                 actionAgent1 = chooseAction(currentState, 1);
+//                actionAgent1 = 3;
 
                 action = getCentralizedAction(actionAgent0, actionAgent1);
 
@@ -126,6 +133,10 @@ public class Bruno_2agents_centralized_HashHash {
                 nextState = doorRewardRewardStateObject.state;
                 reward = rewardAgent0 + rewardAgent1;
 
+                if (early_stop_counter == 1){
+                    System.out.println(currentState.toString() + " " + Arrays.toString(this.centralizedActions.get(action)) + " " + nextState.toString());
+                    System.out.println();
+                }
 
                 //Update Q Table
                 updateQTable(currentState, action, reward, nextState);
@@ -137,32 +148,103 @@ public class Bruno_2agents_centralized_HashHash {
                 currentState = new DoorCentralizedState(nextState);
             }
 
-            if (early_stop_counter == 1)
-                System.out.println("--------------------");
+
 
             //Dyna-Q
             runDynaQ(max_steps);
 
+            if (step < temp)
+                temp = step;
+
             //Early Stop
-            if (step < minimumValidationSteps)
-                minimumValidationSteps = step;
-            else if (step < max_steps && step == minimumValidationSteps)
-                early_stop_counter--;
-            else
-                early_stop_counter = early_stop_counter_reset;
 
-            System.out.println("Validation Episode " + _episode + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Best validations steps = " + minimumValidationSteps + " | Early Stop Counter = " + early_stop_counter + " | Epsilon = " + this.epsilon);
+            if (this.validationEpisode) {
 
-            if (early_stop_counter == 0)
-                break;
+                if (step < minimumValidationSteps)
+                    minimumValidationSteps = step;
+                else if (step < max_steps && step == minimumValidationSteps)
+                    early_stop_counter--;
+                else {
+                    early_stop_counter = early_stop_counter_reset;
+                    minimumValidationSteps = max_steps;
+                }
+                System.out.println("Validation Episode " + _episode + " done | Reached end = " + reachedEnd + " | #Steps = " + step + " | Best validations steps = " + minimumValidationSteps + " | TempSteps = " + temp + " | Early Stop Counter = " + early_stop_counter + " | Epsilon = " + this.epsilon);
 
-            this.epsilon -= this.epsilonRate;
+                if (early_stop_counter == 0)
+                    break;
+            }
 
-            if (this.epsilon <= -0.01f)
-                this.epsilon = 1.0f;
+            if (temp < max_steps) {
+                this.epsilon -= this.epsilonRate;
+                if (this.epsilon > 0.1f)
+                    System.out.println(this.epsilon);
+                _reach = false;
+            }
+//            if (this.epsilon < -2*this.epsilonRate)
+//                this.epsilon = 1.0f;
+//
+//            this.validationEpisode = this.epsilon < 0;
+
+            if (this.epsilon <= 0)
+                this.epsilon = 0.1f;
+
+            this.validationEpisode = this.epsilon < 0.1f;
 
         }
 
+    }
+
+    void runVisualize(){
+        resetMapMatrix();
+
+        this.doorsState = new int[countApperancesOfWordOnInitialMap("door")];
+        this.buttonsState = new int[countApperancesOfWordOnInitialMap("button")];
+        this.targetButtonsAlreadyClicked = new ArrayList<String>();
+
+        DoorCentralizedState currentState = new DoorCentralizedState(findTruePosInCurrentMapMatrix("agent0"), findTruePosInCurrentMapMatrix("agent1"), countApperancesOfWordOnInitialMap("door"));
+        DoorCentralizedState nextState = null;
+
+        int actionAgent0;
+        int actionAgent1;
+        int reward0;
+        int reward1;
+        int action;
+        DoorRewardRewardStateObject doorRewardRewardStateObject;
+
+        int step = 0;
+        while (!checkIfEndend()) {
+
+            //Check if the target buttons have been clicked
+
+            //Get action Agent0
+            actionAgent0 = chooseAction(currentState, 0);
+
+            //Get action Agent1
+            actionAgent1 = chooseAction(currentState, 1);
+
+            //Get centralized action
+            action = getCentralizedAction(actionAgent0, actionAgent1);
+
+            //Prints to see
+            printInvertedMapMatrix();
+            System.out.println(currentState.toString() + " " + Arrays.toString(this.centralizedActions.get(action)));
+
+
+            //Act on map, get rewards and nextState
+            doorRewardRewardStateObject = new DoorRewardRewardStateObject(actOnMap(currentState, actionAgent0, actionAgent1));
+            nextState = doorRewardRewardStateObject.state;
+            reward0 = doorRewardRewardStateObject.rewardAgent0;
+            reward1 = doorRewardRewardStateObject.rewardAgent1;
+            System.out.println(reward0 + " " + reward1);
+            System.out.println();
+
+            //Set new currentState
+            currentState = new DoorCentralizedState(nextState);
+
+            step++;
+        }
+
+        System.out.println("####Steps = " + step);
     }
 
     void setUpScenarioMatrix(String scenario_filename) {
@@ -264,7 +346,7 @@ public class Bruno_2agents_centralized_HashHash {
      */
     void printInvertedMapMatrix() {
         for (int z = this.mapMatrix.size() - 1; z >= 0; z--) {
-            for (int x = this.mapMatrix.get(z).length - 1; x >= 0; x--) {
+            for (int x = 0; x < this.mapMatrix.get(z).length; x++) {
                 String temp = new String(this.mapMatrix.get(z)[x]);
                 temp = temp.replace("gent", "");
                 temp = temp.replace("utton", "");
@@ -273,7 +355,6 @@ public class Bruno_2agents_centralized_HashHash {
             }
             System.out.println();
         }
-        System.out.println();
     }
 
     void printConnectionsButtonsDoors() {
@@ -341,7 +422,8 @@ public class Bruno_2agents_centralized_HashHash {
 
                 rewardAgent0 = getRewardFromPressingButton(buttonToClick);
                 openCloseDoor(buttonToClick);
-            } else
+            }
+            else
                 rewardAgent0--;
         } else if (!this.actions[actionAgent0].equals("Nothing")) {
             newPos = new int[]{nextState.agent0Pos[0], nextState.agent0Pos[1]};
@@ -351,9 +433,9 @@ public class Bruno_2agents_centralized_HashHash {
             else if (this.actions[actionAgent0].equals("Down"))
                 newPos = new int[]{nextState.agent0Pos[0] - 1, nextState.agent0Pos[1]};
             else if (this.actions[actionAgent0].equals("Left"))
-                newPos = new int[]{nextState.agent0Pos[0], nextState.agent0Pos[1] + 1};
-            else if (this.actions[actionAgent0].equals("Right"))
                 newPos = new int[]{nextState.agent0Pos[0], nextState.agent0Pos[1] - 1};
+            else if (this.actions[actionAgent0].equals("Right"))
+                newPos = new int[]{nextState.agent0Pos[0], nextState.agent0Pos[1] + 1};
             if (checkCanMove(newPos[0], newPos[1])) {
                 nextState.changeAgent0Pos(newPos[0], newPos[1]);
 
@@ -384,7 +466,8 @@ public class Bruno_2agents_centralized_HashHash {
 //                System.out.println("Agent1 buttonPressed " + buttonToClick + " | Reward " + rewardAgent1);
 //                System.out.println(this.targetButtonsAlreadyClicked.size() + " | " + Arrays.toString(this.targetButtonsAlreadyClicked.toArray()));
 //                System.out.println();
-            } else
+            }
+            else
                 rewardAgent1--;
         } else if (!this.actions[actionAgent1].equals("Nothing")) {
             newPos = new int[]{nextState.agent1Pos[0], nextState.agent1Pos[1]};
@@ -393,9 +476,9 @@ public class Bruno_2agents_centralized_HashHash {
             else if (this.actions[actionAgent1].equals("Down"))
                 newPos = new int[]{nextState.agent1Pos[0] - 1, nextState.agent1Pos[1]};
             else if (this.actions[actionAgent1].equals("Left"))
-                newPos = new int[]{nextState.agent1Pos[0], nextState.agent1Pos[1] + 1};
-            else if (this.actions[actionAgent1].equals("Right"))
                 newPos = new int[]{nextState.agent1Pos[0], nextState.agent1Pos[1] - 1};
+            else if (this.actions[actionAgent1].equals("Right"))
+                newPos = new int[]{nextState.agent1Pos[0], nextState.agent1Pos[1] + 1};
             if (checkCanMove(newPos[0], newPos[1])) {
                 nextState.changeAgent1Pos(newPos[0], newPos[1]);
 
@@ -412,12 +495,14 @@ public class Bruno_2agents_centralized_HashHash {
     }
 
     boolean checkIfEndend() {
-        int count = targetButtons.length;
-        for (String button : targetButtons) {
-            if (this.buttonsState[(Integer.parseInt(new String(button.substring(button.length() - 1))) - 1)] == 1)
-                count--;
-        }
-        return count == 0;
+//        int count = targetButtons.length;
+//        for (String button : targetButtons) {
+//            if (this.buttonsState[(Integer.parseInt(new String(button.substring(button.length() - 1))) - 1)] == 1)
+//                count--;
+//        }
+//        return count == 0;
+
+        return  this.targetButtonsAlreadyClicked.size() == this.targetButtons.length;
     }
 
     int getRewardFromPressingButton(String buttonPressed) {
@@ -437,7 +522,7 @@ public class Bruno_2agents_centralized_HashHash {
         for (String targetBtn : targetButtons) {
             if (targetBtn.equals(buttonPressed)) {
                 if (!AlreadyClicked(buttonPressed))
-                    return 1000;
+                    return 100;
 //                else if(AlreadyClicked(buttonPressed) && state.buttonsState[Integer.parseInt(buttonPressed.substring(buttonPressed.length() - 1)) - 1] == 1)
 //                    return 10;
             }
@@ -548,7 +633,7 @@ public class Bruno_2agents_centralized_HashHash {
                     return temp.maxActionQValue();
             }
         }
-        return -1;
+        return 0;
     }
 
     void savePolicyToFile(String filename) {
@@ -559,6 +644,19 @@ public class Bruno_2agents_centralized_HashHash {
             out.writeObject(this.QTable);
 
             out.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    void getPolicyFromFile(String filename) {
+        try {
+            FileInputStream fis = new FileInputStream(filename);
+            ObjectInputStream in = new ObjectInputStream(fis);
+
+            this.QTable = (LinkedHashMap<Integer, DoorCentralizedQTableObj>) in.readObject();
+
+            in.close();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
