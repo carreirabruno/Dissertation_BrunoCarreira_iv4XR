@@ -526,7 +526,7 @@ public class Bruno_2agents_individual_HashHash {
         for (String targetBtn : targetButtons) {
             if (targetBtn.equals(buttonPressed)) {
                 if (!AlreadyClicked(buttonPressed))
-                    return 1000;
+                    return 10;
             }
         }
         return -1;
