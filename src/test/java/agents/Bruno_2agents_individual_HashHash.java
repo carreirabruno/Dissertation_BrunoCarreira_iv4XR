@@ -798,7 +798,7 @@ class DoorIndividualQTableObj implements Serializable {
 
     public void changeActionQValue(int actionIndex, float value) {
         if (Float.toString(this.actionsQValues[actionIndex] + value).equals("Infinity")) {
-            System.out.println("AQUIIIIIIIIII  " + this.actionsQValues[actionIndex] + "  " + value);
+            System.out.println("Value too high  " + this.actionsQValues[actionIndex] + "  " + value);
             System.exit(112);
         }
         this.actionsQValues[actionIndex] += value;
