@@ -1,12 +1,9 @@
 package agents;
 
-import helperclasses.datastructures.Tuple;
-import helperclasses.datastructures.Vec3;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.*;
 import java.util.ArrayList;
 
 public class Bruno_2agents_MDP_main {
@@ -102,66 +99,13 @@ public class Bruno_2agents_MDP_main {
 
          */
 
-//        String scenario = "scenario1";
-//        String[] targetButtons = new String[]{"button4"};
 
-        String scenario = "realScenario4";
-        String[] targetButtons = new String[]{"button3"};
+        String scenario = "realScenario1";
+        String[] targetButtons = new String[]{"button4"};
 
-        hashHash(false, true, scenario, targetButtons);
+        hashHash(false, false, scenario, targetButtons);
+
 //        manualControl(scenario);
-
-//        String scenario = "scenario3_1";
-//        String[] targetButtons = new String[]{"button3"};
-//        String scenario = "scenario4_2";
-//        String[] targetButtons = new String[]{"button3", "button4"};
-
-//        String scenario = "scenario4";
-//        String[] targetButtons = new String[]{"button5", "button6"};
-
-        /*
-//        String target1 = "button4";
-//        String target2 = "button4";
-
-//        String scenario = "scenario3";
-//        String target1 = "button5";
-//        String target2 = "button6";
-
-//        String scenario = "scenario7";
-//        String target1 = "button5";
-//        String target2 = "button5";
-
-//        String scenario = "scenario8";
-//        String target1 = "button5";
-//        String target2 = "button5";
-
-         */
-
-//        lowLevelCentralizedTraining(scenario, targetButtons);
-//        hashCentralizedTraining(scenario, targetButtons);
-//        lowLevelCentralizedTesting(scenario, targetButtons, false);
-
-//         lowLevelIndividualTraining(scenario, targetButtons);
-//        hashIndividualTraining(scenario, targetButtons);
-//        lowLevelIndividualTesting(scenario, targetButtons, false);
-
-
-        /*
-
-//        centralizedTraining(scenario, target1, target2, this.actions, this.singular_actions, this.existing_buttons);
-//        positions = centralizedTesting_positions(scenario, target1, target2, this.actions, this.existing_buttons);
-//        centralizedTesting_pressedButtons(scenario, target1, target2, this.actions, this.existing_buttons);
-
-//        individualTraining(scenario, target1, target2, this.singular_actions, this.existing_buttons);
-//        positions = individualTesting(scenario, target1, target2, this.singular_actions, this.existing_buttons);
-//        individualTesting_pressedButtons(scenario, target1, target2, this.singular_actions, this.existing_buttons);
-
-//        saveToTXT("C:/Users/bruno/Desktop/Ambiente de Trabalho/" + scenario + "_individual_agent0.txt", positions.object1);
-//        saveToTXT("C:/Users/bruno/Desktop/Ambiente de Trabalho/" + scenario + "_individual_agent1.txt", positions.object2);
-
-//        comparePolicies(pressedButtons_centralized, pressedButtons_individual);
-
-         */
     }
 
     public void centralizedTraining(String scenario, String target1, String target2, ArrayList<String[]> actions, ArrayList<String> singular_actions, ArrayList<String> existing_buttons) throws Exception {
@@ -204,29 +148,11 @@ public class Bruno_2agents_MDP_main {
         Bruno_2agents_singular_individual_MDP_test.close();
     }
 
-    public void saveToTXT(String filename, ArrayList<Vec3> list) throws IOException {
-        FileWriter write = new FileWriter(filename, false);
-        PrintWriter print_line = new PrintWriter(write);
-
-        for (Vec3 pos : list)
-            print_line.println(pos.toString());
-
-        print_line.close();
-
-    }
-
     public void manualControl(String scenario) throws Exception {
         Bruno_2agents_manualControl.start();
         Bruno_2agents_manualControl individual_train_new = new Bruno_2agents_manualControl();
         individual_train_new.create_policy_manually(scenario);
         Bruno_2agents_manualControl.close();
-    }
-
-    public void comparePolicies(ArrayList<String[]> pressedButtons_centralized, ArrayList<String[]> pressedButtons_individual) throws Exception {
-        Bruno_2agents_ComparePolicies.start();
-        Bruno_2agents_ComparePolicies _comparePolicies = new Bruno_2agents_ComparePolicies();
-        _comparePolicies.run(pressedButtons_centralized, pressedButtons_individual);
-        Bruno_2agents_ComparePolicies.close();
     }
 
     public void lowLevelCentralizedTraining(String scenario, String[] targetButtons) throws Exception {

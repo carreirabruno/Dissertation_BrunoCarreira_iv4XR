@@ -11,6 +11,7 @@ import java.util.*;
 public class Bruno_2agents_individual_HashHash {
 
     String[] actions;
+    ArrayList<String[]> centralizedActions;
     String[] targetButtons;
     int[] doorsState;
     int[] buttonsState;
@@ -36,6 +37,8 @@ public class Bruno_2agents_individual_HashHash {
     float epsilonRate = 0.0001f;
 
     boolean validationEpisode = false;
+
+    ArrayList<CompareObject> behaviouralTraces;
 
     @BeforeAll
     static void start() {
@@ -218,6 +221,9 @@ public class Bruno_2agents_individual_HashHash {
 
         DoorRewardRewardStateStateObject doorRewardRewardStateStateObject;
 
+        behaviouralTraces = new ArrayList<CompareObject>();
+        setupCentralizedActions();
+
         int step = 0;
         while(!checkIfEndend()){
 
@@ -234,6 +240,8 @@ public class Bruno_2agents_individual_HashHash {
             //Get action Agent1
             actionAgent1 = chooseAction(currentStateAgent1, this.QTableAgent1);
 
+            behaviouralTraces.add(getNewCompareObject(currentStateAgent0, currentStateAgent1, actionAgent0, actionAgent1));
+
             //Prints to see
             printInvertedMapMatrix();
             System.out.println(currentStateAgent0.toString() + " " + this.actions[actionAgent0]);
@@ -248,8 +256,13 @@ public class Bruno_2agents_individual_HashHash {
             //Set new currentState
             currentStateAgent0 = new DoorIndividualState(nextStateAgent0);
             currentStateAgent1 = new DoorIndividualState(nextStateAgent1);
+
+            step++;
         }
 
+        System.out.println("####Steps = " + step);
+
+        comparePolicies();
     }
 
     void setUpScenarioMatrix(String scenario_filename) {
@@ -681,6 +694,30 @@ public class Bruno_2agents_individual_HashHash {
         }
 
         return doors;
+    }
+
+    void setupCentralizedActions() {
+        this.centralizedActions = new ArrayList<String[]>();
+        for (String action_agent0 : this.actions)
+            for (String action_agent1 : this.actions)
+                this.centralizedActions.add(new String[]{action_agent0, action_agent1});
+    }
+
+    void comparePolicies(){
+        Bruno_2agents_ComparePolicies.start();
+        Bruno_2agents_ComparePolicies comparePolicies = new Bruno_2agents_ComparePolicies();
+        comparePolicies.run(this.behaviouralTraces);
+        Bruno_2agents_ComparePolicies.close();
+    }
+
+    CompareObject getNewCompareObject(DoorIndividualState stateAgent0, DoorIndividualState stateAgent1, int action0, int action1){
+
+        DoorCentralizedState state = new DoorCentralizedState(stateAgent0.agentPos, stateAgent1.agentPos, stateAgent1.doorsState.length);
+        for (int i = 0; i < stateAgent1.doorsState.length; i++)
+            if (stateAgent1.doorsState[i] == 1)
+                state.changeDoorState(i+1);
+
+        return new CompareObject(state, new String[]{this.actions[action0], this.actions[action1]});
     }
 
 }

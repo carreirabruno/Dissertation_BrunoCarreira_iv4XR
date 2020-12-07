@@ -37,6 +37,8 @@ public class Bruno_2agents_centralized_HashHash {
 
     boolean validationEpisode = false;
 
+    ArrayList<CompareObject> behaviouralTraces;
+
 
     @BeforeAll
     static void start() {
@@ -208,10 +210,10 @@ public class Bruno_2agents_centralized_HashHash {
         int action;
         DoorRewardRewardStateObject doorRewardRewardStateObject;
 
+        behaviouralTraces = new ArrayList<CompareObject>();
+
         int step = 0;
         while (!checkIfEndend()) {
-
-            //Check if the target buttons have been clicked
 
             //Get action Agent0
             actionAgent0 = chooseAction(currentState, 0);
@@ -221,6 +223,8 @@ public class Bruno_2agents_centralized_HashHash {
 
             //Get centralized action
             action = getCentralizedAction(actionAgent0, actionAgent1);
+
+            behaviouralTraces.add(new CompareObject(currentState, this.centralizedActions.get(action)));
 
             //Prints to see
             printInvertedMapMatrix();
@@ -242,6 +246,8 @@ public class Bruno_2agents_centralized_HashHash {
         }
 
         System.out.println("####Steps = " + step);
+
+        comparePolicies();
     }
 
     void setUpScenarioMatrix(String scenario_filename) {
@@ -730,6 +736,13 @@ public class Bruno_2agents_centralized_HashHash {
         return doors;
     }
 
+    void comparePolicies(){
+        Bruno_2agents_ComparePolicies.start();
+        Bruno_2agents_ComparePolicies comparePolicies = new Bruno_2agents_ComparePolicies();
+        comparePolicies.run(this.behaviouralTraces);
+        Bruno_2agents_ComparePolicies.close();
+    }
+
 }
 
 class DoorCentralizedState implements Serializable {
@@ -870,5 +883,21 @@ class DoorRewardRewardStateObject {
         this.state = new DoorCentralizedState(obj.state);
     }
 
+
+}
+
+class CompareObject{
+    DoorCentralizedState state;
+    String[] actions;
+
+    public CompareObject(DoorCentralizedState state, String[] actions){
+        this.state = state;
+        this.actions = actions;
+    }
+
+    @Override
+    public String toString() {
+        return this.state.toString() + " | " + Arrays.toString(this.actions);
+    }
 
 }
