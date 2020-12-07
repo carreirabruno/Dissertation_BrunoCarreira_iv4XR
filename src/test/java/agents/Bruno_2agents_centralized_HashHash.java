@@ -1,5 +1,6 @@
 package agents;
 
+import helperclasses.datastructures.Tuple;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,8 @@ public class Bruno_2agents_centralized_HashHash {
 
     ArrayList<CompareObject> behaviouralTraces;
 
+    String scenario;
+
 
     @BeforeAll
     static void start() {
@@ -56,6 +59,7 @@ public class Bruno_2agents_centralized_HashHash {
         this.targetButtons = targetButtons;
 
         setUpScenarioMatrix(scenario_filename);
+        this.scenario = scenario_filename;
 
         if (train) {
             this.QTable = new LinkedHashMap<Integer, DoorCentralizedQTableObj>();
@@ -63,11 +67,11 @@ public class Bruno_2agents_centralized_HashHash {
 
             runTraining();
 
-            savePolicyToFile("centralizedHashHash_" + scenario_filename);
+            savePolicyToFile("centralizedHashHash_" + this.scenario);
 //            saveTransitionTableToFile("centralizedHashHashTransition_" + scenario_filename);
         } else {
             this.epsilon = 0;
-            getPolicyFromFile("centralizedHashHash_" + scenario_filename);
+            getPolicyFromFile("centralizedHashHash_" + this.scenario);
             runVisualize();
         }
 
@@ -229,6 +233,7 @@ public class Bruno_2agents_centralized_HashHash {
             //Prints to see
             printInvertedMapMatrix();
             System.out.println(currentState.toString() + " " + Arrays.toString(this.centralizedActions.get(action)));
+            System.out.println();
 
 
             //Act on map, get rewards and nextState
@@ -236,8 +241,6 @@ public class Bruno_2agents_centralized_HashHash {
             nextState = doorRewardRewardStateObject.state;
             reward0 = doorRewardRewardStateObject.rewardAgent0;
             reward1 = doorRewardRewardStateObject.rewardAgent1;
-            System.out.println(reward0 + " " + reward1);
-            System.out.println();
 
             //Set new currentState
             currentState = new DoorCentralizedState(nextState);
@@ -739,7 +742,7 @@ public class Bruno_2agents_centralized_HashHash {
     void comparePolicies(){
         Bruno_2agents_ComparePolicies.start();
         Bruno_2agents_ComparePolicies comparePolicies = new Bruno_2agents_ComparePolicies();
-        comparePolicies.run(this.behaviouralTraces);
+        comparePolicies.run(this.behaviouralTraces, this.scenario);
         Bruno_2agents_ComparePolicies.close();
     }
 
@@ -893,6 +896,14 @@ class CompareObject{
     public CompareObject(DoorCentralizedState state, String[] actions){
         this.state = state;
         this.actions = actions;
+    }
+
+    public boolean equalIndividualStates(DoorIndividualState agent0State, DoorIndividualState agent1State){
+        return Arrays.equals(state.agent0Pos, agent0State.agentPos) && Arrays.equals(state.agent1Pos, agent1State.agentPos) && Arrays.equals(state.doorsState, agent0State.doorsState) && Arrays.equals(state.doorsState, agent1State.doorsState);
+    }
+
+    public DoorIndividualState[] getIndividualStates(){
+       return new DoorIndividualState[]{new DoorIndividualState(state.agent0Pos, state.doorsState), new DoorIndividualState(state.agent1Pos, state.doorsState),};
     }
 
     @Override

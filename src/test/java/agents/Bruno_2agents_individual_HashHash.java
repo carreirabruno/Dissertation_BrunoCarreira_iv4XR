@@ -11,7 +11,6 @@ import java.util.*;
 public class Bruno_2agents_individual_HashHash {
 
     String[] actions;
-    ArrayList<String[]> centralizedActions;
     String[] targetButtons;
     int[] doorsState;
     int[] buttonsState;
@@ -40,6 +39,8 @@ public class Bruno_2agents_individual_HashHash {
 
     ArrayList<CompareObject> behaviouralTraces;
 
+    String scenario;
+
     @BeforeAll
     static void start() {
     }
@@ -57,6 +58,7 @@ public class Bruno_2agents_individual_HashHash {
         this.targetButtons = targetButtons;
 
         setUpScenarioMatrix(scenario_filename);
+        this.scenario = scenario_filename;
 
         if (train) {
             this.QTableAgent0 = new LinkedHashMap<Integer, DoorIndividualQTableObj>();
@@ -66,14 +68,14 @@ public class Bruno_2agents_individual_HashHash {
             runTraining();
 
 //            saveTransitionTableToFile("individualHashHashTransitionTable_" + scenario_filename);
-            savePolicyToFile("individualHashHash_" + scenario_filename + "_agent0", this.QTableAgent0);
-            savePolicyToFile("individualHashHash_" + scenario_filename + "_agent1", this.QTableAgent1);
+            savePolicyToFile("individualHashHash_" + this.scenario + "_agent0", this.QTableAgent0);
+            savePolicyToFile("individualHashHash_" + this.scenario + "_agent1", this.QTableAgent1);
 
         } else {
             this.epsilon = 0;
 
-            this.QTableAgent0 = getPolicyFromFile("individualHashHash_" + scenario_filename + "_agent0");
-            this.QTableAgent1 = getPolicyFromFile("individualHashHash_" + scenario_filename + "_agent1");
+            this.QTableAgent0 = getPolicyFromFile("individualHashHash_" + this.scenario + "_agent0");
+            this.QTableAgent1 = getPolicyFromFile("individualHashHash_" + this.scenario + "_agent1");
 
             runVisualize();
         }
@@ -222,7 +224,6 @@ public class Bruno_2agents_individual_HashHash {
         DoorRewardRewardStateStateObject doorRewardRewardStateStateObject;
 
         behaviouralTraces = new ArrayList<CompareObject>();
-        setupCentralizedActions();
 
         int step = 0;
         while(!checkIfEndend()){
@@ -696,17 +697,10 @@ public class Bruno_2agents_individual_HashHash {
         return doors;
     }
 
-    void setupCentralizedActions() {
-        this.centralizedActions = new ArrayList<String[]>();
-        for (String action_agent0 : this.actions)
-            for (String action_agent1 : this.actions)
-                this.centralizedActions.add(new String[]{action_agent0, action_agent1});
-    }
-
     void comparePolicies(){
         Bruno_2agents_ComparePolicies.start();
         Bruno_2agents_ComparePolicies comparePolicies = new Bruno_2agents_ComparePolicies();
-        comparePolicies.run(this.behaviouralTraces);
+        comparePolicies.run(this.behaviouralTraces, this.scenario);
         Bruno_2agents_ComparePolicies.close();
     }
 
