@@ -244,10 +244,10 @@ public class Bruno_2agents_individual_HashHash {
             behaviouralTraces.add(getNewCompareObject(currentStateAgent0, currentStateAgent1, actionAgent0, actionAgent1));
 
             //Prints to see
-            printInvertedMapMatrix();
-            System.out.println(currentStateAgent0.toString() + " " + this.actions[actionAgent0]);
-            System.out.println(currentStateAgent1.toString() + " " + this.actions[actionAgent1]);
-            System.out.println();
+//            printInvertedMapMatrix();
+//            System.out.println(currentStateAgent0.toString() + " " + this.actions[actionAgent0]);
+//            System.out.println(currentStateAgent1.toString() + " " + this.actions[actionAgent1]);
+//            System.out.println();
 
             //Act on map, get rewards and nextState
             doorRewardRewardStateStateObject = new DoorRewardRewardStateStateObject(actOnMap(currentStateAgent0, actionAgent0, currentStateAgent1, actionAgent1));

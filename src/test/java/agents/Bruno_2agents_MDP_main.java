@@ -100,10 +100,10 @@ public class Bruno_2agents_MDP_main {
          */
 
 
-        String scenario = "realScenario3";
-        String[] targetButtons = new String[]{"button3"};
+        String scenario = "realScenario2";
+        String[] targetButtons = new String[]{"button3", "button4"};
 
-        hashHash(true, false, scenario, targetButtons);
+        hashHash(false, false, scenario, targetButtons);
 
 //        manualControl(scenario);
     }

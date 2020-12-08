@@ -16,6 +16,7 @@ import java.lang.reflect.Array;
 import java.sql.SQLOutput;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 
 import static agents.TestSettings.USE_SERVER_FOR_TEST;
@@ -49,9 +50,18 @@ public class Bruno_2agents_ComparePolicies {
 
         //Analyse Behavioural Trace
         for (CompareObject obj : behaviouralTraces) {
-            centCount += getVoteCentralized(obj)/behaviouralTraces.size();
-            indCount += getVoteIndividual(obj)/behaviouralTraces.size();
+//            centCount += getVoteCentralized(obj)/behaviouralTraces.size();
+//            indCount += getVoteIndividual(obj)/behaviouralTraces.size();
+            centCount += getVoteCentralizedEPOW(obj);
+            indCount += getVoteIndividualEPOW(obj);
         }
+
+        //TODO
+        //Make normalized Sum
+        float total = centCount + indCount;
+        centCount = centCount/total;
+        indCount = indCount/total;
+
 
         System.out.println("Centralized " + String.format("%.2f", centCount) + " " + behaviouralTraces.size());
         System.out.println("Individual " + String.format("%.2f", indCount) + " " + behaviouralTraces.size());
@@ -70,6 +80,45 @@ public class Bruno_2agents_ComparePolicies {
         return vote;
     }
 
+    float getVoteCentralizedEPOW(CompareObject obj){
+        float vote = 0;
+        for (DoorCentralizedQTableObj temp : this.CentralizedPolicy.values())
+            if (temp.state.equalsTo(obj.state)){
+                int[] values = getCentralizedActionIndexOrdered(temp.actionsQValues, obj.actions);
+                vote += Math.exp(-values[0]) + Math.exp(-values[1]);
+            }
+
+        float denominator = 0;
+        for (int i = 1; i < this.actions.length+1; i++)
+            denominator += Math.exp(-i);
+
+        return vote/(denominator*2);
+    }
+
+    int[] getCentralizedActionIndexOrdered(float[] actionValues, String[] actions){
+
+        //Organize individual arrays of actions values from the centralized actions values
+        float[] actionsAgent0 = new float[this.actions.length];
+        float[] actionsAgent1 = new float[this.actions.length];
+
+        for (int i = 0; i < actionValues.length; i++){
+            for( int j = 0; j < this.actions.length; j++){
+                if (this.centralizedActions.get(i)[0].equals(this.actions[j]))
+                    actionsAgent0[j] += actionValues[i];
+                if (this.centralizedActions.get(i)[1].equals(this.actions[j]))
+                    actionsAgent1[j] += actionValues[i];
+            }
+        }
+
+        for(int v = 0; v < actionsAgent0.length; v++){
+            actionsAgent0[v] = actionsAgent0[v]/actionsAgent0.length;
+            actionsAgent1[v] = actionsAgent1[v]/actionsAgent1.length;
+        }
+
+        return new int[]{getIndividualActionIndexOrdered(actionsAgent0, actions[0]), getIndividualActionIndexOrdered(actionsAgent1, actions[1])};
+
+    }
+
     float getVoteIndividual(CompareObject obj){
         float vote = 0;
         for (DoorIndividualQTableObj temp : this.IndividualPolicyAgent0.values()) {
@@ -85,6 +134,43 @@ public class Bruno_2agents_ComparePolicies {
             }
         }
         return vote;
+    }
+
+    float getVoteIndividualEPOW(CompareObject obj){
+        
+        float vote = 0;
+        for (DoorIndividualQTableObj temp : this.IndividualPolicyAgent0.values())
+            if (temp.state.equalsTo(obj.getIndividualStates()[0]))
+                vote += Math.exp(-getIndividualActionIndexOrdered(temp.actionsQValues, obj.actions[0]));
+
+        for (DoorIndividualQTableObj temp : this.IndividualPolicyAgent1.values())
+            if (temp.state.equalsTo(obj.getIndividualStates()[1]))
+                vote += Math.exp(-getIndividualActionIndexOrdered(temp.actionsQValues, obj.actions[1]));
+
+        float denominator = 0;
+        for (int i = 1; i < this.actions.length+1; i++)
+            denominator += Math.exp(-i);
+
+
+        return vote/(denominator*2);
+    }
+
+    int getIndividualActionIndexOrdered(float[] actionValues, String action){
+        float[] temp = Arrays.copyOf(actionValues, actionValues.length);
+        Arrays.sort(temp);
+
+        float actionV = -1;
+
+        for (int i = 0; i< actionValues.length; i++)
+            if( this.actions[i].equals(action))
+                actionV = actionValues[i];
+
+        for(int i = temp.length - 1; i >= 0; i--)
+            if (actionV == temp[i])
+                return temp.length - i;
+
+        return -1;
+        
     }
 
     void setupCentralizedActions() {
