@@ -42,6 +42,10 @@ public class Bruno_2agents_ComparePolicies {
         getCentralizedPolicyFromFile("centralizedHashHash_" + scenario);
         setupCentralizedActions();
 
+        System.out.println(this.centralizedActions.size());
+        System.out.println(this.actions.length);
+        System.exit(123);
+
         this.IndividualPolicyAgent0 = getIndividualPolicyFromFile("individualHashHash_" + scenario + "_agent0");
         this.IndividualPolicyAgent1 = getIndividualPolicyFromFile("individualHashHash_" + scenario + "_agent1");
 
