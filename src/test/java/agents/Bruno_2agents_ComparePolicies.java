@@ -42,10 +42,6 @@ public class Bruno_2agents_ComparePolicies {
         getCentralizedPolicyFromFile("centralizedHashHash_" + scenario);
         setupCentralizedActions();
 
-        System.out.println(this.centralizedActions.size());
-        System.out.println(this.actions.length);
-        System.exit(123);
-
         this.IndividualPolicyAgent0 = getIndividualPolicyFromFile("individualHashHash_" + scenario + "_agent0");
         this.IndividualPolicyAgent1 = getIndividualPolicyFromFile("individualHashHash_" + scenario + "_agent1");
 
@@ -62,9 +58,12 @@ public class Bruno_2agents_ComparePolicies {
 
         //TODO
         //Make normalized Sum
-        float total = centCount + indCount;
-        centCount = centCount/total;
-        indCount = indCount/total;
+//        float total = centCount + indCount;
+//        centCount = centCount/total;
+//        indCount = indCount/total;
+
+        centCount = (float) (centCount/(behaviouralTraces.size() * Math.exp(-1f/this.centralizedActions.size())));
+        indCount = (float) (indCount/(behaviouralTraces.size() * Math.exp(- (1f/this.actions.length) * (1f/this.actions.length))));
 
 
         System.out.println("Centralized " + String.format("%.2f", centCount) + " " + behaviouralTraces.size());
@@ -85,41 +84,60 @@ public class Bruno_2agents_ComparePolicies {
     }
 
     float getVoteCentralizedEPOW(CompareObject obj){
-        float vote = 0;
+//        float vote = 0;
         for (DoorCentralizedQTableObj temp : this.CentralizedPolicy.values())
             if (temp.state.equalsTo(obj.state)){
-                int[] values = getCentralizedActionIndexOrdered(temp.actionsQValues, obj.actions);
-                vote += Math.exp(-values[0]) + Math.exp(-values[1]);
+//                int[] values = getCentralizedActionIndexOrdered(temp.actionsQValues, obj.actions);
+//                vote += Math.exp(-values[0]) + Math.exp(-values[1]);
+                return (float) Math.exp(-getCentralizedActionIndexOrdered(temp.actionsQValues, obj.actions)/this.centralizedActions.size());
             }
 
-        float denominator = 0;
-        for (int i = 1; i < this.actions.length+1; i++)
-            denominator += Math.exp(-i);
+//        float denominator = 0;
+//        for (int i = 1; i < this.actions.length+1; i++)
+//            denominator += Math.exp(-i);
 
-        return vote/(denominator*2);
+//        return vote/(denominator*2);
+
+        return -1;
     }
 
-    int[] getCentralizedActionIndexOrdered(float[] actionValues, String[] actions){
+    float getCentralizedActionIndexOrdered(float[] actionsQValues, String[] stringActions){
 
-        //Organize individual arrays of actions values from the centralized actions values
-        float[] actionsAgent0 = new float[this.actions.length];
-        float[] actionsAgent1 = new float[this.actions.length];
+//        //Organize individual arrays of actions values from the centralized actions values
+//        float[] actionsAgent0 = new float[this.actions.length];
+//        float[] actionsAgent1 = new float[this.actions.length];
+//
+//        for (int i = 0; i < actionValues.length; i++){
+//            for( int j = 0; j < this.actions.length; j++){
+//                if (this.centralizedActions.get(i)[0].equals(this.actions[j]))
+//                    actionsAgent0[j] += actionValues[i];
+//                if (this.centralizedActions.get(i)[1].equals(this.actions[j]))
+//                    actionsAgent1[j] += actionValues[i];
+//            }
+//        }
+//
+//        for(int v = 0; v < actionsAgent0.length; v++){
+//            actionsAgent0[v] = actionsAgent0[v]/actionsAgent0.length;
+//            actionsAgent1[v] = actionsAgent1[v]/actionsAgent1.length;
+//        }
+//
+//        return new int[]{getIndividualActionIndexOrdered(actionsAgent0, actions[0]), getIndividualActionIndexOrdered(actionsAgent1, actions[1])};
 
-        for (int i = 0; i < actionValues.length; i++){
-            for( int j = 0; j < this.actions.length; j++){
-                if (this.centralizedActions.get(i)[0].equals(this.actions[j]))
-                    actionsAgent0[j] += actionValues[i];
-                if (this.centralizedActions.get(i)[1].equals(this.actions[j]))
-                    actionsAgent1[j] += actionValues[i];
-            }
-        }
+        float[] tempActionValues = Arrays.copyOf(actionsQValues, actionsQValues.length);
 
-        for(int v = 0; v < actionsAgent0.length; v++){
-            actionsAgent0[v] = actionsAgent0[v]/actionsAgent0.length;
-            actionsAgent1[v] = actionsAgent1[v]/actionsAgent1.length;
-        }
+        Arrays.sort(tempActionValues);
 
-        return new int[]{getIndividualActionIndexOrdered(actionsAgent0, actions[0]), getIndividualActionIndexOrdered(actionsAgent1, actions[1])};
+        float actionV = -1;
+
+        for (int i = 0; i < actionsQValues.length; i++)
+            if (Arrays.equals(stringActions, this.centralizedActions.get(i)))
+                actionV = actionsQValues[i];
+
+        for (int i = tempActionValues.length - 1; i >= 0; i--)
+            if (actionV == tempActionValues[i])
+                return tempActionValues.length - i;
+
+        return -1;
 
     }
 
@@ -142,24 +160,36 @@ public class Bruno_2agents_ComparePolicies {
 
     float getVoteIndividualEPOW(CompareObject obj){
         
-        float vote = 0;
+//        float vote = 0;
+//        for (DoorIndividualQTableObj temp : this.IndividualPolicyAgent0.values())
+//            if (temp.state.equalsTo(obj.getIndividualStates()[0]))
+//                vote += Math.exp(-getIndividualActionIndexOrdered(temp.actionsQValues, obj.actions[0]));
+//
+//        for (DoorIndividualQTableObj temp : this.IndividualPolicyAgent1.values())
+//            if (temp.state.equalsTo(obj.getIndividualStates()[1]))
+//                vote += Math.exp(-getIndividualActionIndexOrdered(temp.actionsQValues, obj.actions[1]));
+//
+//        float denominator = 0;
+//        for (int i = 1; i < this.actions.length+1; i++)
+//            denominator += Math.exp(-i);
+//
+//
+//        return vote/(denominator*2);
+
+        float vote = 1;
         for (DoorIndividualQTableObj temp : this.IndividualPolicyAgent0.values())
             if (temp.state.equalsTo(obj.getIndividualStates()[0]))
-                vote += Math.exp(-getIndividualActionIndexOrdered(temp.actionsQValues, obj.actions[0]));
+                vote *= getIndividualActionIndex(temp.actionsQValues, obj.actions[0])/this.actions.length;
 
         for (DoorIndividualQTableObj temp : this.IndividualPolicyAgent1.values())
             if (temp.state.equalsTo(obj.getIndividualStates()[1]))
-                vote += Math.exp(-getIndividualActionIndexOrdered(temp.actionsQValues, obj.actions[1]));
+                vote *= getIndividualActionIndex(temp.actionsQValues, obj.actions[1])/this.actions.length;
 
-        float denominator = 0;
-        for (int i = 1; i < this.actions.length+1; i++)
-            denominator += Math.exp(-i);
+        return (float) Math.exp(-vote);
 
-
-        return vote/(denominator*2);
     }
 
-    int getIndividualActionIndexOrdered(float[] actionValues, String action){
+    float getIndividualActionIndex(float[] actionValues, String action){
         float[] temp = Arrays.copyOf(actionValues, actionValues.length);
         Arrays.sort(temp);
 
