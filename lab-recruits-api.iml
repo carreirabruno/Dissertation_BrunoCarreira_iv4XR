@@ -29,5 +29,7 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.openjfx:javafx-base:win:11" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.openjfx:javafx-controls:11" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.openjfx:javafx-controls:win:11" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: javax.mail:mail:1.4.7" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: javax.activation:activation:1.1" level="project" />
   </component>
 </module>

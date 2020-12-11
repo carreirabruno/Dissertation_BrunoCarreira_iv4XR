@@ -902,6 +902,13 @@ class CompareObject{
         return Arrays.equals(state.agent0Pos, agent0State.agentPos) && Arrays.equals(state.agent1Pos, agent1State.agentPos) && Arrays.equals(state.doorsState, agent0State.doorsState) && Arrays.equals(state.doorsState, agent1State.doorsState);
     }
 
+    public boolean equal(CompareObject obj){
+//        System.out.println(this.toString());
+//        System.out.println(obj.toString());
+//        System.exit(123);
+        return Arrays.equals(this.state.agent0Pos, obj.state.agent0Pos) && Arrays.equals(this.state.agent0Pos, obj.state.agent0Pos) && Arrays.equals(this.state.doorsState, obj.state.doorsState) && Arrays.equals(this.actions, obj.actions);
+    }
+
     public DoorIndividualState[] getIndividualStates(){
        return new DoorIndividualState[]{new DoorIndividualState(state.agent0Pos, state.doorsState), new DoorIndividualState(state.agent1Pos, state.doorsState),};
     }

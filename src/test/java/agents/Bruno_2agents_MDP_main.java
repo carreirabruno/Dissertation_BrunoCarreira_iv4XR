@@ -103,11 +103,15 @@ public class Bruno_2agents_MDP_main {
         String scenario = "realScenario1";
         String[] targetButtons = new String[]{"button4"};
 
-        hashHash(true, false, scenario, targetButtons);
+//        hashHash(true, false, scenario, targetButtons);
 //        hashHash(false, false, scenario, targetButtons);
+
+        analyseUsers();
 
 //        manualControl(scenario);
     }
+
+
 
     public void centralizedTraining(String scenario, String target1, String target2, ArrayList<String[]> actions, ArrayList<String> singular_actions, ArrayList<String> existing_buttons) throws Exception {
         Bruno_2agents_centralized_MDP_train.start();
@@ -182,6 +186,13 @@ public class Bruno_2agents_MDP_main {
             hashHashindividual.run(train, scenario, targetButtons);
             Bruno_2agents_individual_HashHash.close();
         }
+    }
+
+    public void analyseUsers() throws Exception {
+        Bruno_2agents_AnalyseUsers.start();
+        Bruno_2agents_AnalyseUsers analyseUsers = new Bruno_2agents_AnalyseUsers();
+        analyseUsers.run();
+        Bruno_2agents_AnalyseUsers.close();
     }
 
     public void lowLevelIndividualTraining(String scenario, String[] targetButtons) throws Exception {

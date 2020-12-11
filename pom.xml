@@ -87,5 +87,11 @@
             <version>11</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>1.4.7</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
