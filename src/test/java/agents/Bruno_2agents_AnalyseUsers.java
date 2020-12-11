@@ -64,7 +64,7 @@ public class Bruno_2agents_AnalyseUsers {
             emailFolder.open(Folder.READ_ONLY);
 
             Message[] messages = emailFolder.getMessages();
-            for (int i = 0; i < messages.length; i++) {
+            for (int i = messages.length-9; i < messages.length; i++) {
                 System.out.println("Subject " + messages[i].getSubject());
 
                 String subject =  messages[i].getSubject();
@@ -74,6 +74,7 @@ public class Bruno_2agents_AnalyseUsers {
                 this.scenario = scenario[0];
 
                 setContentToList((MimeMultipart) messages[i].getContent());
+                System.out.println();
             }
 
             emailFolder.close(false);
@@ -90,11 +91,24 @@ public class Bruno_2agents_AnalyseUsers {
         for (String state : stringsContent){
             if (state.startsWith("<")) {
                 CompareObject obj = treatStringState(state);
-                if (behaviouralTraces.size() == 0 || !behaviouralTraces.get(behaviouralTraces.size()-1).equal(obj)) {
+                if (behaviouralTraces.size() == 0 || !behaviouralTraces.get(behaviouralTraces.size()-1).equalTo(obj)) {
+//                    if (behaviouralTraces.size() == 5) {
+//                        System.out.println(Arrays.toString(behaviouralTraces.toArray()));
+//                        for(CompareObject a: behaviouralTraces)
+//                            System.out.println(a.toString());
+//                        System.exit(5);
+//                    }
+//                    System.out.println(obj);
+                    behaviouralTraces.add(obj);
+                }
+                else if(behaviouralTraces.get(behaviouralTraces.size()-1).equalTo(obj)){
+                    behaviouralTraces.remove(behaviouralTraces.size()-1);
                     behaviouralTraces.add(obj);
                 }
             }
         }
+
+//        System.exit(123);
 
         comparePolicies(arrangeListWithActionCount(behaviouralTraces));
     }
@@ -111,7 +125,10 @@ public class Bruno_2agents_AnalyseUsers {
         String stringAgent0Pos = varsPart1[0].replace("(","");
         stringAgent0Pos = stringAgent0Pos.replace(", 0,","");
         String[] arrayAgent0Pos = stringAgent0Pos.split(" ");
+
         int[] agent0Pos = new int[]{Integer.parseInt(arrayAgent0Pos[1]), Integer.parseInt(arrayAgent0Pos[0])};
+
+
 
         String stringAgent1Pos = varsPart1[1].replace(" (","");
         stringAgent1Pos = stringAgent1Pos.replace(", 0,","");

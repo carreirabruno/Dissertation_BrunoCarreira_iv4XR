@@ -87,6 +87,9 @@ public class Bruno_2agents_ComparePolicies {
 //        float vote = 0;
         for (DoorCentralizedQTableObj temp : this.CentralizedPolicy.values())
             if (temp.state.equalsTo(obj.state)){
+//                System.out.println(obj.state.toString() + "-" + Arrays.toString(obj.actions));
+//                System.out.println(temp.state.toString()+ "---" + Arrays.toString(this.centralizedActions.get(temp.maxAction())));
+//                System.exit(999);
 //                int[] values = getCentralizedActionIndexOrdered(temp.actionsQValues, obj.actions);
 //                vote += Math.exp(-values[0]) + Math.exp(-values[1]);
                 return (float) Math.exp(-getCentralizedActionIndexOrdered(temp.actionsQValues, obj.actions)/this.centralizedActions.size());
