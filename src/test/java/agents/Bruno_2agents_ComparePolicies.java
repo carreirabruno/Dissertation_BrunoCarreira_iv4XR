@@ -102,7 +102,7 @@ public class Bruno_2agents_ComparePolicies {
 
 //        return vote/(denominator*2);
 
-        return -1;
+        return 0;
     }
 
     float getCentralizedActionIndexOrdered(float[] actionsQValues, String[] stringActions){
@@ -194,7 +194,7 @@ public class Bruno_2agents_ComparePolicies {
 
         if (returnVote)
             return (float) Math.exp(-vote);
-        return -1;
+        return 0;
 
     }
 
