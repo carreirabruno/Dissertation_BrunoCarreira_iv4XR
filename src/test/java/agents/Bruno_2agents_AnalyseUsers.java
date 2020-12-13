@@ -64,17 +64,19 @@ public class Bruno_2agents_AnalyseUsers {
             emailFolder.open(Folder.READ_ONLY);
 
             Message[] messages = emailFolder.getMessages();
-            for (int i = messages.length-9; i < messages.length; i++) {
-                System.out.println("Subject " + messages[i].getSubject());
+            for (int i = 0; i < messages.length; i++) {
 
                 String subject =  messages[i].getSubject();
                 subject = subject.replace("Dissertation Playtesting Results  +  ", "");
 
-                String[] scenario = subject.split("_");
-                this.scenario = scenario[0];
+                String[] inf = subject.split("_");
+                this.scenario = inf[0];
 
-                setContentToList((MimeMultipart) messages[i].getContent());
-                System.out.println();
+                if(inf[1].equals("Try2")) {
+                    System.out.println("Subject: " + subject);
+                    setContentToList((MimeMultipart) messages[i].getContent());
+                    System.out.println();
+                }
             }
 
             emailFolder.close(false);
@@ -108,8 +110,6 @@ public class Bruno_2agents_AnalyseUsers {
             }
         }
 
-//        System.exit(123);
-
         comparePolicies(arrangeListWithActionCount(behaviouralTraces));
     }
 
@@ -129,7 +129,6 @@ public class Bruno_2agents_AnalyseUsers {
         int[] agent0Pos = new int[]{Integer.parseInt(arrayAgent0Pos[1]), Integer.parseInt(arrayAgent0Pos[0])};
 
 
-
         String stringAgent1Pos = varsPart1[1].replace(" (","");
         stringAgent1Pos = stringAgent1Pos.replace(", 0,","");
         String[] arrayAgent1Pos = stringAgent1Pos.split(" ");
@@ -139,12 +138,12 @@ public class Bruno_2agents_AnalyseUsers {
 
         String stringDoors = varsPart2[0].replace(" [","");
         String[] arrayDoors = stringDoors.split(", ");
-        int[] doorState = new int[]{Integer.parseInt(arrayDoors[0]), Integer.parseInt(arrayDoors[1])};
 
-        DoorCentralizedState state = new DoorCentralizedState(agent0Pos, agent1Pos, doorState.length);
-        for (int i = 0; i < doorState.length; i++)
-            if (doorState[i] == 1)
+        DoorCentralizedState state = new DoorCentralizedState(agent0Pos, agent1Pos, arrayDoors.length);
+        for (int i = 0; i < arrayDoors.length; i++)
+            if (Integer.parseInt(arrayDoors[i]) == 1)
                 state.changeDoorState(i+1);
+
 
         String stringActions = varsPart2[1].replace("(", "");
         stringActions = stringActions.replace(")", "");

@@ -85,15 +85,16 @@ public class Bruno_2agents_ComparePolicies {
 
     float getVoteCentralizedEPOW(CompareObject obj){
 //        float vote = 0;
-        for (DoorCentralizedQTableObj temp : this.CentralizedPolicy.values())
-            if (temp.state.equalsTo(obj.state)){
+        for (DoorCentralizedQTableObj temp : this.CentralizedPolicy.values()) {
+            if (temp.state.equalsTo(obj.state)) {
 //                System.out.println(obj.state.toString() + "-" + Arrays.toString(obj.actions));
-//                System.out.println(temp.state.toString()+ "---" + Arrays.toString(this.centralizedActions.get(temp.maxAction())));
+//                System.out.println(temp.state.toString() + "---" + Arrays.toString(this.centralizedActions.get(temp.maxAction())));
 //                System.exit(999);
 //                int[] values = getCentralizedActionIndexOrdered(temp.actionsQValues, obj.actions);
 //                vote += Math.exp(-values[0]) + Math.exp(-values[1]);
-                return (float) Math.exp(-getCentralizedActionIndexOrdered(temp.actionsQValues, obj.actions)/this.centralizedActions.size());
+                return (float) Math.exp(-getCentralizedActionIndexOrdered(temp.actionsQValues, obj.actions) / this.centralizedActions.size());
             }
+        }
 
 //        float denominator = 0;
 //        for (int i = 1; i < this.actions.length+1; i++)
@@ -179,16 +180,21 @@ public class Bruno_2agents_ComparePolicies {
 //
 //        return vote/(denominator*2);
 
+        boolean returnVote = false;
         float vote = 1;
         for (DoorIndividualQTableObj temp : this.IndividualPolicyAgent0.values())
-            if (temp.state.equalsTo(obj.getIndividualStates()[0]))
-                vote *= getIndividualActionIndex(temp.actionsQValues, obj.actions[0])/this.actions.length;
+            if (temp.state.equalsTo(obj.getIndividualStates()[0])) {
+                returnVote = true;
+                vote *= getIndividualActionIndex(temp.actionsQValues, obj.actions[0]) / this.actions.length;
+            }
 
         for (DoorIndividualQTableObj temp : this.IndividualPolicyAgent1.values())
             if (temp.state.equalsTo(obj.getIndividualStates()[1]))
                 vote *= getIndividualActionIndex(temp.actionsQValues, obj.actions[1])/this.actions.length;
 
-        return (float) Math.exp(-vote);
+        if (returnVote)
+            return (float) Math.exp(-vote);
+        return -1;
 
     }
 
