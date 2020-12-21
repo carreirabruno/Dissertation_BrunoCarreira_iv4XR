@@ -261,7 +261,7 @@ public class Bruno_2agents_individual_HashHash {
             step++;
         }
 
-        System.out.println("####Steps = " + step);
+//        System.out.println("####Steps = " + step);
 
         comparePolicies();
     }

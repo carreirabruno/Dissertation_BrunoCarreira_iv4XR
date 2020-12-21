@@ -231,9 +231,9 @@ public class Bruno_2agents_centralized_HashHash {
             behaviouralTraces.add(new CompareObject(currentState, this.centralizedActions.get(action)));
 
             //Prints to see
-            printInvertedMapMatrix();
-            System.out.println(currentState.toString() + " " + Arrays.toString(this.centralizedActions.get(action)));
-            System.out.println();
+//            printInvertedMapMatrix();
+//            System.out.println(currentState.toString() + " " + Arrays.toString(this.centralizedActions.get(action)));
+//            System.out.println();
 
 
             //Act on map, get rewards and nextState
@@ -248,7 +248,7 @@ public class Bruno_2agents_centralized_HashHash {
             step++;
         }
 
-        System.out.println("####Steps = " + step);
+//        System.out.println("####Steps = " + step);
 
         comparePolicies();
     }

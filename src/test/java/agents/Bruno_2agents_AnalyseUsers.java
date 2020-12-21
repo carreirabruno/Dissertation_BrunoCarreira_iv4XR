@@ -72,7 +72,7 @@ public class Bruno_2agents_AnalyseUsers {
                 String[] inf = subject.split("_");
                 this.scenario = inf[0];
 
-                if(inf[1].equals("Try2")) {
+                if(inf[1].equals("Try2") && this.scenario.equals("Scenario3")) {
                     System.out.println("Subject: " + subject);
                     setContentToList((MimeMultipart) messages[i].getContent());
                     System.out.println();
