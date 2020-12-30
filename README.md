@@ -1,7 +1,7 @@
 # Collaboration analysis in the iv4XR framework
 
 
-This is a copy of the [iv4xr Agent-based Testing Framework Demo](https://github.com/iv4xr-project/iv4xrDemo), used and modified for the dissertation of the Instituto Superior Técnico - UL student Bruno Carreira.
+This is a copy of the [iv4xr Agent-based Testing Framework Demo](https://github.com/iv4xr-project/iv4xrDemo), used and modified for the dissertation of the Instituto Superior Técnico, Universidade de Lisboa student Bruno Carreira.
 
 This repository contains all the original files from the copied version of the iv4XR framework, for any information regarding instalation and other related matters, please check the https://github.com/iv4xr-project/iv4xrDemo. All the added files and funtions were done using the the prefix "Bruno_" representating the student implenting the work.
 
