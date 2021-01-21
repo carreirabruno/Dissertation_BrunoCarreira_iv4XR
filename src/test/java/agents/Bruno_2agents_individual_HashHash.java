@@ -385,12 +385,6 @@ public class Bruno_2agents_individual_HashHash {
         System.out.println();
     }
 
-    void printTransitionTable(LinkedHashMap<Integer, IndividualTransitionObj> table) {
-        for (IndividualTransitionObj a : table.values())
-            System.out.println(a.toString());
-        System.out.println();
-    }
-
     void printQTable(LinkedHashMap<Integer, DoorIndividualQTableObj> table) {
         for (DoorIndividualQTableObj obj : table.values())
             System.out.println(obj.toString());
@@ -480,7 +474,6 @@ public class Bruno_2agents_individual_HashHash {
 //                ArrayList<Integer> doorsToChange = getDoorsFromConnections(buttonToClick);
 //                for (Integer _door : doorsToChange)
 //                    nextStateAgent1.changeDoorState(_door);
-
 
 
                 rewardAgent1 = getRewardFromPressingButton(buttonToClick);

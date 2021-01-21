@@ -105,11 +105,11 @@ public class Bruno_2agents_MDP_main {
         /**
         Set "0" to test all Scenarios. Any other index means only that scenario. Example 2 -> Scenario2
          */
-        setupScenarioList(0);
+        setupScenarioList(3);
         for (ScenarioObject obj : this.scenarios) {
             System.out.println(obj.scenario);
-            System.out.println("--Centralized agents--");
-            hashHash(true, false, obj.scenario, obj.targetButtons);
+//            System.out.println("--Centralized agents--");
+//            hashHash(true, false, obj.scenario, obj.targetButtons);
             System.out.println("--Individual agents--");
             hashHash(false, false, obj.scenario, obj.targetButtons);
             System.out.println();
@@ -134,33 +134,11 @@ public class Bruno_2agents_MDP_main {
         }
     }
 
-    public void centralizedTraining(String scenario, String target1, String target2, ArrayList<String[]> actions, ArrayList<String> singular_actions, ArrayList<String> existing_buttons) throws Exception {
-        Bruno_2agents_centralized_MDP_train.start();
-        Bruno_2agents_centralized_MDP_train centralized_train_new = new Bruno_2agents_centralized_MDP_train();
-        centralized_train_new.create_policy_train(scenario, target1, target2, actions, singular_actions, existing_buttons);
-        Bruno_2agents_centralized_MDP_train.close();
-
-    }
-
-    public void individualTraining(String scenario, String target1, String target2, ArrayList<String> singular_actions, ArrayList<String> existing_buttons) throws Exception {
-        Bruno_2agents_individual_MDP_train.start();
-        Bruno_2agents_individual_MDP_train individual_train_new = new Bruno_2agents_individual_MDP_train();
-        individual_train_new.create_policy_train(scenario, target1, target2, singular_actions, existing_buttons);
-        Bruno_2agents_individual_MDP_train.close();
-    }
-
     public void manualControl(String scenario) throws Exception {
         Bruno_2agents_manualControl.start();
         Bruno_2agents_manualControl individual_train_new = new Bruno_2agents_manualControl();
         individual_train_new.create_policy_manually(scenario);
         Bruno_2agents_manualControl.close();
-    }
-
-    public void lowLevelCentralizedTraining(String scenario, String[] targetButtons) throws Exception {
-        Bruno_2agents_centralized_lowLevelActions_train.start();
-        Bruno_2agents_centralized_lowLevelActions_train lowLevelActionsCentralized_train = new Bruno_2agents_centralized_lowLevelActions_train();
-        lowLevelActionsCentralized_train.create_policy_train(scenario, targetButtons);
-        Bruno_2agents_centralized_lowLevelActions_train.close();
     }
 
     public void hashHash(boolean centralized, boolean train, String scenario, String[] targetButtons) throws Exception {
@@ -182,27 +160,6 @@ public class Bruno_2agents_MDP_main {
         Bruno_2agents_AnalyseUsers analyseUsers = new Bruno_2agents_AnalyseUsers();
         analyseUsers.run();
         Bruno_2agents_AnalyseUsers.close();
-    }
-
-    public void lowLevelIndividualTraining(String scenario, String[] targetButtons) throws Exception {
-        Bruno_2agents_individual_lowLevelActions_train.start();
-        Bruno_2agents_individual_lowLevelActions_train lowLevelActionsIndividual_train = new Bruno_2agents_individual_lowLevelActions_train();
-        lowLevelActionsIndividual_train.create_policy_train(scenario, targetButtons);
-        Bruno_2agents_individual_lowLevelActions_train.close();
-    }
-
-    public void lowLevelCentralizedTesting(String scenario, String[] targetButtons, boolean useLabrecruits) throws Exception {
-        Bruno_2agents_centralized_lowLevelActions_test.start(useLabrecruits);
-        Bruno_2agents_centralized_lowLevelActions_test lowLevelActionsCentralized_test = new Bruno_2agents_centralized_lowLevelActions_test();
-        lowLevelActionsCentralized_test.test(scenario, targetButtons, useLabrecruits);
-        Bruno_2agents_centralized_lowLevelActions_test.close(useLabrecruits);
-    }
-
-    public void lowLevelIndividualTesting(String scenario, String[] targetButtons, boolean useLabrecruits) throws Exception {
-        Bruno_2agents_individual_lowLevelActions_test.start(useLabrecruits);
-        Bruno_2agents_individual_lowLevelActions_test lowLevelActionsIndividual_test = new Bruno_2agents_individual_lowLevelActions_test();
-        lowLevelActionsIndividual_test.test(scenario, targetButtons, useLabrecruits);
-        Bruno_2agents_individual_lowLevelActions_test.close(useLabrecruits);
     }
 
 
