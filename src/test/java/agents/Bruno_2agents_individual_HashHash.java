@@ -67,7 +67,6 @@ public class Bruno_2agents_individual_HashHash {
 
             runTraining();
 
-//            saveTransitionTableToFile("individualHashHashTransitionTable_" + scenario_filename);
             savePolicyToFile("individualHashHash_" + this.scenario + "_agent0", this.QTableAgent0);
             savePolicyToFile("individualHashHash_" + this.scenario + "_agent1", this.QTableAgent1);
 
@@ -193,9 +192,6 @@ public class Bruno_2agents_individual_HashHash {
                     System.out.println(this.epsilon);
             }
 
-//            if (this.epsilon < -2*this.epsilonRate)
-//                this.epsilon = 1.0f;
-//            this.validationEpisode = this.epsilon < 0;
 
             if (this.epsilon <= 0)
                 this.epsilon = 0.1f;

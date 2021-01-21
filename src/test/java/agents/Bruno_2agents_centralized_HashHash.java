@@ -68,7 +68,6 @@ public class Bruno_2agents_centralized_HashHash {
             runTraining();
 
             savePolicyToFile("centralizedHashHash_" + this.scenario);
-//            saveTransitionTableToFile("centralizedHashHashTransition_" + scenario_filename);
         } else {
             this.epsilon = 0;
             getPolicyFromFile("centralizedHashHash_" + this.scenario);
@@ -713,21 +712,6 @@ public class Bruno_2agents_centralized_HashHash {
         }
     }
 
-    void saveTransitionTableToFile(String filename) {
-        try {
-            FileOutputStream fos = new FileOutputStream(filename);
-            ObjectOutputStream out = new ObjectOutputStream(fos);
-
-//            for (Map.Entry<Integer, CentralizedTransitionObj> obj : this.TransitionTable.entrySet())
-//                out.writeObject(obj);
-            out.writeObject(this.TransitionTable);
-
-            out.close();
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-    }
 
     ArrayList<Integer> getDoorsFromConnections(String realButton) {
         ArrayList<Integer> doors = new ArrayList<Integer>();
