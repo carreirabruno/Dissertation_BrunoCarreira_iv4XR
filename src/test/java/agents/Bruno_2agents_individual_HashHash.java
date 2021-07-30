@@ -267,7 +267,8 @@ public class Bruno_2agents_individual_HashHash {
         this.initialMapMatrix = new ArrayList<String[]>();
         this.connectionButtonsDoors = new ArrayList<String[]>();
 
-        String csvFile = "D:/GitHub/Tese_iv4XR_Pessoal/src/test/resources/levels/bruno_" + scenario_filename + ".csv";
+        String currentDir = System.getProperty("user.dir");
+        String csvFile = currentDir + "/src/test/resources/levels/bruno_" + scenario_filename + ".csv";
 //        String csvFile = "C:\\Users\\Beatriz Carreirer\\Documents\\Bruno_Programas\\GitHub\\Tese_iv4XR_Pessoal\\src\\test\\resources\\levels\\bruno_" + scenario_filename + ".csv";
 
         String line = "";
